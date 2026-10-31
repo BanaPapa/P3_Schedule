@@ -10,7 +10,18 @@ export const ERROR_MESSAGES = {
   invitation_revoked: "취소된 초대입니다. 새 초대 링크를 요청해 주세요.",
   invitation_used: "이미 사용된 초대입니다.",
   invitation_expired: "만료된 초대입니다. 새 초대 링크를 요청해 주세요.",
+  invalid_subject: "과목은 1~30자로 입력해 주세요.",
+  invalid_period: "수강 기간을 확인해 주세요. 종료일은 시작일 이후여야 합니다.",
+  invalid_schedule: "수업 요일과 시간을 확인해 주세요.",
+  child_not_found: "자녀를 찾을 수 없습니다. 새로고침 후 다시 시도해 주세요.",
+  academy_not_found: "학원을 찾을 수 없습니다. 새로고침 후 다시 시도해 주세요.",
+  enrollment_not_found: "수강 과목을 찾을 수 없습니다. 새로고침 후 다시 시도해 주세요.",
+  enrollment_has_history: "지난 수업 기록이 있어 삭제할 수 없습니다. 대신 수강을 종료해 주세요.",
+  range_too_far: "1년 넘게 먼 날짜의 일정은 볼 수 없습니다.",
+  too_many_enrollments: "진행 중인 수강 과목은 30개까지 등록할 수 있습니다. 끝난 과목은 수강 종료해 주세요.",
   // 앱
+  academy_in_use: "수강 과목이 등록된 학원은 삭제할 수 없습니다. 먼저 수강 과목을 정리해 주세요.",
+  child_in_use: "수강 과목이 등록된 자녀는 삭제할 수 없습니다. 먼저 수강 과목을 정리해 주세요.",
   forbidden: "이 가족의 정보에 접근할 수 없습니다.",
   conflict: "다른 가족 구성원이 먼저 수정했습니다. 최신 내용을 확인한 뒤 다시 시도해 주세요.",
   invalid_input: "입력한 내용을 확인해 주세요.",
@@ -35,7 +46,19 @@ const RPC_ERROR_CODES: ReadonlySet<string> = new Set<ErrorCode>([
   "invitation_revoked",
   "invitation_used",
   "invitation_expired",
+  "invalid_subject",
+  "invalid_period",
+  "invalid_schedule",
+  "child_not_found",
+  "academy_not_found",
+  "enrollment_not_found",
+  "enrollment_has_history",
+  "range_too_far",
+  "too_many_enrollments",
 ]);
+
+/** 참조 중인 행을 지우려 할 때(외래키 위반) */
+export const FOREIGN_KEY_VIOLATION = "23503";
 
 const AUTH_ERROR_CODES: Readonly<Record<string, ErrorCode>> = {
   invalid_credentials: "invalid_credentials",

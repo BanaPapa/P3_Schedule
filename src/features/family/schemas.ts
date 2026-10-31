@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isIsoDate, todayInSeoul } from "@/lib/dates";
 import { isInviteCode } from "@/lib/invite-url";
 
 /** 캘린더에서 자녀를 구분하는 색. 첫 번째 값은 DB 기본값과 같다. */
@@ -13,7 +14,15 @@ export const CHILD_COLORS = [
 
 export type ChildColor = (typeof CHILD_COLORS)[number];
 
-const FAMILY_TIME_ZONE = "Asia/Seoul";
+/** 화면 낭독기용 색 이름 */
+export const CHILD_COLOR_LABELS: Record<ChildColor, string> = {
+  "#2563eb": "파랑",
+  "#db2777": "분홍",
+  "#16a34a": "초록",
+  "#ea580c": "주황",
+  "#7c3aed": "보라",
+  "#0891b2": "청록",
+};
 
 const familyName = z
   .string()
@@ -34,28 +43,13 @@ export const acceptInvitationSchema = z.object({
   displayName,
 });
 
-function isCalendarDate(value: string): boolean {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) return false;
-  const [year, month, day] = match.slice(1).map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return (
-    date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
-  );
-}
-
-function dateInFamilyTimeZone(now: Date): string {
-  // en-CA 형식이 YYYY-MM-DD 다
-  return new Intl.DateTimeFormat("en-CA", { timeZone: FAMILY_TIME_ZONE }).format(now);
-}
-
 function birthDate(today: Date) {
-  const todayIso = dateInFamilyTimeZone(today);
+  const todayIso = todayInSeoul(today);
   return z
     .string()
     .trim()
     .transform((value) => (value === "" ? null : value))
-    .refine((value) => value === null || isCalendarDate(value), {
+    .refine((value) => value === null || isIsoDate(value), {
       error: "생년월일을 올바르게 입력해 주세요.",
     })
     .refine((value) => value === null || value <= todayIso, {

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { dbErrorMessage, ERROR_MESSAGES } from "@/lib/errors";
+import { dbErrorMessage, ERROR_MESSAGES, FOREIGN_KEY_VIOLATION } from "@/lib/errors";
 import {
   conflict,
   failure,
@@ -158,6 +158,7 @@ export async function deleteChildAction(_prev: FormState, formData: FormData): P
     .eq("id", parsed.data.id)
     .eq("version", parsed.data.version)
     .select("id");
+  if (error?.code === FOREIGN_KEY_VIOLATION) return failure(ERROR_MESSAGES.child_in_use);
   if (error) return dbFailure("delete_child", error);
 
   refreshFamilyPages();

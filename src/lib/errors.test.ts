@@ -9,6 +9,9 @@ describe("dbErrorMessage", () => {
     expect(dbErrorMessage({ code: "P0001", message: "invitation_expired" })).toBe(
       ERROR_MESSAGES.invitation_expired,
     );
+    expect(dbErrorMessage({ code: "P0001", message: "enrollment_has_history" })).toBe(
+      ERROR_MESSAGES.enrollment_has_history,
+    );
   });
 
   it("treats permission errors as a membership problem", () => {

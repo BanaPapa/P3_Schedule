@@ -7,7 +7,7 @@ import { TextField } from "@/components/ui/text-field";
 import { IDLE, type FormState } from "@/lib/form-state";
 import { addChildAction, updateChildAction } from "../actions";
 import type { Child } from "../queries";
-import { CHILD_COLORS } from "../schemas";
+import { CHILD_COLOR_LABELS, CHILD_COLORS } from "../schemas";
 
 interface ChildFormProps {
   /** 없으면 새 자녀 등록, 있으면 그 자녀 수정 */
@@ -65,7 +65,7 @@ export function ChildForm({ child, onResult, onCancel }: ChildFormProps) {
                 value={color}
                 defaultChecked={color === selectedColor}
                 className="peer sr-only"
-                aria-label={`색 ${color}`}
+                aria-label={CHILD_COLOR_LABELS[color]}
               />
               <span
                 className="block size-9 rounded-full border-2 border-transparent ring-offset-2 ring-offset-surface peer-checked:ring-2 peer-checked:ring-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-primary"

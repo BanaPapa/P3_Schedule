@@ -1,3 +1,4 @@
+import { formatDotDate } from "@/lib/dates";
 import type { Database } from "@/lib/supabase/database.types";
 
 type FamilyRole = Database["public"]["Enums"]["family_role"];
@@ -13,9 +14,7 @@ export function roleLabel(role: FamilyRole): string {
 
 /** 2018-03-02 → 2018. 3. 2. */
 export function formatBirthDate(isoDate: string | null): string | null {
-  if (!isoDate) return null;
-  const [year, month, day] = isoDate.split("-").map(Number);
-  return `${year}. ${month}. ${day}.`;
+  return isoDate ? formatDotDate(isoDate) : null;
 }
 
 /**

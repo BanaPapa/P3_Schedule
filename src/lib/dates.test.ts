@@ -1,0 +1,101 @@
+import { describe, expect, it } from "vitest";
+import {
+  addDays,
+  addMonths,
+  formatDayLabel,
+  formatMonthLabel,
+  formatTime,
+  isIsoDate,
+  isoWeekday,
+  monthBounds,
+  monthGrid,
+  parseMonth,
+  todayInSeoul,
+  weekDates,
+} from "./dates";
+
+describe("isIsoDate", () => {
+  it.each(["2026-11-03", "2024-02-29"])("accepts %s", (value) => {
+    expect(isIsoDate(value)).toBe(true);
+  });
+
+  it.each(["2026-02-29", "2026-13-01", "2026-1-3", "20261103", ""])("rejects %s", (value) => {
+    expect(isIsoDate(value)).toBe(false);
+  });
+});
+
+describe("todayInSeoul", () => {
+  it("uses the Seoul date, not UTC", () => {
+    // 2026-10-31 16:30 UTC = 2026-11-01 01:30 KST
+    expect(todayInSeoul(new Date("2026-10-31T16:30:00Z"))).toBe("2026-11-01");
+  });
+});
+
+describe("addDays / isoWeekday", () => {
+  it("crosses month and year boundaries", () => {
+    expect(addDays("2026-12-31", 1)).toBe("2027-01-01");
+    expect(addDays("2026-03-01", -1)).toBe("2026-02-28");
+  });
+
+  it("numbers weekdays Monday=1 … Sunday=7", () => {
+    expect(isoWeekday("2026-11-02")).toBe(1);
+    expect(isoWeekday("2026-11-08")).toBe(7);
+  });
+});
+
+describe("weekDates", () => {
+  it("returns Sunday through Saturday around the date", () => {
+    expect(weekDates("2026-11-04")).toEqual([
+      "2026-11-01",
+      "2026-11-02",
+      "2026-11-03",
+      "2026-11-04",
+      "2026-11-05",
+      "2026-11-06",
+      "2026-11-07",
+    ]);
+  });
+
+  it("treats Sunday as the first day", () => {
+    expect(weekDates("2026-11-08")[0]).toBe("2026-11-08");
+  });
+});
+
+describe("months", () => {
+  it("parses YYYY-MM and rejects junk", () => {
+    expect(parseMonth("2026-11")).toEqual({ year: 2026, month: 11 });
+    expect(parseMonth("2026-13")).toBeNull();
+    expect(parseMonth("nope")).toBeNull();
+    expect(parseMonth(undefined)).toBeNull();
+  });
+
+  it("adds months across years", () => {
+    expect(addMonths({ year: 2026, month: 12 }, 1)).toEqual({ year: 2027, month: 1 });
+    expect(addMonths({ year: 2026, month: 1 }, -1)).toEqual({ year: 2025, month: 12 });
+  });
+
+  it("gives first and last day", () => {
+    expect(monthBounds({ year: 2026, month: 2 })).toEqual({ first: "2026-02-01", last: "2026-02-28" });
+  });
+
+  it("builds a Sunday-first grid of whole weeks", () => {
+    const grid = monthGrid({ year: 2026, month: 11 });
+    expect(grid).toHaveLength(5);
+    expect(grid[0][0]).toBe("2026-11-01");
+    expect(grid.at(-1)?.at(-1)).toBe("2026-12-05");
+    expect(grid.every((week) => week.length === 7)).toBe(true);
+  });
+
+  it("pads the first week with the previous month", () => {
+    expect(monthGrid({ year: 2026, month: 12 })[0][0]).toBe("2026-11-29");
+  });
+});
+
+describe("formatting", () => {
+  it("formats times, months and days in Korean", () => {
+    expect(formatTime("16:00:00")).toBe("16:00");
+    expect(formatTime("09:05")).toBe("09:05");
+    expect(formatMonthLabel({ year: 2026, month: 11 })).toBe("2026년 11월");
+    expect(formatDayLabel("2026-11-03")).toBe("11월 3일 (화)");
+  });
+});

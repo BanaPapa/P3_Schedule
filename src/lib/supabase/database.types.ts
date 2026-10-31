@@ -23,7 +23,27 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "audit_logs": {
+            "academies": {
+                  Row: {
+                    "contact_name": string | null,"created_at": string,"family_id": string,"id": string,"memo": string | null,"name": string,"phone": string | null,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "contact_name"?: string | null,"created_at"?: string,"family_id": string,"id"?: string,"memo"?: string | null,"name": string,"phone"?: string | null,"updated_at"?: string,"version"?: number
+                  }
+                  Update: {
+                    "contact_name"?: string | null,"created_at"?: string,"family_id"?: string,"id"?: string,"memo"?: string | null,"name"?: string,"phone"?: string | null,"updated_at"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "academies_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"audit_logs": {
                   Row: {
                     "action": string,"actor_id": string | null,"created_at": string,"family_id": string,"id": number,"new_data": Json | null,"old_data": Json | null,"record_id": string,"table_name": string
                   }
@@ -51,6 +71,96 @@ export type Database = {
                   Relationships: [
                     {
       foreignKeyName: "children_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"class_rules": {
+                  Row: {
+                    "created_at": string,"effective_from": string,"effective_until": string | null,"end_time": string,"enrollment_id": string,"family_id": string,"id": string,"start_time": string,"updated_at": string,"version": number,"weekday": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"effective_from": string,"effective_until"?: string | null,"end_time": string,"enrollment_id": string,"family_id": string,"id"?: string,"start_time": string,"updated_at"?: string,"version"?: number,"weekday": number
+                  }
+                  Update: {
+                    "created_at"?: string,"effective_from"?: string,"effective_until"?: string | null,"end_time"?: string,"enrollment_id"?: string,"family_id"?: string,"id"?: string,"start_time"?: string,"updated_at"?: string,"version"?: number,"weekday"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "class_rules_enrollment_id_family_id_fkey"
+      columns: ["enrollment_id","family_id"]
+isOneToOne: false
+      referencedRelation: "enrollments"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "class_rules_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"class_sessions": {
+                  Row: {
+                    "created_at": string,"end_time": string,"enrollment_id": string,"family_id": string,"id": string,"note": string | null,"rule_id": string | null,"session_date": string,"start_time": string,"status": Database["public"]['Enums']["class_session_status"],"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"end_time": string,"enrollment_id": string,"family_id": string,"id"?: string,"note"?: string | null,"rule_id"?: string | null,"session_date": string,"start_time": string,"status"?: Database["public"]['Enums']["class_session_status"],"updated_at"?: string,"version"?: number
+                  }
+                  Update: {
+                    "created_at"?: string,"end_time"?: string,"enrollment_id"?: string,"family_id"?: string,"id"?: string,"note"?: string | null,"rule_id"?: string | null,"session_date"?: string,"start_time"?: string,"status"?: Database["public"]['Enums']["class_session_status"],"updated_at"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "class_sessions_enrollment_id_family_id_fkey"
+      columns: ["enrollment_id","family_id"]
+isOneToOne: false
+      referencedRelation: "enrollments"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "class_sessions_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "class_sessions_rule_id_family_id_fkey"
+      columns: ["rule_id","family_id"]
+isOneToOne: false
+      referencedRelation: "class_rules"
+      referencedColumns: ["id","family_id"]
+    }
+                  ]
+                },"enrollments": {
+                  Row: {
+                    "academy_id": string,"child_id": string,"created_at": string,"end_date": string | null,"family_id": string,"id": string,"memo": string | null,"start_date": string,"subject": string,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "academy_id": string,"child_id": string,"created_at"?: string,"end_date"?: string | null,"family_id": string,"id"?: string,"memo"?: string | null,"start_date": string,"subject": string,"updated_at"?: string,"version"?: number
+                  }
+                  Update: {
+                    "academy_id"?: string,"child_id"?: string,"created_at"?: string,"end_date"?: string | null,"family_id"?: string,"id"?: string,"memo"?: string | null,"start_date"?: string,"subject"?: string,"updated_at"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "enrollments_academy_id_family_id_fkey"
+      columns: ["academy_id","family_id"]
+isOneToOne: false
+      referencedRelation: "academies"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "enrollments_child_id_family_id_fkey"
+      columns: ["child_id","family_id"]
+isOneToOne: false
+      referencedRelation: "children"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "enrollments_family_id_fkey"
       columns: ["family_id"]
 isOneToOne: false
       referencedRelation: "families"
@@ -120,6 +230,9 @@ isOneToOne: false
             "accept_invitation":
 { Args: { "p_code": string,"p_display_name": string }; Returns: string
                            },
+"create_enrollment":
+{ Args: { "p_academy_id": string,"p_child_id": string,"p_end_date": string,"p_rules": Json,"p_start_date": string,"p_subject": string }; Returns: string
+                           },
 "create_family":
 { Args: { "p_display_name": string,"p_name": string }; Returns: string
                            },
@@ -127,6 +240,15 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "code": string,"expires_at": string
             }[]
+                           },
+"delete_enrollment":
+{ Args: { "p_enrollment_id": string }; Returns: undefined
+                           },
+"end_enrollment":
+{ Args: { "p_end_date": string,"p_enrollment_id": string }; Returns: undefined
+                           },
+"ensure_sessions_until":
+{ Args: { "p_until": string }; Returns: number
                            },
 "get_invitation":
 { Args: { "p_code": string }; Returns: {
@@ -138,7 +260,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "family_role": "owner"|"parent"
+            "class_session_status": "scheduled"|"completed"|"absent"|"academy_cancelled"|"cancelled"|"makeup_scheduled"|"makeup_completed","family_role": "owner"|"parent"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -258,7 +380,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "family_role": ["owner", "parent"]
+            "class_session_status": ["scheduled", "completed", "absent", "academy_cancelled", "cancelled", "makeup_scheduled", "makeup_completed"],"family_role": ["owner", "parent"]
           }
         }
 } as const

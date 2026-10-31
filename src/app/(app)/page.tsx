@@ -1,10 +1,31 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Card, CardSkeleton } from "@/components/ui/card";
+import { SessionList } from "@/features/calendar/components/session-item";
+import { getSessionsBetween } from "@/features/calendar/queries";
 import { requireFamily } from "@/features/family/queries";
+import { formatDayLabel } from "@/lib/dates";
+import { requestToday } from "@/lib/request-date";
 import { ROUTES } from "@/lib/routes";
 
 const MAX_PARENTS = 2;
+
+async function TodaySchedule({ showChild }: { showChild: boolean }) {
+  const today = await requestToday();
+  const sessions = await getSessionsBetween(today, today);
+  return (
+    <Card
+      title={`오늘 일정 · ${formatDayLabel(today)}`}
+      action={
+        <Link href={ROUTES.calendar} className="text-sm font-semibold text-primary">
+          캘린더
+        </Link>
+      }
+    >
+      <SessionList sessions={sessions} showChild={showChild} emptyText="오늘은 수업이 없습니다." />
+    </Card>
+  );
+}
 
 async function HomeContent() {
   const { family, me, members, children } = await requireFamily();
@@ -16,6 +37,10 @@ async function HomeContent() {
         <p className="text-sm text-muted">{me.display_name}님, 안녕하세요</p>
         <h1 className="text-xl font-bold">{family.name}</h1>
       </div>
+
+      <Suspense fallback={<CardSkeleton />}>
+        <TodaySchedule showChild={children.length > 1} />
+      </Suspense>
 
       {spouseMissing ? (
         <Card title="배우자를 초대하세요" description="함께 쓰면 한 사람이 바꾼 일정과 교육비가 서로에게 바로 보입니다.">

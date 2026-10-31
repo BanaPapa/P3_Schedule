@@ -1,18 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-
-const PASSWORD = "family-hub-1234";
-
-function uniqueEmail(label: string): string {
-  return `${label}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.local`;
-}
-
-async function signUp(page: Page, email: string): Promise<void> {
-  // 링크로 넘어온 경우 이전 화면(로그인) 폼에 입력하지 않도록 회원가입 화면을 기다린다
-  await expect(page.getByRole("heading", { name: "회원가입" })).toBeVisible();
-  await page.getByRole("textbox", { name: "이메일", exact: true }).fill(email);
-  await page.getByRole("textbox", { name: "비밀번호", exact: true }).fill(PASSWORD);
-  await page.getByRole("button", { name: "가입하기" }).click();
-}
+import { expect, test } from "@playwright/test";
+import { signUp, uniqueEmail } from "./helpers";
 
 test("parents share a family: invite, join, edit, and detect conflicting edits", async ({ browser }) => {
   const dad = await (await browser.newContext()).newPage();

@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 프로젝트
 
 **Family Hub**: 부부가 자녀의 학원 일정·학원비·가족 일정을 함께 관리하는 앱. 기준 문서는 상세 PRD v1.0(2026-10-31)이다.
-M1(가족 계정: 로그인, 가족 생성, 배우자 초대, 자녀 프로필)까지 구현되어 있다.
+M1(가족 계정)과 M2(학원·수강 과목·반복 수업·통합 캘린더)까지 구현되어 있다.
 
 ## 기술 스택
 
@@ -56,7 +56,20 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 - **아직 구성원이 아닌 사람의 일**(가족 생성, 초대 조회·수락)은 `security definer` RPC로만 한다. `set search_path = ''`, 스키마를 붙인 이름, `anon` 실행 권한 회수를 지킨다.
 - **RPC 오류**는 `raise exception '<code>'`(SQLSTATE P0001)로 던지고, 같은 코드를 `src/lib/errors.ts` 의 `ERROR_MESSAGES` 에 한국어로 등록한다.
 - **동시 수정 감지**: 수정 가능한 테이블은 `version` 컬럼과 `private.bump_version()` 트리거를 둔다. 화면이 읽은 version을 hidden input으로 보내고 `.eq("version", v)` 로 저장한다. 0행이면 `conflict()` 를 돌려주고, 화면은 편집을 닫고 최신 값 위에 메시지를 보여준다.
-- **변경 이력**: `private.write_audit_log()` 트리거를 붙이면 `audit_logs` 에 행위자·이전/이후 값이 남는다. 새 도메인 테이블에도 붙인다.
+- **변경 이력**: `private.write_audit_log()` 트리거를 붙이면 `audit_logs` 에 행위자·이전/이후 값이 남는다. 새 도메인 테이블에도 붙인다. (자동 생성되는 `class_sessions` 는 insert 를 빼고 update/delete 만 남긴다.)
+- **같은 가족끼리만 연결**: 다른 도메인 행을 참조할 때는 `(x_id, family_id)` 복합 외래키를 쓴다. 참조되는 테이블에는 `unique (id, family_id)` 를 둔다.
+
+### 수업 일정 모델 (M2)
+
+- `enrollments`(자녀 × 학원 × 과목, 기간) → `class_rules`(요일·시각, 유효 기간) → `class_sessions`(날짜별 회차, 상태).
+- 회차는 **실제 행**이다. 결석·보강(M3), 회차별 학원비(M4)가 회차 단위로 움직인다.
+- 정규 회차는 `private.generate_sessions_between()` 이 규칙에서 만든다. `(rule_id, session_date)` 유일 인덱스와 `on conflict do nothing` 으로 몇 번을 불러도 같다.
+  - 수강 등록 때 3개월 뒤 달 말일까지 만들고, 캘린더 조회 때 `ensure_sessions_until(보는 범위 끝)` 으로 오늘 이후만 이어서 만든다(최대 400일).
+- **규칙에서 만든 회차의 `session_date` 는 바꾸지 않는다.** 바꾸면 다시 만들 때 원래 날짜 회차가 또 생긴다. M3의 "이번 수업만 변경"은 원 회차의 상태를 바꾸고 `rule_id = null` 회차를 새로 만든다.
+- 지난 회차는 지우지 않는다. 수강을 그만두면 `end_enrollment` 로 종료한다. 종료일을 과거로 잡아도 **오늘 이후의** `scheduled` 회차만 지운다. 종료일을 늦추면 오늘부터만 다시 만든다.
+- `delete_enrollment` 는 지난 회차가 없을 때만 된다. **M3 주의**: 지금은 `session_date < 오늘` 만 보므로, 오늘·미래에 상태가 바뀐 회차(보강 예정 등)가 있으면 함께 지워진다. M3에서 `status <> 'scheduled'` 회차가 있으면 막도록 고친다.
+- 진행 중 수강 과목은 가족당 30개, 시작일은 오늘 기준 -366 ~ +400일. 앱 검증(`education/schemas.ts`)과 DB 상수를 같이 바꾼다.
+- 날짜는 서울 기준 `date`/`time`. DB는 `private.family_today()`, 앱은 `src/lib/dates.ts` (`"YYYY-MM-DD"` 문자열). 서버 컴포넌트에서 오늘 날짜는 `requestToday()` 로 얻는다.
 - 서버 액션은 `FormState`(`src/lib/form-state.ts`)를 돌려주고 클라이언트는 `useActionState` 로 받는다. 검증은 항상 서버 액션 안에서 zod로 한다.
 
 ### Next.js 16 / Cache Components 주의점
@@ -64,7 +77,8 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 - `cookies()`, `params`, `searchParams` 를 읽는 컴포넌트는 `<Suspense>` 안에 둔다. 페이지는 정적 껍데기 + Suspense 안의 데이터 컴포넌트로 나눈다. 레이아웃 최상단에서 세션을 await 하지 않는다.
 - Suspense fallback 에 **입력 가능한 폼을 두지 않는다.** 실제 폼으로 교체될 때 입력값이 사라진다. 로그인·가입 페이지는 이 때문에 정적으로 두고 `?next=` 를 제출 순간 `window.location` 에서 읽는다.
 - Partial Prefetching 프리렌더가 끝나면 Next가 진행 중인 fetch를 거절하는데, supabase-js는 이를 `{ error }` 로 바꿔 버린다. `src/lib/supabase/server.ts` 의 `prerenderSafeFetch` 가 이를 막는다. 서버용 Supabase 클라이언트는 반드시 `createClient()` 로 만든다.
-- 방문한 화면이 숨겨진 채(React Activity) DOM에 남는다. E2E에서는 `getByLabel` 대신 숨은 요소를 무시하는 `getByRole` 을 쓰고, 화면 전환을 기다린 뒤 입력한다.
+- 서버 컴포넌트에서 `new Date()` 를 요청 데이터 없이 먼저 쓰면 빌드가 실패한다. `requestToday()`(`connection()` 후 날짜)를 쓴다.
+- 방문한 화면이 숨겨진 채(React Activity) DOM에 남는다. E2E에서는 `getByLabel` 대신 숨은 요소를 무시하는 `getByRole` 을 쓰고, `getByText` 는 `.filter({ visible: true })` 를 붙인다. 화면 전환을 기다린 뒤 입력하고, 탭 이동은 `e2e/helpers.ts` 의 `tab()` 을 쓴다.
 - `"use server"` 파일에서 export 한 async 함수는 모두 외부에서 호출 가능한 엔드포인트가 된다. 헬퍼는 `queries.ts` 같은 서버 전용 모듈에 둔다.
 
 ## 범위와 순서
@@ -72,7 +86,7 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 1차 범위는 학원 관리다. 여행은 2차, 학교·학습은 3차, AI는 4차다. 나중에 붙이기 쉽도록 데이터 구조를 설계한다.
 
 - M1: 가족 계정 ✅
-- M2: 학원·수강 과목·반복 수업, 통합 캘린더
+- M2: 학원·수강 과목·반복 수업, 통합 캘린더 ✅ (가족 공통 일정 `calendar_events` 는 아직 없음)
 - M3: 결석·휴강·시간 변경·보강 연결
 - M4: 학원비 정책, 월별 계산, 청구 확정, 납부
 - M5: 변경 이력 화면, 실시간 동기화, 홈 대시보드
