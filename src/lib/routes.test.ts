@@ -65,6 +65,11 @@ describe("resolveRouteAccess", () => {
     });
   });
 
+  it("lets anyone open the email confirmation link", () => {
+    expect(resolveRouteAccess("/auth/confirm", "?token_hash=x&type=signup", false)).toEqual({ type: "next" });
+    expect(resolveRouteAccess("/auth/confirm", "?token_hash=x&type=signup", true)).toEqual({ type: "next" });
+  });
+
   it("lets signed-in users through to app pages", () => {
     expect(resolveRouteAccess("/family", "", true)).toEqual({ type: "next" });
   });

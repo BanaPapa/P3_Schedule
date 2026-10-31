@@ -13,9 +13,12 @@ export const ROUTES = {
   tuitionDetail: (enrollmentId: string, month: string) => `/tuition/${enrollmentId}?month=${month.slice(0, 7)}`,
   tuitionPolicy: (enrollmentId: string) => `/tuition/${enrollmentId}/policy`,
   invite: (code: string) => `/invite/${code}`,
+  authConfirm: "/auth/confirm",
 } as const;
 
 const AUTH_PATHS: readonly string[] = [ROUTES.login, ROUTES.signup];
+/** 로그인 여부와 상관없이 열리는 경로 (가입 확인 메일 링크) */
+const OPEN_PATHS: readonly string[] = [ROUTES.authConfirm];
 
 export type RouteAccess = { type: "next" } | { type: "redirect"; to: string };
 
@@ -40,6 +43,7 @@ export function resolveRouteAccess(
   search: string,
   isAuthenticated: boolean,
 ): RouteAccess {
+  if (OPEN_PATHS.includes(pathname)) return { type: "next" };
   const isAuthPath = AUTH_PATHS.includes(pathname);
 
   if (isAuthPath) {

@@ -1,7 +1,9 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { authErrorMessage } from "@/lib/errors";
+import { requestOrigin } from "@/lib/invite-url";
 import { failure, formValues, success, validationError, type FormState } from "@/lib/form-state";
 import { logger } from "@/lib/logger";
 import { ROUTES, safeNextPath } from "@/lib/routes";
@@ -16,8 +18,14 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   });
   if (!parsed.success) return validationError(parsed.error, values);
 
+  const next = safeNextPath(formData.get("next")?.toString(), ROUTES.onboarding);
+  // 메일 확인을 켠 운영 환경: 확인 링크(/auth/confirm)가 로그인 후 next(예: 초대 화면)로 보낸다
+  const origin = requestOrigin(await headers(), process.env.NEXT_PUBLIC_SITE_URL);
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp(parsed.data);
+  const { data, error } = await supabase.auth.signUp({
+    ...parsed.data,
+    options: { emailRedirectTo: `${origin}${ROUTES.authConfirm}?next=${encodeURIComponent(next)}` },
+  });
   if (error) {
     if (!error.code) logger.error("sign up failed", { status: error.status });
     return failure(authErrorMessage(error), values);
@@ -25,10 +33,10 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
 
   // 이메일 인증을 켠 환경에서는 세션 없이 돌아온다
   if (!data.session) {
-    return success("가입 확인 메일을 보냈습니다. 메일의 링크를 누른 뒤 로그인해 주세요.");
+    return success("가입 확인 메일을 보냈습니다. 메일의 링크를 누르면 바로 로그인됩니다.");
   }
 
-  redirect(safeNextPath(formData.get("next")?.toString(), ROUTES.onboarding));
+  redirect(next);
 }
 
 export async function signInAction(_prev: FormState, formData: FormData): Promise<FormState> {
