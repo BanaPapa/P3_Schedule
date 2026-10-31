@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f7f9;
+  --surface: #ffffff;
+  --foreground: #16181d;
+  --muted: #5f6673;
+  --border: #e3e6eb;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --danger: #c2261d;
+  --success: #15803d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f1115;
+    --surface: #181b21;
+    --foreground: #eceef2;
+    --muted: #9aa1ad;
+    --border: #2a2f38;
+    --primary: #5b8cff;
+    --primary-foreground: #0f1115;
+    --danger: #ff7a70;
+    --success: #4ade80;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic",
+    "Noto Sans KR", sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  word-break: keep-all;
+}
