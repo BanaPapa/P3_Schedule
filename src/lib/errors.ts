@@ -19,6 +19,12 @@ export const ERROR_MESSAGES = {
   enrollment_has_history: "지난 수업 기록이 있어 삭제할 수 없습니다. 대신 수강을 종료해 주세요.",
   range_too_far: "1년 넘게 먼 날짜의 일정은 볼 수 없습니다.",
   too_many_enrollments: "진행 중인 수강 과목은 30개까지 등록할 수 있습니다. 끝난 과목은 수강 종료해 주세요.",
+  session_not_found: "수업을 찾을 수 없습니다. 새로고침 후 다시 시도해 주세요.",
+  invalid_status: "이 수업에는 그 상태를 쓸 수 없습니다.",
+  replacement_exists: "이미 보강이나 변경된 수업이 잡혀 있습니다. 그 수업을 먼저 취소해 주세요.",
+  makeup_not_allowed: "결석하거나 휴강한 수업에만 보강을 잡을 수 있습니다.",
+  session_not_changeable: "예정된 수업만 날짜·시간을 바꿀 수 있습니다.",
+  too_many_schedule_changes: "이 과목은 일정을 너무 많이 바꿨습니다. 수강을 종료하고 새로 등록해 주세요.",
   // 앱
   academy_in_use: "수강 과목이 등록된 학원은 삭제할 수 없습니다. 먼저 수강 과목을 정리해 주세요.",
   child_in_use: "수강 과목이 등록된 자녀는 삭제할 수 없습니다. 먼저 수강 과목을 정리해 주세요.",
@@ -55,7 +61,16 @@ const RPC_ERROR_CODES: ReadonlySet<string> = new Set<ErrorCode>([
   "enrollment_has_history",
   "range_too_far",
   "too_many_enrollments",
+  "session_not_found",
+  "invalid_status",
+  "replacement_exists",
+  "makeup_not_allowed",
+  "session_not_changeable",
+  "too_many_schedule_changes",
 ]);
+
+/** 회차를 읽은 뒤 다른 사람이 먼저 바꿨을 때 RPC 가 던지는 코드. 화면은 conflict() 로 처리한다. */
+export const SESSION_CONFLICT = "session_conflict";
 
 /** 참조 중인 행을 지우려 할 때(외래키 위반) */
 export const FOREIGN_KEY_VIOLATION = "23503";

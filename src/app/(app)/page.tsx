@@ -4,11 +4,32 @@ import { Card, CardSkeleton } from "@/components/ui/card";
 import { SessionList } from "@/features/calendar/components/session-item";
 import { getSessionsBetween } from "@/features/calendar/queries";
 import { requireFamily } from "@/features/family/queries";
+import { MakeupWaitlist } from "@/features/sessions/components/makeup-waitlist";
+import { getMakeupWaitlist } from "@/features/sessions/queries";
 import { formatDayLabel } from "@/lib/dates";
 import { requestToday } from "@/lib/request-date";
 import { ROUTES } from "@/lib/routes";
 
 const MAX_PARENTS = 2;
+const MAX_HOME_WAITING = 3;
+
+/** 주요 알림: 보강을 잡아야 하는 수업 */
+async function MakeupAlert() {
+  const waiting = await getMakeupWaitlist();
+  if (waiting.length === 0) return null;
+  return (
+    <Card
+      title={`보강 대기 ${waiting.length}건`}
+      action={
+        <Link href={ROUTES.education} className="text-sm font-semibold text-primary">
+          전체 보기
+        </Link>
+      }
+    >
+      <MakeupWaitlist sessions={waiting.slice(0, MAX_HOME_WAITING)} />
+    </Card>
+  );
+}
 
 async function TodaySchedule({ showChild }: { showChild: boolean }) {
   const today = await requestToday();
@@ -40,6 +61,10 @@ async function HomeContent() {
 
       <Suspense fallback={<CardSkeleton />}>
         <TodaySchedule showChild={children.length > 1} />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <MakeupAlert />
       </Suspense>
 
       {spouseMissing ? (

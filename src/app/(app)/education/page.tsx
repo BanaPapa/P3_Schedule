@@ -8,21 +8,30 @@ import { EnrollmentForm } from "@/features/education/components/enrollment-form"
 import { EnrollmentList } from "@/features/education/components/enrollment-list";
 import { getAcademies, getEnrollments } from "@/features/education/queries";
 import { requireFamily } from "@/features/family/queries";
+import { MakeupWaitlist } from "@/features/sessions/components/makeup-waitlist";
+import { getMakeupWaitlist } from "@/features/sessions/queries";
 import { requestToday } from "@/lib/request-date";
 import { ROUTES } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "교육" };
 
 async function EducationContent() {
-  const [{ children }, academies, enrollments] = await Promise.all([
+  const [{ children }, academies, enrollments, waiting] = await Promise.all([
     requireFamily(),
     getAcademies(),
     getEnrollments(),
+    getMakeupWaitlist(),
   ]);
   const today = await requestToday();
 
   return (
     <>
+      {waiting.length > 0 ? (
+        <Card title={`보강 대기 ${waiting.length}건`} description="결석·휴강한 수업입니다. 눌러서 보강 일정을 등록하세요.">
+          <MakeupWaitlist sessions={waiting} />
+        </Card>
+      ) : null}
+
       <Card title="수강 과목" description="정규 수업은 캘린더에 자동으로 표시됩니다.">
         <EnrollmentList enrollments={enrollments} today={today} />
       </Card>

@@ -21,6 +21,7 @@ import {
   enrollmentDeleteSchema,
   enrollmentEndSchema,
   parseEnrollmentForm,
+  parseScheduleChangeForm,
 } from "./schemas";
 
 const ACADEMY_FIELDS = ["name", "phone", "contactName", "memo"] as const;
@@ -129,6 +130,28 @@ export async function createEnrollmentAction(_prev: FormState, formData: FormDat
 
   refreshEducationPages();
   return success(`${subject} 수업을 등록했습니다. 캘린더에서 확인할 수 있습니다.`);
+}
+
+export async function changeScheduleAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const values = formValues(formData, ["enrollmentId", "fromDate"]);
+  const parsed = parseScheduleChangeForm(formData);
+  if (!parsed.success) return validationError(parsed.error, values);
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("change_schedule_from", {
+    p_enrollment_id: parsed.data.enrollmentId,
+    p_from: parsed.data.fromDate,
+    p_rules: parsed.data.rules.map((rule) => ({
+      weekday: rule.weekday,
+      start_time: rule.startTime,
+      end_time: rule.endTime,
+    })),
+  });
+  if (error) return dbFailure("change_schedule_from", error, values);
+
+  refreshEducationPages();
+  revalidatePath(ROUTES.scheduleChange(parsed.data.enrollmentId));
+  return success("일정을 바꿨습니다. 캘린더에 새 일정이 반영되었습니다.");
 }
 
 export async function endEnrollmentAction(_prev: FormState, formData: FormData): Promise<FormState> {

@@ -2,6 +2,14 @@ import { formatDotDate, formatTime, WEEKDAY_LABELS, type IsoDate } from "@/lib/d
 import type { Database } from "@/lib/supabase/database.types";
 
 type SessionStatus = Database["public"]["Enums"]["class_session_status"];
+type SessionKind = Database["public"]["Enums"]["class_session_kind"];
+
+/** 정규 수업은 따로 표시하지 않는다 */
+export const SESSION_KIND_LABELS: Record<SessionKind, string | null> = {
+  regular: null,
+  makeup: "보강",
+  rescheduled: "변경",
+};
 
 export const SESSION_STATUS_LABELS: Record<SessionStatus, string> = {
   scheduled: "예정",

@@ -105,14 +105,14 @@ isOneToOne: false
                   ]
                 },"class_sessions": {
                   Row: {
-                    "created_at": string,"end_time": string,"enrollment_id": string,"family_id": string,"id": string,"note": string | null,"rule_id": string | null,"session_date": string,"start_time": string,"status": Database["public"]['Enums']["class_session_status"],"updated_at": string,"version": number
+                    "created_at": string,"end_time": string,"enrollment_id": string,"family_id": string,"id": string,"kind": Database["public"]['Enums']["class_session_kind"],"makeup_waived": boolean,"note": string | null,"origin_session_id": string | null,"rule_id": string | null,"session_date": string,"start_time": string,"status": Database["public"]['Enums']["class_session_status"],"updated_at": string,"version": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"end_time": string,"enrollment_id": string,"family_id": string,"id"?: string,"note"?: string | null,"rule_id"?: string | null,"session_date": string,"start_time": string,"status"?: Database["public"]['Enums']["class_session_status"],"updated_at"?: string,"version"?: number
+                    "created_at"?: string,"end_time": string,"enrollment_id": string,"family_id": string,"id"?: string,"kind"?: Database["public"]['Enums']["class_session_kind"],"makeup_waived"?: boolean,"note"?: string | null,"origin_session_id"?: string | null,"rule_id"?: string | null,"session_date": string,"start_time": string,"status"?: Database["public"]['Enums']["class_session_status"],"updated_at"?: string,"version"?: number
                   }
                   Update: {
-                    "created_at"?: string,"end_time"?: string,"enrollment_id"?: string,"family_id"?: string,"id"?: string,"note"?: string | null,"rule_id"?: string | null,"session_date"?: string,"start_time"?: string,"status"?: Database["public"]['Enums']["class_session_status"],"updated_at"?: string,"version"?: number
+                    "created_at"?: string,"end_time"?: string,"enrollment_id"?: string,"family_id"?: string,"id"?: string,"kind"?: Database["public"]['Enums']["class_session_kind"],"makeup_waived"?: boolean,"note"?: string | null,"origin_session_id"?: string | null,"rule_id"?: string | null,"session_date"?: string,"start_time"?: string,"status"?: Database["public"]['Enums']["class_session_status"],"updated_at"?: string,"version"?: number
                   }
                   Relationships: [
                     {
@@ -127,6 +127,18 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "families"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "class_sessions_origin_fkey"
+      columns: ["origin_session_id","family_id"]
+isOneToOne: false
+      referencedRelation: "class_sessions"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "class_sessions_origin_fkey"
+      columns: ["origin_session_id","family_id"]
+isOneToOne: false
+      referencedRelation: "makeup_waitlist"
+      referencedColumns: ["id","family_id"]
     },{
       foreignKeyName: "class_sessions_rule_id_family_id_fkey"
       columns: ["rule_id","family_id"]
@@ -224,11 +236,58 @@ isOneToOne: false
                 }
           }
           Views: {
-            [_ in never]: never
+            "makeup_waitlist": {
+                  Row: {
+                    "created_at": string,"end_time": string,"enrollment_id": string,"family_id": string,"id": string,"kind": Database["public"]['Enums']["class_session_kind"],"makeup_waived": boolean,"note": string | null,"origin_session_id": string | null,"rule_id": string | null,"session_date": string,"start_time": string,"status": Database["public"]['Enums']["class_session_status"],"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                           "created_at"?: string | null,"end_time"?: string | null,"enrollment_id"?: string | null,"family_id"?: string | null,"id"?: string | null,"kind"?: Database["public"]['Enums']["class_session_kind"] | null,"makeup_waived"?: boolean | null,"note"?: string | null,"origin_session_id"?: string | null,"rule_id"?: string | null,"session_date"?: string | null,"start_time"?: string | null,"status"?: Database["public"]['Enums']["class_session_status"] | null,"updated_at"?: string | null,"version"?: number | null
+                         }
+                        Update: {
+                           "created_at"?: string | null,"end_time"?: string | null,"enrollment_id"?: string | null,"family_id"?: string | null,"id"?: string | null,"kind"?: Database["public"]['Enums']["class_session_kind"] | null,"makeup_waived"?: boolean | null,"note"?: string | null,"origin_session_id"?: string | null,"rule_id"?: string | null,"session_date"?: string | null,"start_time"?: string | null,"status"?: Database["public"]['Enums']["class_session_status"] | null,"updated_at"?: string | null,"version"?: number | null
+                         }
+                        Relationships: [
+                    {
+      foreignKeyName: "class_sessions_enrollment_id_family_id_fkey"
+      columns: ["enrollment_id","family_id"]
+isOneToOne: false
+      referencedRelation: "enrollments"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "class_sessions_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "class_sessions_origin_fkey"
+      columns: ["origin_session_id","family_id"]
+isOneToOne: false
+      referencedRelation: "class_sessions"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "class_sessions_origin_fkey"
+      columns: ["origin_session_id","family_id"]
+isOneToOne: false
+      referencedRelation: "makeup_waitlist"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "class_sessions_rule_id_family_id_fkey"
+      columns: ["rule_id","family_id"]
+isOneToOne: false
+      referencedRelation: "class_rules"
+      referencedColumns: ["id","family_id"]
+    }
+                  ]
+                }
           }
           Functions: {
             "accept_invitation":
 { Args: { "p_code": string,"p_display_name": string }; Returns: string
+                           },
+"change_schedule_from":
+{ Args: { "p_enrollment_id": string,"p_from": string,"p_rules": Json }; Returns: undefined
                            },
 "create_enrollment":
 { Args: { "p_academy_id": string,"p_child_id": string,"p_end_date": string,"p_rules": Json,"p_start_date": string,"p_subject": string }; Returns: string
@@ -240,6 +299,9 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "code": string,"expires_at": string
             }[]
+                           },
+"create_makeup":
+{ Args: { "p_date": string,"p_end_time": string,"p_session_id": string,"p_start_time": string,"p_version": number }; Returns: string
                            },
 "delete_enrollment":
 { Args: { "p_enrollment_id": string }; Returns: undefined
@@ -255,12 +317,21 @@ isOneToOne: false
               "expires_at": string,"family_name": string,"inviter_name": string,"status": string
             }[]
                            },
+"reschedule_session":
+{ Args: { "p_date": string,"p_end_time": string,"p_session_id": string,"p_start_time": string,"p_version": number }; Returns: string
+                           },
 "revoke_invitation":
 { Args: { "p_invitation_id": string }; Returns: undefined
+                           },
+"set_makeup_waived":
+{ Args: { "p_session_id": string,"p_version": number,"p_waived": boolean }; Returns: undefined
+                           },
+"set_session_status":
+{ Args: { "p_session_id": string,"p_status": Database["public"]['Enums']["class_session_status"],"p_version": number }; Returns: undefined
                            }
           }
           Enums: {
-            "class_session_status": "scheduled"|"completed"|"absent"|"academy_cancelled"|"cancelled"|"makeup_scheduled"|"makeup_completed","family_role": "owner"|"parent"
+            "class_session_kind": "regular"|"makeup"|"rescheduled","class_session_status": "scheduled"|"completed"|"absent"|"academy_cancelled"|"cancelled"|"makeup_scheduled"|"makeup_completed","family_role": "owner"|"parent"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -380,7 +451,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "class_session_status": ["scheduled", "completed", "absent", "academy_cancelled", "cancelled", "makeup_scheduled", "makeup_completed"],"family_role": ["owner", "parent"]
+            "class_session_kind": ["regular", "makeup", "rescheduled"],"class_session_status": ["scheduled", "completed", "absent", "academy_cancelled", "cancelled", "makeup_scheduled", "makeup_completed"],"family_role": ["owner", "parent"]
           }
         }
 } as const

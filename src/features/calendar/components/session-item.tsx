@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { formatTime } from "@/lib/dates";
-import { SESSION_STATUS_LABELS } from "@/features/education/format";
+import { ROUTES } from "@/lib/routes";
+import { SESSION_KIND_LABELS, SESSION_STATUS_LABELS } from "@/features/education/format";
 import type { CalendarSession } from "../queries";
 
 interface SessionItemProps {
@@ -7,31 +9,37 @@ interface SessionItemProps {
   showChild: boolean;
 }
 
+const INACTIVE = new Set(["cancelled", "academy_cancelled", "absent"]);
+
 export function SessionItem({ session, showChild }: SessionItemProps) {
-  const inactive = session.status === "cancelled" || session.status === "academy_cancelled";
+  const inactive = INACTIVE.has(session.status);
+  const kindLabel = SESSION_KIND_LABELS[session.kind];
 
   return (
-    <li className="flex items-start gap-3 py-2.5">
-      <span
-        aria-hidden
-        className="mt-1.5 size-2.5 shrink-0 rounded-full"
-        style={{ backgroundColor: session.child.color }}
-      />
-      <div className="w-24 shrink-0 text-sm tabular-nums text-muted">
-        {formatTime(session.startTime)}–{formatTime(session.endTime)}
-      </div>
-      <div className={`min-w-0 flex-1 ${inactive ? "text-muted line-through" : ""}`}>
-        <p className="font-medium">
-          {showChild ? `${session.child.name} · ` : ""}
-          {session.subject}
-        </p>
-        <p className="text-sm text-muted">{session.academyName}</p>
-      </div>
-      {session.status !== "scheduled" ? (
-        <span className="shrink-0 rounded-full bg-background px-2 py-0.5 text-xs text-muted">
-          {SESSION_STATUS_LABELS[session.status]}
-        </span>
-      ) : null}
+    <li>
+      <Link href={ROUTES.session(session.id)} className="flex items-start gap-3 py-2.5">
+        <span
+          aria-hidden
+          className="mt-1.5 size-2.5 shrink-0 rounded-full"
+          style={{ backgroundColor: session.child.color }}
+        />
+        <div className="w-24 shrink-0 text-sm tabular-nums text-muted">
+          {formatTime(session.startTime)}–{formatTime(session.endTime)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className={`font-medium ${inactive ? "text-muted line-through" : ""}`}>
+            {showChild ? `${session.child.name} · ` : ""}
+            {session.subject}
+            {kindLabel ? <span className="ml-1.5 text-xs font-semibold text-primary no-underline">{kindLabel}</span> : null}
+          </p>
+          <p className="text-sm text-muted">{session.academyName}</p>
+        </div>
+        {session.status !== "scheduled" ? (
+          <span className="shrink-0 rounded-full bg-background px-2 py-0.5 text-xs text-muted">
+            {SESSION_STATUS_LABELS[session.status]}
+          </span>
+        ) : null}
+      </Link>
     </li>
   );
 }

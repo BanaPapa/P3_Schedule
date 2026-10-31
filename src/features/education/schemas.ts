@@ -7,7 +7,7 @@ export const MAX_WEEKLY_SCHEDULES = 14;
 const MAX_PAST_START_DAYS = 366;
 const MAX_FUTURE_START_DAYS = 400;
 
-const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+export const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 const PHONE_PATTERN = /^[0-9+\-() ]{2,30}$/;
 
 const optionalText = (max: number, message: string) =>
@@ -53,6 +53,15 @@ const weeklyScheduleSchema = z
   })
   .refine((rule) => rule.endTime > rule.startTime);
 
+const weeklySchedulesSchema = z
+  .array(weeklyScheduleSchema, { error: "수업 요일과 시간을 확인해 주세요." })
+  .min(1, { error: "수업 요일과 시간을 하나 이상 입력해 주세요." })
+  .max(MAX_WEEKLY_SCHEDULES)
+  .refine(
+    (rules) => new Set(rules.map((rule) => `${rule.weekday}-${rule.startTime}`)).size === rules.length,
+    { error: "같은 요일·시간이 두 번 들어 있습니다." },
+  );
+
 function enrollmentSchema(today: Date) {
   const earliestStart = addDays(todayInSeoul(today), -MAX_PAST_START_DAYS);
   const latestStart = addDays(todayInSeoul(today), MAX_FUTURE_START_DAYS);
@@ -72,14 +81,7 @@ function enrollmentSchema(today: Date) {
         .string()
         .transform((value) => (value === "" ? null : value))
         .refine((value) => value === null || isIsoDate(value), { error: "날짜를 올바르게 입력해 주세요." }),
-      rules: z
-        .array(weeklyScheduleSchema, { error: "수업 요일과 시간을 확인해 주세요." })
-        .min(1, { error: "수업 요일과 시간을 하나 이상 입력해 주세요." })
-        .max(MAX_WEEKLY_SCHEDULES)
-        .refine(
-          (rules) => new Set(rules.map((rule) => `${rule.weekday}-${rule.startTime}`)).size === rules.length,
-          { error: "같은 요일·시간이 두 번 들어 있습니다." },
-        ),
+      rules: weeklySchedulesSchema,
     })
     .refine((value) => value.endDate === null || value.endDate >= value.startDate, {
       path: ["endDate"],
@@ -93,28 +95,47 @@ function textEntries(formData: FormData, key: string): string[] {
   return formData.getAll(key).map((value) => (typeof value === "string" ? value : ""));
 }
 
+function text(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  return typeof value === "string" ? value : "";
+}
+
 /** 수업 시간 행은 weekday/startTime/endTime 이 같은 순서로 여러 개 온다 */
-export function parseEnrollmentForm(formData: FormData, today: Date = new Date()) {
-  const weekdays = textEntries(formData, "weekday");
+function readScheduleRows(formData: FormData) {
   const startTimes = textEntries(formData, "startTime");
   const endTimes = textEntries(formData, "endTime");
-  const text = (key: string) => {
-    const value = formData.get(key);
-    return typeof value === "string" ? value : "";
-  };
+  return textEntries(formData, "weekday").map((weekday, index) => ({
+    weekday,
+    startTime: startTimes[index] ?? "",
+    endTime: endTimes[index] ?? "",
+  }));
+}
 
+export function parseEnrollmentForm(formData: FormData, today: Date = new Date()) {
   return enrollmentSchema(today).safeParse({
-    childId: text("childId"),
-    academyId: text("academyId"),
-    subject: text("subject"),
-    startDate: text("startDate"),
-    endDate: text("endDate"),
-    rules: weekdays.map((weekday, index) => ({
-      weekday,
-      startTime: startTimes[index] ?? "",
-      endTime: endTimes[index] ?? "",
-    })),
+    childId: text(formData, "childId"),
+    academyId: text(formData, "academyId"),
+    subject: text(formData, "subject"),
+    startDate: text(formData, "startDate"),
+    endDate: text(formData, "endDate"),
+    rules: readScheduleRows(formData),
   });
+}
+
+/** 앞으로 전체 변경: 기준일(오늘 이후)부터 새 요일·시간 */
+export function parseScheduleChangeForm(formData: FormData, today: Date = new Date()) {
+  const todayIso = todayInSeoul(today);
+  return z
+    .object({
+      enrollmentId: z.uuid(),
+      fromDate: isoDate.refine((value) => value >= todayIso, { error: "변경 시작일은 오늘 이후로 골라 주세요." }),
+      rules: weeklySchedulesSchema,
+    })
+    .safeParse({
+      enrollmentId: text(formData, "enrollmentId"),
+      fromDate: text(formData, "fromDate"),
+      rules: readScheduleRows(formData),
+    });
 }
 
 export const enrollmentEndSchema = z.object({ id: z.uuid(), endDate: isoDate });

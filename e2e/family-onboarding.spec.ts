@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { signUp, uniqueEmail } from "./helpers";
+import { signUp, signUpWithFamily, uniqueEmail } from "./helpers";
 
 test("parents share a family: invite, join, edit, and detect conflicting edits", async ({ browser }) => {
   const dad = await (await browser.newContext()).newPage();
@@ -65,11 +65,7 @@ test("an invite link cannot be reused by a third person", async ({ browser }) =>
   const spouse = await (await browser.newContext()).newPage();
   const stranger = await (await browser.newContext()).newPage();
 
-  await owner.goto("/signup");
-  await signUp(owner, uniqueEmail("owner"));
-  await owner.getByRole("textbox", { name: "가족 이름", exact: true }).fill("박씨네");
-  await owner.getByRole("textbox", { name: "나의 호칭", exact: true }).fill("엄마");
-  await owner.getByRole("button", { name: "가족 만들기" }).click();
+  await signUpWithFamily(owner, "박씨네", "엄마");
   await owner.goto("/family");
   await owner.getByRole("button", { name: "초대 링크 만들기" }).click();
   const invitePath = new URL(await owner.getByRole("textbox", { name: "초대 링크", exact: true }).inputValue()).pathname;

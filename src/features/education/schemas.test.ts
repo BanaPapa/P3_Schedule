@@ -5,6 +5,7 @@ import {
   academyUpdateSchema,
   enrollmentEndSchema,
   parseEnrollmentForm,
+  parseScheduleChangeForm,
 } from "./schemas";
 
 const UUID_A = "6f1c2f0e-8f43-4c1e-9d55-3f0f6c2f9a11";
@@ -120,6 +121,41 @@ describe("parseEnrollmentForm", () => {
     const result = parseEnrollmentForm(enrollmentForm({ childId: "", academyId: "" }), TODAY);
     expect(result.success).toBe(false);
     expect(result.error?.issues.map((issue) => issue.path[0])).toEqual(["childId", "academyId"]);
+  });
+});
+
+describe("parseScheduleChangeForm", () => {
+  function changeForm(fromDate: string, weekdays: string[] = ["3"]): FormData {
+    const formData = new FormData();
+    formData.set("enrollmentId", UUID_A);
+    formData.set("fromDate", fromDate);
+    for (const weekday of weekdays) {
+      formData.append("weekday", weekday);
+      formData.append("startTime", "17:00");
+      formData.append("endTime", "18:00");
+    }
+    return formData;
+  }
+
+  it("parses the change date and the new schedule", () => {
+    const result = parseScheduleChangeForm(changeForm("2026-11-09"), TODAY);
+    expect(result.data).toEqual({
+      enrollmentId: UUID_A,
+      fromDate: "2026-11-09",
+      rules: [{ weekday: 3, startTime: "17:00", endTime: "18:00" }],
+    });
+  });
+
+  it("allows today but not the past", () => {
+    expect(parseScheduleChangeForm(changeForm("2026-11-01"), TODAY).success).toBe(true);
+    const past = parseScheduleChangeForm(changeForm("2026-10-31"), TODAY);
+    expect(past.success).toBe(false);
+    expect(past.error?.issues[0]?.path).toEqual(["fromDate"]);
+  });
+
+  it("rejects duplicate schedule rows", () => {
+    const result = parseScheduleChangeForm(changeForm("2026-11-09", ["3", "3"]), TODAY);
+    expect(result.error?.issues[0]?.path[0]).toBe("rules");
   });
 });
 

@@ -23,6 +23,19 @@ export function newScheduleRow(previous?: ScheduleRow): ScheduleRow {
   };
 }
 
+/** 지금 규칙으로 행을 채운다 (앞으로 전체 변경 화면의 시작값) */
+export function scheduleRowsFrom(
+  rules: readonly { weekday: number; start_time: string; end_time: string }[],
+): ScheduleRow[] {
+  if (rules.length === 0) return [newScheduleRow()];
+  return rules.map((rule) => ({
+    ...newScheduleRow(),
+    weekday: String(rule.weekday),
+    startTime: rule.start_time.slice(0, 5),
+    endTime: rule.end_time.slice(0, 5),
+  }));
+}
+
 interface ScheduleRowsProps {
   rows: ScheduleRow[];
   onChange: (rows: ScheduleRow[]) => void;

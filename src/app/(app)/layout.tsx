@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { AppHeader } from "@/components/app-header";
-import { BottomNav } from "@/components/bottom-nav";
+import { BottomNav, BottomNavView } from "@/components/bottom-nav";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
@@ -10,7 +10,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 pt-5 pb-[calc(5rem+env(safe-area-inset-bottom))]">
         {children}
       </main>
-      <BottomNav />
+      {/* 동적 경로(/sessions/[id] 등)에서 주소는 요청 때 정해지므로 Suspense 안에서 읽는다 */}
+      <Suspense fallback={<BottomNavView pathname={null} />}>
+        <BottomNav />
+      </Suspense>
     </>
   );
 }

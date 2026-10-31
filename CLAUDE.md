@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 프로젝트
 
 **Family Hub**: 부부가 자녀의 학원 일정·학원비·가족 일정을 함께 관리하는 앱. 기준 문서는 상세 PRD v1.0(2026-10-31)이다.
-M1(가족 계정)과 M2(학원·수강 과목·반복 수업·통합 캘린더)까지 구현되어 있다.
+M1(가족 계정), M2(학원·수강 과목·반복 수업·통합 캘린더), M3(결석·휴강·일정 변경·보강)까지 구현되어 있다.
 
 ## 기술 스택
 
@@ -65,9 +65,26 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 - 회차는 **실제 행**이다. 결석·보강(M3), 회차별 학원비(M4)가 회차 단위로 움직인다.
 - 정규 회차는 `private.generate_sessions_between()` 이 규칙에서 만든다. `(rule_id, session_date)` 유일 인덱스와 `on conflict do nothing` 으로 몇 번을 불러도 같다.
   - 수강 등록 때 3개월 뒤 달 말일까지 만들고, 캘린더 조회 때 `ensure_sessions_until(보는 범위 끝)` 으로 오늘 이후만 이어서 만든다(최대 400일).
-- **규칙에서 만든 회차의 `session_date` 는 바꾸지 않는다.** 바꾸면 다시 만들 때 원래 날짜 회차가 또 생긴다. M3의 "이번 수업만 변경"은 원 회차의 상태를 바꾸고 `rule_id = null` 회차를 새로 만든다.
-- 지난 회차는 지우지 않는다. 수강을 그만두면 `end_enrollment` 로 종료한다. 종료일을 과거로 잡아도 **오늘 이후의** `scheduled` 회차만 지운다. 종료일을 늦추면 오늘부터만 다시 만든다.
-- `delete_enrollment` 는 지난 회차가 없을 때만 된다. **M3 주의**: 지금은 `session_date < 오늘` 만 보므로, 오늘·미래에 상태가 바뀐 회차(보강 예정 등)가 있으면 함께 지워진다. M3에서 `status <> 'scheduled'` 회차가 있으면 막도록 고친다.
+- **규칙에서 만든 회차의 `session_date` 는 바꾸지 않는다.** 바꾸면 다시 만들 때 원래 날짜 회차가 또 생긴다.
+- 지난 회차는 지우지 않는다. 수강을 그만두면 `end_enrollment` 로 종료한다. 종료일을 과거로 잡아도 **오늘 이후의 손대지 않은 정규**(`kind = 'regular'`, `status = 'scheduled'`) 회차만 지운다. 종료일을 늦추면 오늘부터만 다시 만든다.
+- `delete_enrollment` 는 지난 회차도, 사람이 바꾼 회차(상태 변경·보강·변경)도 없을 때만 된다.
+
+### 회차 변경 모델 (M3)
+
+- `class_sessions.kind`: `regular`(규칙) / `makeup`(보강) / `rescheduled`(이번만 다른 날). 보강·변경은 `origin_session_id` 로 원 회차와 연결한다. 정규만 `rule_id` 를 가진다(체크 제약).
+- 원 회차 하나에 살아 있는(취소 아닌) 보강·변경은 **하나뿐**이다(부분 유일 인덱스). 학원비(M4)는 이 연결로 중복·누락을 판단한다.
+- 상태는 `set_session_status` RPC 로만 바꾼다. 보강은 `makeup_scheduled/makeup_completed/cancelled`, 나머지는 `scheduled/completed/absent/academy_cancelled/cancelled`. 살아 있는 보강·변경이 있으면 원 회차를 `scheduled/completed` 로 되돌릴 수 없다.
+- **이번만 변경**(`reschedule_session`): 같은 날 시간만 바꾸면 그 회차를 고친다. 정규 회차를 다른 날로 옮기면 원 회차는 `cancelled`, 새 `rescheduled` 회차를 만든다(앱은 새 회차 화면으로 이동).
+- **앞으로 전체 변경**(`change_schedule_from`): 기준일(오늘 ~ +400일) 전날까지 기존 규칙을 끝내고 새 규칙을 넣는다.
+  - "손대지 않은 회차" = `kind = 'regular' and status = 'scheduled' and version = 1`. 이것만 지우고 다시 만든다. 메모·시간 변경·상태 변경한 회차는 남는다.
+  - `generate_sessions_between` 은 그날 이미 **끝난(또는 지워진) 규칙의 정규 회차**가 있으면 건너뛴다. 남긴 회차와 새 회차가 겹치지 않게 하는 장치다.
+  - 수강 과목당 규칙은 60개까지(`too_many_schedule_changes`).
+- 수강 종료 때도 손대지 않은 회차만 지우고, 손댄 미래 정규 회차는 `cancelled` 로 남긴다.
+- 원 회차 FK(`origin_session_id`)는 cascade 하지 않는다. 보강·변경 이력이 원 회차와 함께 사라지면 안 된다.
+- 알려진 미처리(LOW): 같은 자녀의 시간 겹침 검사 없음, 미래 회차를 `completed` 로 표시 가능, 메모 저장은 version 검사를 거치지 않을 수 있음(직접 update).
+- **보강 대기**: `makeup_waitlist` 뷰(security_invoker, RLS 적용) = 결석·휴강 + 살아 있는 보강 없음 + `makeup_waived = false`.
+- 회차 RPC 는 화면이 읽은 `version` 을 받는다. 다르면 `session_conflict` 를 던지고, 앱은 `conflict()` 로 처리한다.
+- 메모(`note`)만 직접 update 할 수 있다(컬럼 권한).
 - 진행 중 수강 과목은 가족당 30개, 시작일은 오늘 기준 -366 ~ +400일. 앱 검증(`education/schemas.ts`)과 DB 상수를 같이 바꾼다.
 - 날짜는 서울 기준 `date`/`time`. DB는 `private.family_today()`, 앱은 `src/lib/dates.ts` (`"YYYY-MM-DD"` 문자열). 서버 컴포넌트에서 오늘 날짜는 `requestToday()` 로 얻는다.
 - 서버 액션은 `FormState`(`src/lib/form-state.ts`)를 돌려주고 클라이언트는 `useActionState` 로 받는다. 검증은 항상 서버 액션 안에서 zod로 한다.
@@ -78,7 +95,9 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 - Suspense fallback 에 **입력 가능한 폼을 두지 않는다.** 실제 폼으로 교체될 때 입력값이 사라진다. 로그인·가입 페이지는 이 때문에 정적으로 두고 `?next=` 를 제출 순간 `window.location` 에서 읽는다.
 - Partial Prefetching 프리렌더가 끝나면 Next가 진행 중인 fetch를 거절하는데, supabase-js는 이를 `{ error }` 로 바꿔 버린다. `src/lib/supabase/server.ts` 의 `prerenderSafeFetch` 가 이를 막는다. 서버용 Supabase 클라이언트는 반드시 `createClient()` 로 만든다.
 - 서버 컴포넌트에서 `new Date()` 를 요청 데이터 없이 먼저 쓰면 빌드가 실패한다. `requestToday()`(`connection()` 후 날짜)를 쓴다.
-- 방문한 화면이 숨겨진 채(React Activity) DOM에 남는다. E2E에서는 `getByLabel` 대신 숨은 요소를 무시하는 `getByRole` 을 쓰고, `getByText` 는 `.filter({ visible: true })` 를 붙인다. 화면 전환을 기다린 뒤 입력하고, 탭 이동은 `e2e/helpers.ts` 의 `tab()` 을 쓴다.
+- 클라이언트 컴포넌트의 `usePathname()` 도 동적 경로에서는 `<Suspense>` 안에 있어야 빌드된다(아래 탭 바 참고).
+- 방문한 화면이 숨겨진 채(React Activity) DOM에 남는다. E2E에서는 `getByLabel` 대신 숨은 요소를 무시하는 `getByRole` 을 쓰고, `getByText` 는 `.filter({ visible: true })` 를 붙인다. 탭 이동은 주소 변경까지 기다리는 `goToTab()`, 카드는 보이는 것만 찾는 `card()` 를 쓴다(`e2e/helpers.ts`).
+- 성공하면 폼이 있던 카드가 사라지는 동작(예: 다른 날로 옮기기)은 결과 메시지도 사라진다. 그럴 때는 결과 화면으로 `redirect` 한다.
 - `"use server"` 파일에서 export 한 async 함수는 모두 외부에서 호출 가능한 엔드포인트가 된다. 헬퍼는 `queries.ts` 같은 서버 전용 모듈에 둔다.
 
 ## 범위와 순서
@@ -87,7 +106,7 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 
 - M1: 가족 계정 ✅
 - M2: 학원·수강 과목·반복 수업, 통합 캘린더 ✅ (가족 공통 일정 `calendar_events` 는 아직 없음)
-- M3: 결석·휴강·시간 변경·보강 연결
+- M3: 결석·휴강·시간 변경·보강 연결 ✅
 - M4: 학원비 정책, 월별 계산, 청구 확정, 납부
 - M5: 변경 이력 화면, 실시간 동기화, 홈 대시보드
 - M6: 접근 권한 검증, 계산 테스트, 모바일 실사용 테스트, 배포

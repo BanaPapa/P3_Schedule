@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState, type FormEvent } from "react";
+import { ROUTES } from "@/lib/routes";
 import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/ui/form-message";
 import { TextField } from "@/components/ui/text-field";
@@ -105,7 +107,15 @@ function EnrollmentRow({ enrollment, today }: { enrollment: Enrollment; today: s
           </Button>
         </form>
       ) : (
-        <div className="flex gap-2 pl-6">
+        <div className="flex flex-wrap gap-2 pl-6">
+          {ended ? null : (
+            <Link
+              href={ROUTES.scheduleChange(enrollment.id)}
+              className="inline-flex h-9 items-center rounded-xl border border-border bg-surface px-3 text-sm font-semibold"
+            >
+              일정 변경
+            </Link>
+          )}
           <Button type="button" variant="secondary" className="h-9 px-3 text-sm" onClick={() => setEnding(true)}>
             {enrollment.endDate ? "종료일 변경" : "수강 종료"}
           </Button>

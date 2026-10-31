@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { addChild, field, newPage, signUpWithFamily, tab, todayIsoWeekdayInSeoul } from "./helpers";
+import { addChild, field, goToTab, newPage, signUpWithFamily, todayIsoWeekdayInSeoul } from "./helpers";
 
 test("an enrolled class appears on today's home card and the calendar, and leaves when deleted", async ({
   browser,
@@ -9,7 +9,7 @@ test("an enrolled class appears on today's home card and the calendar, and leave
   await addChild(page, "첫째");
 
   // 학원 등록
-  await tab(page, "교육").click();
+  await goToTab(page, "교육");
   await expect(page.getByRole("heading", { name: "교육", level: 1 })).toBeVisible();
   await field(page, "학원 이름").fill("튼튼영어");
   await field(page, "전화번호 (선택)").fill("02-123-4567");
@@ -36,13 +36,13 @@ test("an enrolled class appears on today's home card and the calendar, and leave
   await expect(page.getByRole("alert").filter({ hasText: "수강 과목이 등록된 학원은 삭제할 수 없습니다" })).toBeVisible();
 
   // 홈: 오늘 일정
-  await tab(page, "홈").click();
+  await goToTab(page, "홈");
   const todayCard = page.locator("section").filter({ hasText: "오늘 일정" });
   await expect(todayCard.getByText("영어", { exact: true })).toBeVisible();
   await expect(todayCard.getByText("16:00–17:00")).toBeVisible();
 
   // 캘린더: 월간 아래 목록과 주간
-  await tab(page, "캘린더").click();
+  await goToTab(page, "캘린더");
   await expect(page.getByText("튼튼영어", { exact: true }).filter({ visible: true })).toBeVisible();
   await page.getByRole("link", { name: "주간" }).click();
   await expect(page.getByRole("region").filter({ hasText: "오늘" }).getByText("영어", { exact: true })).toBeVisible();
@@ -50,7 +50,7 @@ test("an enrolled class appears on today's home card and the calendar, and leave
   await expect(page.getByText("영어", { exact: true }).filter({ visible: true }).first()).toBeVisible();
 
   // 오늘 시작해 지난 수업이 없으니 삭제할 수 있고, 캘린더에서도 빠진다
-  await tab(page, "교육").click();
+  await goToTab(page, "교육");
   page.once("dialog", (dialog) => dialog.accept());
   await page
     .getByRole("listitem")
@@ -58,7 +58,7 @@ test("an enrolled class appears on today's home card and the calendar, and leave
     .getByRole("button", { name: "삭제" })
     .click();
   await expect(page.getByText("아직 등록한 수강 과목이 없습니다.")).toBeVisible();
-  await tab(page, "캘린더").click();
+  await goToTab(page, "캘린더");
   await expect(page.getByText("이날은 수업이 없습니다.").filter({ visible: true })).toBeVisible();
 });
 

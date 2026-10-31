@@ -6,6 +6,8 @@ export const ROUTES = {
   family: "/family",
   calendar: "/calendar",
   education: "/education",
+  session: (id: string) => `/sessions/${id}`,
+  scheduleChange: (enrollmentId: string) => `/education/enrollments/${enrollmentId}/schedule`,
   invite: (code: string) => `/invite/${code}`,
 } as const;
 

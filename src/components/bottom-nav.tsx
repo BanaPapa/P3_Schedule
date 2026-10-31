@@ -22,9 +22,12 @@ function isActive(pathname: string, href: string): boolean {
   return href === ROUTES.home ? pathname === href : pathname.startsWith(href);
 }
 
+/** 현재 탭 표시. 동적 경로에서는 주소를 읽기 전까지 표시 없이 그린다. */
 export function BottomNav() {
-  const pathname = usePathname();
+  return <BottomNavView pathname={usePathname()} />;
+}
 
+export function BottomNavView({ pathname }: { pathname: string | null }) {
   return (
     <nav
       aria-label="주요 메뉴"
@@ -32,7 +35,7 @@ export function BottomNav() {
     >
       <ul className="mx-auto grid h-16 max-w-2xl grid-cols-3">
         {TABS.map((tab) => {
-          const active = isActive(pathname, tab.href);
+          const active = pathname !== null && isActive(pathname, tab.href);
           return (
             <li key={tab.href}>
               <Link

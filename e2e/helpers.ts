@@ -50,3 +50,49 @@ export function todayIsoWeekdayInSeoul(): number {
 export function tab(page: Page, name: "홈" | "캘린더" | "교육") {
   return page.getByRole("navigation", { name: "주요 메뉴" }).getByRole("link", { name });
 }
+
+/** 서울 기준 오늘에서 days 만큼 떨어진 날짜 "YYYY-MM-DD" */
+export function seoulDate(days = 0): string {
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+  const date = new Date(`${today}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+/** 서울 기준 날짜의 ISO 요일(1=월 … 7=일) */
+export function isoWeekdayOf(isoDate: string): number {
+  const day = new Date(`${isoDate}T00:00:00Z`).getUTCDay();
+  return day === 0 ? 7 : day;
+}
+
+/** 제목이 정확히 같은 카드(section) */
+export function card(page: Page, title: string) {
+  return page
+    .locator("section")
+    .filter({ visible: true })
+    .filter({ has: page.getByRole("heading", { name: title, exact: true }) });
+}
+
+/** 학원과 오늘 요일 수업(16:00-17:00, 오늘 시작)을 등록한다 */
+export async function enrollTodayClass(page: Page, academy: string, subject: string): Promise<void> {
+  await goToTab(page, "교육");
+  await expect(page.getByRole("heading", { name: "교육", level: 1 })).toBeVisible();
+  await field(page, "학원 이름").fill(academy);
+  await page.getByRole("button", { name: "학원 등록" }).click();
+  await expect(page.getByRole("status").filter({ hasText: `${academy}을(를) 등록했습니다.` })).toBeVisible();
+  await page.getByRole("combobox", { name: "학원" }).selectOption({ label: academy });
+  await field(page, "과목").fill(subject);
+  await page.getByRole("combobox", { name: "1번째 수업 요일" }).selectOption(String(todayIsoWeekdayInSeoul()));
+  await page.getByRole("textbox", { name: "1번째 수업 시작 시각" }).fill("16:00");
+  await page.getByRole("textbox", { name: "1번째 수업 종료 시각" }).fill("17:00");
+  await page.getByRole("button", { name: "수강 과목 등록" }).click();
+  await expect(page.getByRole("status").filter({ hasText: `${subject} 수업을 등록했습니다.` })).toBeVisible();
+}
+
+const TAB_PATHS = { 홈: /\/$/, 캘린더: /\/calendar/, 교육: /\/education$/ } as const;
+
+/** 탭으로 이동하고 주소가 바뀔 때까지 기다린다. 이전 화면 요소를 잡지 않기 위해서다. */
+export async function goToTab(page: Page, name: keyof typeof TAB_PATHS): Promise<void> {
+  await tab(page, name).click();
+  await expect(page).toHaveURL(TAB_PATHS[name]);
+}

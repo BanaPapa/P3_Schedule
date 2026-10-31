@@ -15,6 +15,7 @@ export interface CalendarSession {
   startTime: string;
   endTime: string;
   status: SessionStatus;
+  kind: Database["public"]["Enums"]["class_session_kind"];
   subject: string;
   academyName: string;
   child: { id: string; name: string; color: string };
@@ -43,7 +44,7 @@ export async function getSessionsBetween(
   let query = supabase
     .from("class_sessions")
     .select(
-      `id, session_date, start_time, end_time, status,
+      `id, session_date, start_time, end_time, status, kind,
        enrollment:enrollments!inner (
          subject,
          child_id,
@@ -69,6 +70,7 @@ export async function getSessionsBetween(
     startTime: row.start_time,
     endTime: row.end_time,
     status: row.status,
+    kind: row.kind,
     subject: row.enrollment.subject,
     academyName: row.enrollment.academy.name,
     child: row.enrollment.child,
