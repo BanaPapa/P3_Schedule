@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 프로젝트
 
 **Family Hub**: 부부가 자녀의 학원 일정·학원비·가족 일정을 함께 관리하는 앱. 기준 문서는 상세 PRD v1.0(2026-10-31)이다.
-M1(가족 계정), M2(학원·수강 과목·반복 수업·통합 캘린더), M3(결석·휴강·일정 변경·보강)까지 구현되어 있다.
+M1(가족 계정), M2(학원·수강 과목·반복 수업·통합 캘린더), M3(결석·휴강·일정 변경·보강), M4(학원비), M5(실시간 공유·변경 이력)까지 구현되어 있다.
+목표는 PRD 전체(1차 M1~M6, 2차 여행, 3차 학교·학습, 4차 AI)를 끝내는 것이다.
 
 ## 기술 스택
 
@@ -89,6 +90,25 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 - 날짜는 서울 기준 `date`/`time`. DB는 `private.family_today()`, 앱은 `src/lib/dates.ts` (`"YYYY-MM-DD"` 문자열). 서버 컴포넌트에서 오늘 날짜는 `requestToday()` 로 얻는다.
 - 서버 액션은 `FormState`(`src/lib/form-state.ts`)를 돌려주고 클라이언트는 `useActionState` 로 받는다. 검증은 항상 서버 액션 안에서 zod로 한다.
 
+### 학원비 모델 (M4)
+
+- 청구 단위는 **수강 과목 × 월**(사용자 결정). 화면에서만 학원별로 묶는다.
+- `tuition_policies`: 적용 시작 월별 정책(월정액/회차별/수동, 결석·휴강 청구 여부, 결제일). 어떤 달에는 그 달 이전에 시작한 가장 최근 정책을 쓴다. 저장은 `save_tuition_policy` (같은 월이면 덮어씀).
+- 예상액은 저장하지 않는다. `tuition_estimates(월)`, `tuition_session_breakdown(과목, 월)` 이 정책과 회차로 그때그때 계산한다(security invoker → RLS).
+- **청구 규칙(`private.session_billable`)**: 원 수업 1건당 한 번만 청구. 예정·완료 청구, 결석·휴강은 정책 플래그, 취소 미청구, 보강은 원 수업이 청구되지 않았을 때만 청구(결석 청구면 결석 보강 무료). 다른 날로 옮긴 수업은 원 회차가 취소이므로 옮긴 회차만 청구.
+- `tuition_invoices` 는 확정 순간의 스냅샷(방식, 단가, 회차 수, 예상액, 기본 청구액). **일정이 바뀌어도 자동으로 바뀌지 않는다.** 앱은 `estimateChanged()` 로 차이를 알리고, 사용자가 `adjust_invoice` 를 불러야 바뀐다(스냅샷도 그때 갱신).
+- 합계·납부·잔액은 `tuition_invoice_summaries` 뷰. 추가·할인 항목과 납부는 직접 insert/delete(RLS), 바뀌면 `private.touch_invoice` 가 청구서 version 을 올린다.
+- 납부 기록이 있으면 확정 취소 불가, 청구서가 있으면 수강 과목 삭제 불가. 금액은 원 단위 정수(`src/lib/money.ts`).
+- 회차별 청구 여부는 `private.billed_sessions` 한 곳에서 계산한다. 결석·휴강 판단 정책은 **청구 기준 월**(보강이면 원 수업의 달)의 정책. 수강 종료일 뒤의 정규 회차는 세지 않는다. 합계는 bigint.
+- 상한: 청구서당 추가·할인 20개, 납부 50개(트리거). 할인으로 합계가 음수가 될 수 없다.
+- 알려진 미처리: 정책 저장(`save_tuition_policy`)은 version 검사 없이 같은 달 정책을 덮어쓴다.
+
+### 실시간 공유·변경 이력 (M5)
+
+- `audit_logs` 하나만 Realtime publication 에 넣었다. 의미 있는 변경은 모두 이력 한 줄을 남기므로, 브라우저는 `RealtimeRefresher` 로 가족의 이력 insert 를 받아 배우자 변경일 때 `router.refresh()` 한다. Realtime 은 구독자의 RLS 로 거른다.
+- 브라우저 클라이언트(`src/lib/supabase/client.ts`)는 세션을 늦게 읽는다. 구독 전에 `auth.getSession()` → `realtime.setAuth(token)` 을 해야 한다. 안 하면 익명으로 취급되어 "invalid column for filter" 로 거절된다.
+- 이력 문장은 `src/features/history/describe.ts` 가 만든다. 자동 생성 회차, 규칙 삽입, 일정 변경으로 지워진 회차, 청구서 version 만 오른 기록은 숨긴다. 새 테이블에 audit 트리거를 붙이면 여기 문장도 추가한다.
+
 ### Next.js 16 / Cache Components 주의점
 
 - `cookies()`, `params`, `searchParams` 를 읽는 컴포넌트는 `<Suspense>` 안에 둔다. 페이지는 정적 껍데기 + Suspense 안의 데이터 컴포넌트로 나눈다. 레이아웃 최상단에서 세션을 await 하지 않는다.
@@ -107,8 +127,8 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 - M1: 가족 계정 ✅
 - M2: 학원·수강 과목·반복 수업, 통합 캘린더 ✅ (가족 공통 일정 `calendar_events` 는 아직 없음)
 - M3: 결석·휴강·시간 변경·보강 연결 ✅
-- M4: 학원비 정책, 월별 계산, 청구 확정, 납부
-- M5: 변경 이력 화면, 실시간 동기화, 홈 대시보드
+- M4: 학원비 정책, 월별 계산, 청구 확정, 납부 ✅
+- M5: 변경 이력 화면, 실시간 동기화, 홈 대시보드 ✅
 - M6: 접근 권한 검증, 계산 테스트, 모바일 실사용 테스트, 배포
 
 1차 화면은 홈 / 캘린더 / 교육 / 교육비 네 개다.

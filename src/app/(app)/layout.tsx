@@ -1,6 +1,7 @@
 import { Suspense, type ReactNode } from "react";
 import { AppHeader } from "@/components/app-header";
 import { BottomNav, BottomNavView } from "@/components/bottom-nav";
+import { RealtimeSync } from "@/features/sync/components/realtime-sync";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
@@ -13,6 +14,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       {/* 동적 경로(/sessions/[id] 등)에서 주소는 요청 때 정해지므로 Suspense 안에서 읽는다 */}
       <Suspense fallback={<BottomNavView pathname={null} />}>
         <BottomNav />
+      </Suspense>
+      {/* 배우자가 바꾼 내용을 실시간으로 받아 화면을 새로 고친다 */}
+      <Suspense fallback={null}>
+        <RealtimeSync />
       </Suspense>
     </>
   );

@@ -1,12 +1,17 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { Suspense } from "react";
+import { HistoryList } from "@/features/history/components/history-list";
+import { getHistory } from "@/features/history/queries";
 import { Card, CardSkeleton } from "@/components/ui/card";
 import { SessionList } from "@/features/calendar/components/session-item";
 import { getSessionsBetween } from "@/features/calendar/queries";
 import { requireFamily } from "@/features/family/queries";
 import { MakeupWaitlist } from "@/features/sessions/components/makeup-waitlist";
 import { getMakeupWaitlist } from "@/features/sessions/queries";
-import { formatDayLabel } from "@/lib/dates";
+import { MonthTotals } from "@/features/tuition/components/tuition-overview";
+import { getTuitionMonth } from "@/features/tuition/queries";
+import { formatDayLabel, formatMonthParam, monthOf } from "@/lib/dates";
 import { requestToday } from "@/lib/request-date";
 import { ROUTES } from "@/lib/routes";
 
@@ -27,6 +32,47 @@ async function MakeupAlert() {
       }
     >
       <MakeupWaitlist sessions={waiting.slice(0, MAX_HOME_WAITING)} />
+    </Card>
+  );
+}
+
+const HOME_HISTORY_LIMIT = 5;
+
+/** 최근 변경 (배우자가 바꾼 것은 강조) */
+async function RecentChanges() {
+  await connection();
+  const items = await getHistory(HOME_HISTORY_LIMIT);
+  if (items.length === 0) return null;
+  return (
+    <Card
+      title="최근 변경"
+      action={
+        <Link href={ROUTES.history} className="text-sm font-semibold text-primary">
+          전체 이력
+        </Link>
+      }
+    >
+      <HistoryList items={items} now={new Date()} />
+    </Card>
+  );
+}
+
+/** 이번 달 교육비 요약 */
+async function MonthTuition() {
+  const today = await requestToday();
+  const month = monthOf(today);
+  const rows = await getTuitionMonth(`${formatMonthParam(month)}-01`);
+  if (rows.length === 0) return null;
+  return (
+    <Card
+      title={`${month.month}월 교육비`}
+      action={
+        <Link href={ROUTES.tuition} className="text-sm font-semibold text-primary">
+          자세히
+        </Link>
+      }
+    >
+      <MonthTotals rows={rows} />
     </Card>
   );
 }
@@ -65,6 +111,14 @@ async function HomeContent() {
 
       <Suspense fallback={null}>
         <MakeupAlert />
+      </Suspense>
+
+      <Suspense fallback={<CardSkeleton />}>
+        <MonthTuition />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <RecentChanges />
       </Suspense>
 
       {spouseMissing ? (

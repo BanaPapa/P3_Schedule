@@ -16,6 +16,11 @@ const TABS = [
     label: "교육",
     icon: "M12 5 2 10l10 5 10-5zM6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5",
   },
+  {
+    href: ROUTES.tuition,
+    label: "교육비",
+    icon: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8 9l2 6 2-4 2 4 2-6M7.5 12h9",
+  },
 ] as const;
 
 function isActive(pathname: string, href: string): boolean {
@@ -33,7 +38,7 @@ export function BottomNavView({ pathname }: { pathname: string | null }) {
       aria-label="주요 메뉴"
       className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
     >
-      <ul className="mx-auto grid h-16 max-w-2xl grid-cols-3">
+      <ul className="mx-auto grid h-16 max-w-2xl grid-cols-4">
         {TABS.map((tab) => {
           const active = pathname !== null && isActive(pathname, tab.href);
           return (

@@ -8,6 +8,10 @@ export const ROUTES = {
   education: "/education",
   session: (id: string) => `/sessions/${id}`,
   scheduleChange: (enrollmentId: string) => `/education/enrollments/${enrollmentId}/schedule`,
+  tuition: "/tuition",
+  history: "/history",
+  tuitionDetail: (enrollmentId: string, month: string) => `/tuition/${enrollmentId}?month=${month.slice(0, 7)}`,
+  tuitionPolicy: (enrollmentId: string) => `/tuition/${enrollmentId}/policy`,
   invite: (code: string) => `/invite/${code}`,
 } as const;
 

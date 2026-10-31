@@ -129,3 +129,27 @@ export function formatDayLabel(iso: IsoDate): string {
   const day = Number(iso.slice(8, 10));
   return `${month}월 ${day}일 (${WEEKDAY_LABELS[isoWeekday(iso)]})`;
 }
+
+/** 서울 기준 "HH:MM" */
+function seoulTime(date: Date): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: FAMILY_TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(date);
+}
+
+/** 변경 이력 시각: "방금", "5분 전", "3시간 전", "어제 20:00", "11월 1일 08:05" */
+export function formatRelative(isoDateTime: string, now: Date = new Date()): string {
+  const then = new Date(isoDateTime);
+  const minutes = Math.floor((now.getTime() - then.getTime()) / 60_000);
+  const today = todayInSeoul(now);
+  const day = todayInSeoul(then);
+  if (minutes < 1) return "방금";
+  if (minutes < 60) return `${minutes}분 전`;
+  if (day === today) return `${Math.floor(minutes / 60)}시간 전`;
+  if (day === addDays(today, -1)) return `어제 ${seoulTime(then)}`;
+  const { month } = monthOf(day);
+  return `${month}월 ${Number(day.slice(8))}일 ${seoulTime(then)}`;
+}

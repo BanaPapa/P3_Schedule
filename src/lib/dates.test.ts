@@ -4,6 +4,7 @@ import {
   addMonths,
   formatDayLabel,
   formatMonthLabel,
+  formatRelative,
   formatTime,
   isIsoDate,
   isoWeekday,
@@ -88,6 +89,19 @@ describe("months", () => {
 
   it("pads the first week with the previous month", () => {
     expect(monthGrid({ year: 2026, month: 12 })[0][0]).toBe("2026-11-29");
+  });
+});
+
+describe("formatRelative", () => {
+  const now = new Date("2026-11-04T12:00:00+09:00");
+  it.each([
+    ["2026-11-04T11:59:40+09:00", "방금"],
+    ["2026-11-04T11:55:00+09:00", "5분 전"],
+    ["2026-11-04T09:00:00+09:00", "3시간 전"],
+    ["2026-11-03T20:00:00+09:00", "어제 20:00"],
+    ["2026-11-01T08:05:00+09:00", "11월 1일 08:05"],
+  ])("%s → %s", (iso, expected) => {
+    expect(formatRelative(iso, now)).toBe(expected);
   });
 });
 

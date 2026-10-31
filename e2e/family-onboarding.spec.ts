@@ -34,7 +34,7 @@ test("parents share a family: invite, join, edit, and detect conflicting edits",
   await mom.getByRole("textbox", { name: "나의 호칭", exact: true }).fill("엄마");
   await mom.getByRole("button", { name: "김씨네에 합류하기" }).click();
   await expect(mom.getByRole("heading", { name: "김씨네" })).toBeVisible();
-  await expect(mom.getByText("첫째")).toBeVisible();
+  await expect(mom.getByText("첫째", { exact: true }).filter({ visible: true })).toBeVisible();
 
   // 아빠: 오래된 화면에서 수정 폼을 열어 둔다
   await dad.reload();

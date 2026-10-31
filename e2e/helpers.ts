@@ -47,8 +47,8 @@ export function todayIsoWeekdayInSeoul(): number {
 }
 
 /** 아래 탭 바의 메뉴 */
-export function tab(page: Page, name: "홈" | "캘린더" | "교육") {
-  return page.getByRole("navigation", { name: "주요 메뉴" }).getByRole("link", { name });
+export function tab(page: Page, name: keyof typeof TAB_PATHS) {
+  return page.getByRole("navigation", { name: "주요 메뉴" }).getByRole("link", { name, exact: true });
 }
 
 /** 서울 기준 오늘에서 days 만큼 떨어진 날짜 "YYYY-MM-DD" */
@@ -89,10 +89,27 @@ export async function enrollTodayClass(page: Page, academy: string, subject: str
   await expect(page.getByRole("status").filter({ hasText: `${subject} 수업을 등록했습니다.` })).toBeVisible();
 }
 
-const TAB_PATHS = { 홈: /\/$/, 캘린더: /\/calendar/, 교육: /\/education$/ } as const;
+const TAB_PATHS = { 홈: /\/$/, 캘린더: /\/calendar/, 교육: /\/education$/, 교육비: /\/tuition/ } as const;
 
 /** 탭으로 이동하고 주소가 바뀔 때까지 기다린다. 이전 화면 요소를 잡지 않기 위해서다. */
 export async function goToTab(page: Page, name: keyof typeof TAB_PATHS): Promise<void> {
   await tab(page, name).click();
   await expect(page).toHaveURL(TAB_PATHS[name]);
+}
+
+/** 아빠가 가족을 만들고 엄마를 초대해 합류시킨다. 둘 다 홈 화면에서 멈춘다. */
+export async function createFamilyWithSpouse(browser: Browser, familyName: string): Promise<{ dad: Page; mom: Page }> {
+  const dad = await newPage(browser);
+  const mom = await newPage(browser);
+  await signUpWithFamily(dad, familyName, "아빠");
+  await dad.goto("/family");
+  await dad.getByRole("button", { name: "초대 링크 만들기" }).click();
+  const invitePath = new URL(await field(dad, "초대 링크").inputValue()).pathname;
+
+  await mom.goto(`/signup?next=${encodeURIComponent(invitePath)}`);
+  await signUp(mom, uniqueEmail("mom"));
+  await field(mom, "나의 호칭").fill("엄마");
+  await mom.getByRole("button", { name: `${familyName}에 합류하기` }).click();
+  await expect(mom.getByRole("heading", { name: familyName })).toBeVisible();
+  return { dad, mom };
 }

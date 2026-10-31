@@ -233,6 +233,122 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"tuition_invoice_items": {
+                  Row: {
+                    "amount": number,"created_at": string,"family_id": string,"id": string,"invoice_id": string,"kind": Database["public"]['Enums']["tuition_item_kind"],"label": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount": number,"created_at"?: string,"family_id": string,"id"?: string,"invoice_id": string,"kind": Database["public"]['Enums']["tuition_item_kind"],"label": string
+                  }
+                  Update: {
+                    "amount"?: number,"created_at"?: string,"family_id"?: string,"id"?: string,"invoice_id"?: string,"kind"?: Database["public"]['Enums']["tuition_item_kind"],"label"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "tuition_invoice_items_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tuition_invoice_items_invoice_id_family_id_fkey"
+      columns: ["invoice_id","family_id"]
+isOneToOne: false
+      referencedRelation: "tuition_invoice_summaries"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "tuition_invoice_items_invoice_id_family_id_fkey"
+      columns: ["invoice_id","family_id"]
+isOneToOne: false
+      referencedRelation: "tuition_invoices"
+      referencedColumns: ["id","family_id"]
+    }
+                  ]
+                },"tuition_invoices": {
+                  Row: {
+                    "adjustment_reason": string | null,"base_amount": number,"billable_count": number,"billing_month": string,"confirmed_at": string,"confirmed_by": string | null,"created_at": string,"enrollment_id": string,"estimated_amount": number | null,"family_id": string,"id": string,"method": Database["public"]['Enums']["tuition_method"],"session_count": number,"unit_amount": number | null,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "adjustment_reason"?: string | null,"base_amount": number,"billable_count"?: number,"billing_month": string,"confirmed_at"?: string,"confirmed_by"?: string | null,"created_at"?: string,"enrollment_id": string,"estimated_amount"?: number | null,"family_id": string,"id"?: string,"method": Database["public"]['Enums']["tuition_method"],"session_count"?: number,"unit_amount"?: number | null,"updated_at"?: string,"version"?: number
+                  }
+                  Update: {
+                    "adjustment_reason"?: string | null,"base_amount"?: number,"billable_count"?: number,"billing_month"?: string,"confirmed_at"?: string,"confirmed_by"?: string | null,"created_at"?: string,"enrollment_id"?: string,"estimated_amount"?: number | null,"family_id"?: string,"id"?: string,"method"?: Database["public"]['Enums']["tuition_method"],"session_count"?: number,"unit_amount"?: number | null,"updated_at"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "tuition_invoices_enrollment_id_family_id_fkey"
+      columns: ["enrollment_id","family_id"]
+isOneToOne: false
+      referencedRelation: "enrollments"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "tuition_invoices_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"tuition_payments": {
+                  Row: {
+                    "amount": number,"created_at": string,"created_by": string | null,"family_id": string,"id": string,"invoice_id": string,"memo": string | null,"method": string | null,"paid_on": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount": number,"created_at"?: string,"created_by"?: string | null,"family_id": string,"id"?: string,"invoice_id": string,"memo"?: string | null,"method"?: string | null,"paid_on": string
+                  }
+                  Update: {
+                    "amount"?: number,"created_at"?: string,"created_by"?: string | null,"family_id"?: string,"id"?: string,"invoice_id"?: string,"memo"?: string | null,"method"?: string | null,"paid_on"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "tuition_payments_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tuition_payments_invoice_id_family_id_fkey"
+      columns: ["invoice_id","family_id"]
+isOneToOne: false
+      referencedRelation: "tuition_invoice_summaries"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "tuition_payments_invoice_id_family_id_fkey"
+      columns: ["invoice_id","family_id"]
+isOneToOne: false
+      referencedRelation: "tuition_invoices"
+      referencedColumns: ["id","family_id"]
+    }
+                  ]
+                },"tuition_policies": {
+                  Row: {
+                    "absent_billable": boolean,"academy_cancelled_billable": boolean,"created_at": string,"effective_month": string,"enrollment_id": string,"family_id": string,"id": string,"memo": string | null,"method": Database["public"]['Enums']["tuition_method"],"monthly_amount": number | null,"payment_day": number | null,"per_session_amount": number | null,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "absent_billable"?: boolean,"academy_cancelled_billable"?: boolean,"created_at"?: string,"effective_month": string,"enrollment_id": string,"family_id": string,"id"?: string,"memo"?: string | null,"method": Database["public"]['Enums']["tuition_method"],"monthly_amount"?: number | null,"payment_day"?: number | null,"per_session_amount"?: number | null,"updated_at"?: string,"version"?: number
+                  }
+                  Update: {
+                    "absent_billable"?: boolean,"academy_cancelled_billable"?: boolean,"created_at"?: string,"effective_month"?: string,"enrollment_id"?: string,"family_id"?: string,"id"?: string,"memo"?: string | null,"method"?: Database["public"]['Enums']["tuition_method"],"monthly_amount"?: number | null,"payment_day"?: number | null,"per_session_amount"?: number | null,"updated_at"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "tuition_policies_enrollment_id_family_id_fkey"
+      columns: ["enrollment_id","family_id"]
+isOneToOne: false
+      referencedRelation: "enrollments"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "tuition_policies_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Views: {
@@ -280,14 +396,43 @@ isOneToOne: false
       referencedColumns: ["id","family_id"]
     }
                   ]
+                },"tuition_invoice_summaries": {
+                  Row: {
+                    "adjustment_reason": string | null,"balance": number | null,"base_amount": number,"billable_count": number,"billing_month": string,"confirmed_at": string,"confirmed_by": string | null,"created_at": string,"discount_amount": number | null,"enrollment_id": string,"estimated_amount": number | null,"extra_amount": number | null,"family_id": string,"id": string,"method": Database["public"]['Enums']["tuition_method"],"paid_amount": number | null,"session_count": number,"total_amount": number | null,"unit_amount": number | null,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "tuition_invoices_enrollment_id_family_id_fkey"
+      columns: ["enrollment_id","family_id"]
+isOneToOne: false
+      referencedRelation: "enrollments"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "tuition_invoices_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Functions: {
             "accept_invitation":
 { Args: { "p_code": string,"p_display_name": string }; Returns: string
                            },
+"adjust_invoice":
+{ Args: { "p_base_amount": number,"p_invoice_id": string,"p_reason": string,"p_version": number }; Returns: undefined
+                           },
+"cancel_invoice":
+{ Args: { "p_invoice_id": string,"p_version": number }; Returns: undefined
+                           },
 "change_schedule_from":
 { Args: { "p_enrollment_id": string,"p_from": string,"p_rules": Json }; Returns: undefined
+                           },
+"confirm_invoice":
+{ Args: { "p_base_amount": number,"p_enrollment_id": string,"p_items": Json,"p_month": string,"p_reason": string }; Returns: string
                            },
 "create_enrollment":
 { Args: { "p_academy_id": string,"p_child_id": string,"p_end_date": string,"p_rules": Json,"p_start_date": string,"p_subject": string }; Returns: string
@@ -323,15 +468,28 @@ isOneToOne: false
 "revoke_invitation":
 { Args: { "p_invitation_id": string }; Returns: undefined
                            },
+"save_tuition_policy":
+{ Args: { "p_absent_billable": boolean,"p_academy_cancelled_billable": boolean,"p_effective_month": string,"p_enrollment_id": string,"p_memo": string,"p_method": Database["public"]['Enums']["tuition_method"],"p_monthly_amount": number,"p_payment_day": number,"p_per_session_amount": number }; Returns: string
+                           },
 "set_makeup_waived":
 { Args: { "p_session_id": string,"p_version": number,"p_waived": boolean }; Returns: undefined
                            },
 "set_session_status":
 { Args: { "p_session_id": string,"p_status": Database["public"]['Enums']["class_session_status"],"p_version": number }; Returns: undefined
+                           },
+"tuition_estimates":
+{ Args: { "p_enrollment_id"?: string,"p_month": string }; Returns: {
+              "billable_count": number,"enrollment_id": string,"estimated_amount": number,"method": Database["public"]['Enums']["tuition_method"],"payment_day": number,"policy_id": string,"session_count": number,"unit_amount": number
+            }[]
+                           },
+"tuition_session_breakdown":
+{ Args: { "p_enrollment_id": string,"p_month": string }; Returns: {
+              "billable": boolean,"kind": Database["public"]['Enums']["class_session_kind"],"origin_status": Database["public"]['Enums']["class_session_status"],"session_date": string,"session_id": string,"start_time": string,"status": Database["public"]['Enums']["class_session_status"]
+            }[]
                            }
           }
           Enums: {
-            "class_session_kind": "regular"|"makeup"|"rescheduled","class_session_status": "scheduled"|"completed"|"absent"|"academy_cancelled"|"cancelled"|"makeup_scheduled"|"makeup_completed","family_role": "owner"|"parent"
+            "class_session_kind": "regular"|"makeup"|"rescheduled","class_session_status": "scheduled"|"completed"|"absent"|"academy_cancelled"|"cancelled"|"makeup_scheduled"|"makeup_completed","family_role": "owner"|"parent","tuition_item_kind": "extra"|"discount","tuition_method": "monthly"|"per_session"|"manual"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -451,7 +609,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "class_session_kind": ["regular", "makeup", "rescheduled"],"class_session_status": ["scheduled", "completed", "absent", "academy_cancelled", "cancelled", "makeup_scheduled", "makeup_completed"],"family_role": ["owner", "parent"]
+            "class_session_kind": ["regular", "makeup", "rescheduled"],"class_session_status": ["scheduled", "completed", "absent", "academy_cancelled", "cancelled", "makeup_scheduled", "makeup_completed"],"family_role": ["owner", "parent"],"tuition_item_kind": ["extra", "discount"],"tuition_method": ["monthly", "per_session", "manual"]
           }
         }
 } as const
