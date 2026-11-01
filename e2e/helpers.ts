@@ -89,7 +89,14 @@ export async function enrollTodayClass(page: Page, academy: string, subject: str
   await expect(page.getByRole("status").filter({ hasText: `${subject} 수업을 등록했습니다.` })).toBeVisible();
 }
 
-const TAB_PATHS = { 홈: /\/$/, 캘린더: /\/calendar/, 교육: /\/education$/, 교육비: /\/tuition/ } as const;
+const TAB_PATHS = { 홈: /\/$/, 캘린더: /\/calendar/, 교육: /\/education$/, 여행: /\/travel$/, 비용: /\/costs/ } as const;
+
+/** 비용 탭 → 교육비 상세 목록 */
+export async function goToTuition(page: Page): Promise<void> {
+  await goToTab(page, "비용");
+  await card(page, "교육비").getByRole("link", { name: "자세히" }).click();
+  await expect(page).toHaveURL(/\/tuition/);
+}
 
 /** 탭으로 이동하고 주소가 바뀔 때까지 기다린다. 이전 화면 요소를 잡지 않기 위해서다. */
 export async function goToTab(page: Page, name: keyof typeof TAB_PATHS): Promise<void> {

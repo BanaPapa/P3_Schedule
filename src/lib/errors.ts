@@ -35,6 +35,8 @@ export const ERROR_MESSAGES = {
   invoice_has_payments: "납부 기록이 있는 청구는 취소할 수 없습니다. 납부 기록을 먼저 지워 주세요.",
   too_many_items: "추가·할인 항목은 청구서마다 20개까지 넣을 수 있습니다.",
   too_many_payments: "납부 기록은 청구서마다 50개까지 넣을 수 있습니다.",
+  invalid_trip_day: "여행 기간 안의 날짜를 골라 주세요.",
+  trip_items_outside: "바꾼 기간 밖에 일정이 남아 있습니다. 그 일정을 먼저 옮기거나 지워 주세요.",
   // 앱
   academy_in_use: "수강 과목이 등록된 학원은 삭제할 수 없습니다. 먼저 수강 과목을 정리해 주세요.",
   child_in_use: "수강 과목이 등록된 자녀는 삭제할 수 없습니다. 먼저 수강 과목을 정리해 주세요.",
@@ -87,6 +89,8 @@ const RPC_ERROR_CODES: ReadonlySet<string> = new Set<ErrorCode>([
   "invoice_has_payments",
   "too_many_items",
   "too_many_payments",
+  "invalid_trip_day",
+  "trip_items_outside",
 ]);
 
 /** 회차를 읽은 뒤 다른 사람이 먼저 바꿨을 때 RPC 가 던지는 코드. 화면은 conflict() 로 처리한다. */

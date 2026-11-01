@@ -7,6 +7,9 @@ import { MonthGrid } from "@/features/calendar/components/month-grid";
 import { SessionList } from "@/features/calendar/components/session-item";
 import { calendarRange, groupByDate, parseCalendarParams } from "@/features/calendar/params";
 import { getSessionsBetween } from "@/features/calendar/queries";
+import { TripAgenda } from "@/features/calendar/components/trip-agenda";
+import { tripDays } from "@/features/travel/format";
+import { getTripsBetween } from "@/features/travel/queries";
 import { requireFamily } from "@/features/family/queries";
 import { formatDayLabel, weekDates } from "@/lib/dates";
 import { requestToday } from "@/lib/request-date";
@@ -21,7 +24,10 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
   // 다른 가족 자녀 id 가 주소에 들어와도 우리 자녀가 아니면 필터를 무시한다
   const params = children.some((child) => child.id === parsed.childId) ? parsed : { ...parsed, childId: null };
   const { from, to } = calendarRange(params);
-  const sessions = await getSessionsBetween(from, to, params.childId);
+  const [sessions, trips] = await Promise.all([getSessionsBetween(from, to, params.childId), getTripsBetween(from, to)]);
+  const tripDates = new Set(
+    trips.trips.flatMap((trip) => tripDays(trip.startDate, trip.endDate).filter((day) => day >= from && day <= to)),
+  );
   const byDate = groupByDate(sessions);
   const showChild = params.childId === null && children.length > 1;
 
@@ -35,8 +41,9 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
 
       {params.view === "month" ? (
         <>
-          <MonthGrid params={params} today={today} sessionsByDate={byDate} />
+          <MonthGrid params={params} today={today} sessionsByDate={byDate} tripDates={tripDates} />
           <Card title={formatDayLabel(params.date)}>
+            <TripAgenda date={params.date} data={trips} />
             <SessionList sessions={byDate.get(params.date) ?? []} showChild={showChild} emptyText="이날은 수업이 없습니다." />
           </Card>
         </>
@@ -52,6 +59,7 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
                 {formatDayLabel(date)}
                 {date === today ? <span className="ml-2 text-primary">오늘</span> : null}
               </h3>
+              <TripAgenda date={date} data={trips} />
               <SessionList sessions={byDate.get(date) ?? []} showChild={showChild} emptyText="수업 없음" />
             </section>
           ))}

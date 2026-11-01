@@ -153,3 +153,8 @@ export function formatRelative(isoDateTime: string, now: Date = new Date()): str
   const { month } = monthOf(day);
   return `${month}월 ${Number(day.slice(8))}일 ${seoulTime(then)}`;
 }
+
+/** b - a (일). 같은 날이면 0 */
+export function daysBetween(a: IsoDate, b: IsoDate): number {
+  return Math.round((toUtc(b).getTime() - toUtc(a).getTime()) / 86_400_000);
+}

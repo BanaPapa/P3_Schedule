@@ -1,6 +1,7 @@
 import { formatDayLabel, formatDotDate, formatTime } from "@/lib/dates";
 import { formatWon } from "@/lib/money";
 import { SESSION_STATUS_LABELS } from "@/features/education/format";
+import { CATEGORY_LABELS, type TripCategory } from "@/features/travel/format";
 
 type Data = Record<string, unknown>;
 
@@ -123,6 +124,35 @@ function describeInvoice(entry: AuditEntry, ctx: HistoryContext): string | null 
   return null;
 }
 
+const TRIP_FIELDS = ["title", "destination", "start_date", "end_date", "budget_amount", "memo"] as const;
+
+function describeTravel(entry: AuditEntry): string | null {
+  const data = entry.newData ?? entry.oldData;
+  const title = str(data, "title") ?? "";
+  switch (entry.tableName) {
+    case "trips":
+      if (entry.action === "insert") return `여행 '${title}'을(를) 만들었습니다`;
+      if (entry.action === "delete") return `여행 '${title}'을(를) 지웠습니다`;
+      return TRIP_FIELDS.some((field) => changed(entry, field)) ? `여행 '${title}' 정보를 수정했습니다` : null;
+    case "trip_items":
+      if (entry.action === "insert") return `여행 일정 '${title}'을(를) 넣었습니다`;
+      if (entry.action === "delete") return `여행 일정 '${title}'을(를) 지웠습니다`;
+      return `여행 일정 '${title}'을(를) 고쳤습니다`;
+    case "trip_budgets": {
+      if (entry.action === "delete") return null;
+      const category = CATEGORY_LABELS[str(data, "category") as TripCategory] ?? "";
+      return `여행 예산(${category})을 ${formatWon(num(data, "planned_amount"))}으로 정했습니다`;
+    }
+    case "trip_expenses": {
+      const what = str(data, "description") ?? CATEGORY_LABELS[str(data, "category") as TripCategory] ?? "";
+      const amount = formatWon(num(data, "amount"));
+      return entry.action === "delete" ? `여행 지출 ${amount}(${what}) 기록을 지웠습니다` : `여행 지출 ${amount}(${what})을 기록했습니다`;
+    }
+    default:
+      return null;
+  }
+}
+
 /** 이력 한 줄을 사람이 읽는 문장으로. 보여 줄 필요가 없는 기록이면 null. */
 export function describeEntry(entry: AuditEntry, ctx: HistoryContext): string | null {
   const data = entry.newData ?? entry.oldData;
@@ -167,6 +197,6 @@ export function describeEntry(entry: AuditEntry, ctx: HistoryContext): string | 
         : `${label} 학원비 ${formatWon(num(data, "amount"))} 납부를 기록했습니다`;
     }
     default:
-      return null;
+      return entry.tableName.startsWith("trip") ? describeTravel(entry) : null;
   }
 }

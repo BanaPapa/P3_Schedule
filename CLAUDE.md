@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 프로젝트
 
 **Family Hub**: 부부가 자녀의 학원 일정·학원비·가족 일정을 함께 관리하는 앱. 기준 문서는 상세 PRD v1.0(2026-10-31)이다.
-M1(가족 계정), M2(학원·수강 과목·반복 수업·통합 캘린더), M3(결석·휴강·일정 변경·보강), M4(학원비), M5(실시간 공유·변경 이력)까지 구현되어 있다.
+M1(가족 계정), M2(학원·수강 과목·반복 수업·통합 캘린더), M3(결석·휴강·일정 변경·보강), M4(학원비), M5(실시간 공유·변경 이력), M6(검증·배포 준비), 2차 여행까지 구현되어 있다.
 목표는 PRD 전체(1차 M1~M6, 2차 여행, 3차 학교·학습, 4차 AI)를 끝내는 것이다.
 
 ## 기술 스택
@@ -108,6 +108,13 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 - `audit_logs` 하나만 Realtime publication 에 넣었다. 의미 있는 변경은 모두 이력 한 줄을 남기므로, 브라우저는 `RealtimeRefresher` 로 가족의 이력 insert 를 받아 배우자 변경일 때 `router.refresh()` 한다. Realtime 은 구독자의 RLS 로 거른다.
 - 브라우저 클라이언트(`src/lib/supabase/client.ts`)는 세션을 늦게 읽는다. 구독 전에 `auth.getSession()` → `realtime.setAuth(token)` 을 해야 한다. 안 하면 익명으로 취급되어 "invalid column for filter" 로 거절된다.
 - 이력 문장은 `src/features/history/describe.ts` 가 만든다. 자동 생성 회차, 규칙 삽입, 일정 변경으로 지워진 회차, 청구서 version 만 오른 기록은 숨긴다. 새 테이블에 audit 트리거를 붙이면 여기 문장도 추가한다.
+
+### 여행 (2차)
+
+- `trips`(기간 최대 60일, 전체 예산) → `trip_items`(날짜별 일정·장소, 여행 기간 밖이면 `invalid_trip_day`), `trip_budgets`(분류별 예산, 분류당 1행), `trip_expenses`(실제 지출, 여행 전 예약도 기록).
+- 합계는 `trip_summaries`, 분류별 비교는 `trip_category_totals` 뷰. 여행 기간을 줄여 일정이 밖에 남으면 `trip_items_outside`.
+- 통합: 캘린더(`getTripsBetween` → 월간 칸 표시, 날짜 목록 `TripAgenda`), 월별 비용(`/costs` = 교육비 + 지출일 기준 여행비).
+- 아래 탭은 PRD 메뉴대로 홈·캘린더·교육·여행·비용. 교육비 화면(`/tuition`)은 비용 탭 아래에 있다.
 
 ### Next.js 16 / Cache Components 주의점
 

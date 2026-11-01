@@ -233,6 +233,122 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"trip_budgets": {
+                  Row: {
+                    "category": Database["public"]['Enums']["trip_category"],"created_at": string,"family_id": string,"id": string,"planned_amount": number,"trip_id": string,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "category": Database["public"]['Enums']["trip_category"],"created_at"?: string,"family_id": string,"id"?: string,"planned_amount": number,"trip_id": string,"updated_at"?: string,"version"?: number
+                  }
+                  Update: {
+                    "category"?: Database["public"]['Enums']["trip_category"],"created_at"?: string,"family_id"?: string,"id"?: string,"planned_amount"?: number,"trip_id"?: string,"updated_at"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "trip_budgets_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "trip_budgets_trip_id_family_id_fkey"
+      columns: ["trip_id","family_id"]
+isOneToOne: false
+      referencedRelation: "trip_summaries"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "trip_budgets_trip_id_family_id_fkey"
+      columns: ["trip_id","family_id"]
+isOneToOne: false
+      referencedRelation: "trips"
+      referencedColumns: ["id","family_id"]
+    }
+                  ]
+                },"trip_expenses": {
+                  Row: {
+                    "amount": number,"category": Database["public"]['Enums']["trip_category"],"created_at": string,"created_by": string | null,"description": string | null,"family_id": string,"id": string,"spent_on": string,"trip_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount": number,"category": Database["public"]['Enums']["trip_category"],"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"family_id": string,"id"?: string,"spent_on": string,"trip_id": string
+                  }
+                  Update: {
+                    "amount"?: number,"category"?: Database["public"]['Enums']["trip_category"],"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"family_id"?: string,"id"?: string,"spent_on"?: string,"trip_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "trip_expenses_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "trip_expenses_trip_id_family_id_fkey"
+      columns: ["trip_id","family_id"]
+isOneToOne: false
+      referencedRelation: "trip_summaries"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "trip_expenses_trip_id_family_id_fkey"
+      columns: ["trip_id","family_id"]
+isOneToOne: false
+      referencedRelation: "trips"
+      referencedColumns: ["id","family_id"]
+    }
+                  ]
+                },"trip_items": {
+                  Row: {
+                    "address": string | null,"created_at": string,"day_date": string,"end_time": string | null,"family_id": string,"id": string,"memo": string | null,"place_name": string | null,"start_time": string | null,"title": string,"trip_id": string,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "address"?: string | null,"created_at"?: string,"day_date": string,"end_time"?: string | null,"family_id": string,"id"?: string,"memo"?: string | null,"place_name"?: string | null,"start_time"?: string | null,"title": string,"trip_id": string,"updated_at"?: string,"version"?: number
+                  }
+                  Update: {
+                    "address"?: string | null,"created_at"?: string,"day_date"?: string,"end_time"?: string | null,"family_id"?: string,"id"?: string,"memo"?: string | null,"place_name"?: string | null,"start_time"?: string | null,"title"?: string,"trip_id"?: string,"updated_at"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "trip_items_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "trip_items_trip_id_family_id_fkey"
+      columns: ["trip_id","family_id"]
+isOneToOne: false
+      referencedRelation: "trip_summaries"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "trip_items_trip_id_family_id_fkey"
+      columns: ["trip_id","family_id"]
+isOneToOne: false
+      referencedRelation: "trips"
+      referencedColumns: ["id","family_id"]
+    }
+                  ]
+                },"trips": {
+                  Row: {
+                    "budget_amount": number | null,"created_at": string,"destination": string | null,"end_date": string,"family_id": string,"id": string,"memo": string | null,"start_date": string,"title": string,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "budget_amount"?: number | null,"created_at"?: string,"destination"?: string | null,"end_date": string,"family_id": string,"id"?: string,"memo"?: string | null,"start_date": string,"title": string,"updated_at"?: string,"version"?: number
+                  }
+                  Update: {
+                    "budget_amount"?: number | null,"created_at"?: string,"destination"?: string | null,"end_date"?: string,"family_id"?: string,"id"?: string,"memo"?: string | null,"start_date"?: string,"title"?: string,"updated_at"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "trips_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"tuition_invoice_items": {
                   Row: {
                     "amount": number,"created_at": string,"family_id": string,"id": string,"invoice_id": string,"kind": Database["public"]['Enums']["tuition_item_kind"],"label": string
@@ -396,6 +512,34 @@ isOneToOne: false
       referencedColumns: ["id","family_id"]
     }
                   ]
+                },"trip_category_totals": {
+                  Row: {
+                    "category": Database["public"]['Enums']["trip_category"] | null,"planned_amount": number | null,"spent_amount": number | null,"trip_id": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
+                },"trip_summaries": {
+                  Row: {
+                    "budget_amount": number | null,"created_at": string,"destination": string | null,"end_date": string,"family_id": string,"id": string,"memo": string | null,"planned_total": number | null,"spent_total": number | null,"start_date": string,"title": string,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                           "budget_amount"?: number | null,"created_at"?: string | null,"destination"?: string | null,"end_date"?: string | null,"family_id"?: string | null,"id"?: string | null,"memo"?: string | null,"planned_total"?: never,"spent_total"?: never,"start_date"?: string | null,"title"?: string | null,"updated_at"?: string | null,"version"?: number | null
+                         }
+                        Update: {
+                           "budget_amount"?: number | null,"created_at"?: string | null,"destination"?: string | null,"end_date"?: string | null,"family_id"?: string | null,"id"?: string | null,"memo"?: string | null,"planned_total"?: never,"spent_total"?: never,"start_date"?: string | null,"title"?: string | null,"updated_at"?: string | null,"version"?: number | null
+                         }
+                        Relationships: [
+                    {
+      foreignKeyName: "trips_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"tuition_invoice_summaries": {
                   Row: {
                     "adjustment_reason": string | null,"balance": number | null,"base_amount": number,"billable_count": number,"billing_month": string,"confirmed_at": string,"confirmed_by": string | null,"created_at": string,"discount_amount": number | null,"enrollment_id": string,"estimated_amount": number | null,"extra_amount": number | null,"family_id": string,"id": string,"method": Database["public"]['Enums']["tuition_method"],"paid_amount": number | null,"session_count": number,"total_amount": number | null,"unit_amount": number | null,"updated_at": string,"version": number
@@ -489,7 +633,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "class_session_kind": "regular"|"makeup"|"rescheduled","class_session_status": "scheduled"|"completed"|"absent"|"academy_cancelled"|"cancelled"|"makeup_scheduled"|"makeup_completed","family_role": "owner"|"parent","tuition_item_kind": "extra"|"discount","tuition_method": "monthly"|"per_session"|"manual"
+            "class_session_kind": "regular"|"makeup"|"rescheduled","class_session_status": "scheduled"|"completed"|"absent"|"academy_cancelled"|"cancelled"|"makeup_scheduled"|"makeup_completed","family_role": "owner"|"parent","trip_category": "transport"|"lodging"|"food"|"activity"|"shopping"|"etc","tuition_item_kind": "extra"|"discount","tuition_method": "monthly"|"per_session"|"manual"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -609,7 +753,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "class_session_kind": ["regular", "makeup", "rescheduled"],"class_session_status": ["scheduled", "completed", "absent", "academy_cancelled", "cancelled", "makeup_scheduled", "makeup_completed"],"family_role": ["owner", "parent"],"tuition_item_kind": ["extra", "discount"],"tuition_method": ["monthly", "per_session", "manual"]
+            "class_session_kind": ["regular", "makeup", "rescheduled"],"class_session_status": ["scheduled", "completed", "absent", "academy_cancelled", "cancelled", "makeup_scheduled", "makeup_completed"],"family_role": ["owner", "parent"],"trip_category": ["transport", "lodging", "food", "activity", "shopping", "etc"],"tuition_item_kind": ["extra", "discount"],"tuition_method": ["monthly", "per_session", "manual"]
           }
         }
 } as const

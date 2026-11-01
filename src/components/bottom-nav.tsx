@@ -17,14 +17,22 @@ const TABS = [
     icon: "M12 5 2 10l10 5 10-5zM6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5",
   },
   {
-    href: ROUTES.tuition,
-    label: "교육비",
+    href: ROUTES.travel,
+    label: "여행",
+    icon: "M2 16l20-6-20-6 4 6zM6 10h8",
+  },
+  {
+    href: ROUTES.costs,
+    label: "비용",
     icon: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8 9l2 6 2-4 2 4 2-6M7.5 12h9",
   },
 ] as const;
 
 function isActive(pathname: string, href: string): boolean {
-  return href === ROUTES.home ? pathname === href : pathname.startsWith(href);
+  if (href === ROUTES.home) return pathname === href;
+  // 교육비 화면은 비용 탭 아래에 있다
+  if (href === ROUTES.costs) return pathname.startsWith(href) || pathname.startsWith(ROUTES.tuition);
+  return pathname.startsWith(href);
 }
 
 /** 현재 탭 표시. 동적 경로에서는 주소를 읽기 전까지 표시 없이 그린다. */
@@ -38,7 +46,7 @@ export function BottomNavView({ pathname }: { pathname: string | null }) {
       aria-label="주요 메뉴"
       className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
     >
-      <ul className="mx-auto grid h-16 max-w-2xl grid-cols-4">
+      <ul className="mx-auto grid h-16 max-w-2xl grid-cols-5">
         {TABS.map((tab) => {
           const active = pathname !== null && isActive(pathname, tab.href);
           return (

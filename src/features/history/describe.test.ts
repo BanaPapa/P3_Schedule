@@ -122,3 +122,28 @@ describe("describeEntry: tuition", () => {
     expect(describeEntry(entry("something_new", "insert", {}), CTX)).toBeNull();
   });
 });
+
+describe("describeEntry: travel", () => {
+  const TRIP = { title: "제주 여행", start_date: "2027-07-20", end_date: "2027-07-23", version: 1 };
+
+  it("describes trips, itinerary, budgets and expenses", () => {
+    expect(describeEntry(entry("trips", "insert", TRIP), CTX)).toBe("여행 '제주 여행'을(를) 만들었습니다");
+    expect(describeEntry(entry("trips", "update", { ...TRIP, end_date: "2027-07-24" }, TRIP), CTX)).toBe(
+      "여행 '제주 여행' 정보를 수정했습니다",
+    );
+    expect(describeEntry(entry("trips", "delete", null, TRIP), CTX)).toBe("여행 '제주 여행'을(를) 지웠습니다");
+    expect(describeEntry(entry("trip_items", "insert", { title: "성산일출봉" }), CTX)).toBe(
+      "여행 일정 '성산일출봉'을(를) 넣었습니다",
+    );
+    expect(describeEntry(entry("trip_budgets", "insert", { category: "food", planned_amount: 400000 }), CTX)).toBe(
+      "여행 예산(식비)을 400,000원으로 정했습니다",
+    );
+    expect(
+      describeEntry(entry("trip_expenses", "insert", { category: "food", amount: 85000, description: "흑돼지" }), CTX),
+    ).toBe("여행 지출 85,000원(흑돼지)을 기록했습니다");
+  });
+
+  it("hides trip updates that only bumped the version", () => {
+    expect(describeEntry(entry("trips", "update", { ...TRIP, version: 2 }, TRIP), CTX)).toBeNull();
+  });
+});

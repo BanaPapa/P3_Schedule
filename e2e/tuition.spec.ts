@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { addChild, card, enrollTodayClass, field, goToTab, newPage, seoulDate, signUpWithFamily } from "./helpers";
+import { addChild, card, enrollTodayClass, field, goToTuition, newPage, seoulDate, signUpWithFamily } from "./helpers";
 
 test("PRD: a confirmed invoice stays fixed when the schedule changes until the parent adjusts it, and partial payments add up", async ({
   browser,
@@ -10,7 +10,7 @@ test("PRD: a confirmed invoice stays fixed when the schedule changes until the p
   await enrollTodayClass(page, "튼튼영어", "영어");
 
   // 요금 정책: 회차별 4만원, 결제일 5일
-  await goToTab(page, "교육비");
+  await goToTuition(page);
   await page.getByRole("link").filter({ hasText: "첫째 · 영어" }).click();
   await page.getByRole("link", { name: "요금 정책 설정" }).click();
   await page.getByRole("radio", { name: /회차별/ }).check();
@@ -39,7 +39,7 @@ test("PRD: a confirmed invoice stays fixed when the schedule changes until the p
   await card(page, "상태 바꾸기").getByRole("button", { name: "취소" }).click();
   await expect(page.getByRole("status").filter({ hasText: "'취소'(으)로 바꿨습니다." })).toBeVisible();
 
-  await goToTab(page, "교육비");
+  await goToTuition(page);
   await expect(page.getByText("일정이 바뀌어 예상액이 달라졌습니다")).toBeVisible();
   await page.getByRole("link").filter({ hasText: "첫째 · 영어" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "확정 뒤 일정이 바뀌어" })).toBeVisible();

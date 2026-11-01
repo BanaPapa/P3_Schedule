@@ -7,11 +7,13 @@ interface MonthGridProps {
   params: CalendarParams;
   today: string;
   sessionsByDate: Map<string, CalendarSession[]>;
+  /** 여행 중인 날 */
+  tripDates: Set<string>;
 }
 
 const MAX_DOTS = 3;
 
-export function MonthGrid({ params, today, sessionsByDate }: MonthGridProps) {
+export function MonthGrid({ params, today, sessionsByDate, tripDates }: MonthGridProps) {
   const month = monthOf(params.date);
   const weeks = monthGrid(month);
 
@@ -29,7 +31,8 @@ export function MonthGrid({ params, today, sessionsByDate }: MonthGridProps) {
           const sessions = sessionsByDate.get(date) ?? [];
           const inMonth = monthOf(date).month === month.month;
           const selected = date === params.date;
-          const label = `${formatDayLabel(date)}, 수업 ${sessions.length}개`;
+          const onTrip = tripDates.has(date);
+          const label = `${formatDayLabel(date)}, 수업 ${sessions.length}개${onTrip ? ", 여행" : ""}`;
           return (
             <Link
               key={date}
@@ -44,6 +47,7 @@ export function MonthGrid({ params, today, sessionsByDate }: MonthGridProps) {
               >
                 {Number(date.slice(8))}
               </span>
+              {onTrip ? <span aria-hidden className="h-1 w-6 rounded-full bg-amber-500" /> : null}
               <span className="flex items-center gap-0.5" aria-hidden>
                 {sessions.slice(0, MAX_DOTS).map((session) => (
                   <span
