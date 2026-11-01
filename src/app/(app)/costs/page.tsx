@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Card, CardSkeleton } from "@/components/ui/card";
+import { aiMode } from "@/features/ai/claude";
+import { AnalysisPanel } from "@/features/ai/components/analysis-panel";
 import { getTripSpendingInMonth } from "@/features/travel/queries";
 import { summarizeMonth } from "@/features/tuition/calc";
 import { MonthNav } from "@/features/tuition/components/month-nav";
@@ -59,6 +61,12 @@ async function CostsContent({ searchParams }: { searchParams: PageProps<"/costs"
           <p className="mt-2 text-sm text-muted">확정 전 과목 {tuition.unconfirmedCount}개는 예상액으로 더했습니다.</p>
         ) : null}
       </Card>
+
+      {aiMode() === "disabled" ? null : (
+        <Card title="AI 지출 살펴보기" description="최근 6개월 월별 금액과 자녀·과목 이름을 AI 서비스(Anthropic Claude)로 보내 변화와 제안을 받아 봅니다.">
+          <AnalysisPanel />
+        </Card>
+      )}
 
       <Card
         title="여행비"

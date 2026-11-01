@@ -16,6 +16,7 @@ export const ROUTES = {
   school: "/school",
   schoolEvent: (id: string) => `/school/${id}`,
   study: "/study",
+  assistant: "/assistant",
   tuitionDetail: (enrollmentId: string, month: string) => `/tuition/${enrollmentId}?month=${month.slice(0, 7)}`,
   tuitionPolicy: (enrollmentId: string) => `/tuition/${enrollmentId}/policy`,
   invite: (code: string) => `/invite/${code}`,

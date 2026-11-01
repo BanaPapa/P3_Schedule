@@ -19,6 +19,8 @@ export default defineConfig({
   projects: [{ name: "mobile-chrome", use: { ...devices["Pixel 7"] } }],
   webServer: {
     command: `pnpm build && pnpm start --port ${PORT}`,
+    // AI 는 API 를 부르지 않는 가짜 구현으로 시험한다 (운영에는 절대 설정하지 않는다)
+    env: { FAMILY_HUB_FAKE_AI: "1" },
     url: `${BASE_URL}/login`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

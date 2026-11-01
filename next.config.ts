@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  experimental: {
+    // AI 도우미의 가정통신문 사진(앱에서 3.5MB 까지 받음). 기본 1MB 로는 휴대폰 사진이 막힌다.
+    serverActions: { bodySizeLimit: "5mb" },
+    proxyClientMaxBodySize: "5mb",
+  },
   turbopack: {
     rules: {
       "*.css": {

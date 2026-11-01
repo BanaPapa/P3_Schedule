@@ -28,6 +28,13 @@ async function SchoolContent() {
       <Card title="다가오는 학교 일정" description="시험·과제·행사·준비물을 함께 챙깁니다.">
         <SchoolEventList events={upcoming} emptyText="등록한 학교 일정이 없습니다." />
       </Card>
+      <Link
+        href={ROUTES.assistant}
+        className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-sm font-semibold"
+      >
+        가정통신문 사진·글로 일정 찾기 (AI)
+        <span aria-hidden>›</span>
+      </Link>
       <Card title="학교 일정 추가">
         {children.length === 0 ? (
           <p className="text-sm text-muted">

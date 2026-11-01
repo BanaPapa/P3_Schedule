@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { aiMode } from "@/features/ai/claude";
 import { HistoryList } from "@/features/history/components/history-list";
 import { getHistory } from "@/features/history/queries";
 import { Card, CardSkeleton } from "@/components/ui/card";
@@ -140,6 +141,16 @@ async function HomeContent() {
       <Suspense fallback={null}>
         <UpcomingSchool />
       </Suspense>
+
+      {aiMode() === "disabled" ? null : (
+        <Link
+          href={ROUTES.assistant}
+          className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-sm font-semibold"
+        >
+          가정통신문 사진으로 일정 등록 (AI)
+          <span aria-hidden>›</span>
+        </Link>
+      )}
 
       <Suspense fallback={<CardSkeleton />}>
         <MonthTuition />

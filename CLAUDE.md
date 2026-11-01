@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 프로젝트
 
 **Family Hub**: 부부가 자녀의 학원 일정·학원비·가족 일정을 함께 관리하는 앱. 기준 문서는 상세 PRD v1.0(2026-10-31)이다.
-M1(가족 계정), M2(학원·수강 과목·반복 수업·통합 캘린더), M3(결석·휴강·일정 변경·보강), M4(학원비), M5(실시간 공유·변경 이력), M6(검증·배포 준비), 2차 여행, 3차 학교·학습까지 구현되어 있다.
+M1(가족 계정), M2(학원·수강 과목·반복 수업·통합 캘린더), M3(결석·휴강·일정 변경·보강), M4(학원비), M5(실시간 공유·변경 이력), M6(검증·배포 준비), 2차 여행, 3차 학교·학습, 4차 AI 도우미까지 PRD 전체가 구현되어 있다(클라우드 배포는 `docs/DEPLOY.md` 절차만 준비).
 목표는 PRD 전체(1차 M1~M6, 2차 여행, 3차 학교·학습, 4차 AI)를 끝내는 것이다.
 
 ## 기술 스택
@@ -121,6 +121,15 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 - `school_events`(학사일정·행사·과제·시험·휴업, 여러 날 가능, 시험 점수, 과제 완료) + `school_event_items`(준비물 체크리스트). 요약 뷰 `school_event_summaries` 가 미준비 준비물 수를 준다.
 - `study_subjects`(자녀별 과목·교재·목표, 자녀당 이름 유일) + `study_logs`(날짜·분·진도 단원·진도%·내용). `study_subject_summaries` 가 최근 진도와 총 학습 시간을 준다.
 - 교육 탭 안에 학원·학교·학습 하위 메뉴(`EducationTabs`). 학교 일정은 캘린더(보라색 표시, `SchoolAgenda`)와 홈 "다가오는 학교 일정"에 함께 보인다.
+
+### AI 도우미 (4차)
+
+- **AI 는 제안만 한다(PRD).** 가정통신문·학원 공지(글·사진)에서 일정 후보를 뽑아 화면에 돌려줄 뿐 저장하지 않는다. 부모가 고치고 고른 항목만 `registerSuggestionsAction` 이 다시 zod 로 검증해 `school_events` 에 넣는다. 학원 휴강·보강 등은 "직접 확인할 것"으로만 보여 주고 수업·학원비를 바꾸지 않는다.
+- 호출은 `src/features/ai/claude.ts` 한 곳: `-ai/sdk` 의 `beta.messages.parse` + `betaZodOutputFormat`(구조화 출력), 모델 `claude-opus-5-5`, 거절 시 서버 측 대체(`fallbacks: "default"`), `stop_reason: "refusal"`·타입별 예외를 사용자 메시지로 바꾼다. 추출은 effort `low`, 분석은 `medium`.
+- `ANTHROPIC_API_KEY`(서버 전용)가 없으면 AI 화면은 꺼짐 안내만 보인다. `FAMILY_HUB_FAKE_AI=1` 은 E2E 전용 가짜 구현(API 미호출)이며 키가 없을 때만 켜진다(실제 키가 항상 우선).
+- 부모가 고른 제안은 `create_school_events` RPC 로 한 트랜잭션에 저장한다. 업로드 사진은 파일 시그니처로 형식을 판단하고 3.5MB 까지 받는다(서버 액션 본문 한도 5MB, `next.config.ts`).
+- 비용 상한: `record_ai_request` RPC 가 가족당 하루 30회를 원자적으로 센다. AI 를 부르기 전에 반드시 호출한다.
+- 지출 분석에는 월별 합계와 "자녀 과목" 이름만 보낸다.
 
 ### Next.js 16 / Cache Components 주의점
 

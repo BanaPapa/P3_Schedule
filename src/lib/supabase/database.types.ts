@@ -43,6 +43,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"ai_requests": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"family_id": string,"id": number,"kind": Database["public"]['Enums']["ai_request_kind"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"family_id": string,"id"?: never,"kind": Database["public"]['Enums']["ai_request_kind"]
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"family_id"?: string,"id"?: never,"kind"?: Database["public"]['Enums']["ai_request_kind"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ai_requests_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"audit_logs": {
                   Row: {
                     "action": string,"actor_id": string | null,"created_at": string,"family_id": string,"id": number,"new_data": Json | null,"old_data": Json | null,"record_id": string,"table_name": string
@@ -754,6 +774,9 @@ isOneToOne: false
 "create_makeup":
 { Args: { "p_date": string,"p_end_time": string,"p_session_id": string,"p_start_time": string,"p_version": number }; Returns: string
                            },
+"create_school_events":
+{ Args: { "p_items": Json }; Returns: number
+                           },
 "delete_enrollment":
 { Args: { "p_enrollment_id": string }; Returns: undefined
                            },
@@ -767,6 +790,9 @@ isOneToOne: false
 { Args: { "p_code": string }; Returns: {
               "expires_at": string,"family_name": string,"inviter_name": string,"status": string
             }[]
+                           },
+"record_ai_request":
+{ Args: { "p_kind": Database["public"]['Enums']["ai_request_kind"] }; Returns: number
                            },
 "reschedule_session":
 { Args: { "p_date": string,"p_end_time": string,"p_session_id": string,"p_start_time": string,"p_version": number }; Returns: string
@@ -795,7 +821,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "class_session_kind": "regular"|"makeup"|"rescheduled","class_session_status": "scheduled"|"completed"|"absent"|"academy_cancelled"|"cancelled"|"makeup_scheduled"|"makeup_completed","family_role": "owner"|"parent","school_event_kind": "academic"|"event"|"homework"|"exam"|"holiday","trip_category": "transport"|"lodging"|"food"|"activity"|"shopping"|"etc","tuition_item_kind": "extra"|"discount","tuition_method": "monthly"|"per_session"|"manual"
+            "ai_request_kind": "extract"|"analyze","class_session_kind": "regular"|"makeup"|"rescheduled","class_session_status": "scheduled"|"completed"|"absent"|"academy_cancelled"|"cancelled"|"makeup_scheduled"|"makeup_completed","family_role": "owner"|"parent","school_event_kind": "academic"|"event"|"homework"|"exam"|"holiday","trip_category": "transport"|"lodging"|"food"|"activity"|"shopping"|"etc","tuition_item_kind": "extra"|"discount","tuition_method": "monthly"|"per_session"|"manual"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -915,7 +941,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "class_session_kind": ["regular", "makeup", "rescheduled"],"class_session_status": ["scheduled", "completed", "absent", "academy_cancelled", "cancelled", "makeup_scheduled", "makeup_completed"],"family_role": ["owner", "parent"],"school_event_kind": ["academic", "event", "homework", "exam", "holiday"],"trip_category": ["transport", "lodging", "food", "activity", "shopping", "etc"],"tuition_item_kind": ["extra", "discount"],"tuition_method": ["monthly", "per_session", "manual"]
+            "ai_request_kind": ["extract", "analyze"],"class_session_kind": ["regular", "makeup", "rescheduled"],"class_session_status": ["scheduled", "completed", "absent", "academy_cancelled", "cancelled", "makeup_scheduled", "makeup_completed"],"family_role": ["owner", "parent"],"school_event_kind": ["academic", "event", "homework", "exam", "holiday"],"trip_category": ["transport", "lodging", "food", "activity", "shopping", "etc"],"tuition_item_kind": ["extra", "discount"],"tuition_method": ["monthly", "per_session", "manual"]
           }
         }
 } as const

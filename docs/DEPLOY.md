@@ -32,6 +32,7 @@
    | `NEXT_PUBLIC_SUPABASE_URL` | Supabase 프로젝트 URL |
    | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key (`sb_publishable_…`) |
    | `NEXT_PUBLIC_SITE_URL` | `https://<배포 주소>` — 초대 링크·가입 확인 링크를 이 주소로 만든다. 운영에서는 꼭 넣는다. |
+   | `ANTHROPIC_API_KEY` | (선택) AI 도우미용 Anthropic API 키. 서버에서만 쓰인다. 없으면 AI 화면이 꺼진다. |
 3. 배포 후 확인
    - `/manifest.webmanifest`, `/icon/large` 가 로그인 없이 열리는지
    - 가입 → 확인 메일 → 링크로 로그인 → 가족 만들기 → 초대 링크로 배우자 합류
@@ -39,6 +40,8 @@
 
 ## 3. 운영 중 주의
 
+- `FAMILY_HUB_FAKE_AI` 는 E2E 테스트 전용이다(실제 키가 있으면 무시된다). 운영 환경 변수에 넣지 않는다.
+- AI 사용량은 가족당 하루 30회(`record_ai_request`). 비용 상한을 바꾸려면 마이그레이션 상수를 바꾼다.
 - 서비스 키(`service_role`, `sb_secret_…`)는 앱에 쓰지 않는다. 모든 접근은 로그인한 사용자 권한 + RLS 로 한다.
 - 스키마를 바꿀 때는 새 마이그레이션 파일을 추가하고 `pnpm test:db` 를 통과시킨 뒤 `supabase db push`.
 - 로그인 세션 토큰 만료(기본 1시간) 전까지는 로그아웃해도 이미 발급된 토큰이 유효하다(Supabase 기본 동작).
