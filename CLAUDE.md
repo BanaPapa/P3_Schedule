@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 프로젝트
 
 **Family Hub**: 부부가 자녀의 학원 일정·학원비·가족 일정을 함께 관리하는 앱. 기준 문서는 상세 PRD v1.0(2026-10-31)이다.
-M1(가족 계정), M2(학원·수강 과목·반복 수업·통합 캘린더), M3(결석·휴강·일정 변경·보강), M4(학원비), M5(실시간 공유·변경 이력), M6(검증·배포 준비), 2차 여행까지 구현되어 있다.
+M1(가족 계정), M2(학원·수강 과목·반복 수업·통합 캘린더), M3(결석·휴강·일정 변경·보강), M4(학원비), M5(실시간 공유·변경 이력), M6(검증·배포 준비), 2차 여행, 3차 학교·학습까지 구현되어 있다.
 목표는 PRD 전체(1차 M1~M6, 2차 여행, 3차 학교·학습, 4차 AI)를 끝내는 것이다.
 
 ## 기술 스택
@@ -115,6 +115,12 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 - 합계는 `trip_summaries`, 분류별 비교는 `trip_category_totals` 뷰. 여행 기간을 줄여 일정이 밖에 남으면 `trip_items_outside`.
 - 통합: 캘린더(`getTripsBetween` → 월간 칸 표시, 날짜 목록 `TripAgenda`), 월별 비용(`/costs` = 교육비 + 지출일 기준 여행비).
 - 아래 탭은 PRD 메뉴대로 홈·캘린더·교육·여행·비용. 교육비 화면(`/tuition`)은 비용 탭 아래에 있다.
+
+### 학교·학습 (3차)
+
+- `school_events`(학사일정·행사·과제·시험·휴업, 여러 날 가능, 시험 점수, 과제 완료) + `school_event_items`(준비물 체크리스트). 요약 뷰 `school_event_summaries` 가 미준비 준비물 수를 준다.
+- `study_subjects`(자녀별 과목·교재·목표, 자녀당 이름 유일) + `study_logs`(날짜·분·진도 단원·진도%·내용). `study_subject_summaries` 가 최근 진도와 총 학습 시간을 준다.
+- 교육 탭 안에 학원·학교·학습 하위 메뉴(`EducationTabs`). 학교 일정은 캘린더(보라색 표시, `SchoolAgenda`)와 홈 "다가오는 학교 일정"에 함께 보인다.
 
 ### Next.js 16 / Cache Components 주의점
 

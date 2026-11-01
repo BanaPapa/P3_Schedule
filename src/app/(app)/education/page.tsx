@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { EducationTabs } from "@/components/education-tabs";
 import { Card, CardSkeleton } from "@/components/ui/card";
 import { AcademyForm } from "@/features/education/components/academy-form";
 import { AcademyList } from "@/features/education/components/academy-list";
@@ -73,6 +74,7 @@ export default function EducationPage() {
   return (
     <>
       <h1 className="text-xl font-bold">교육</h1>
+      <EducationTabs current="academy" />
       <Suspense
         fallback={
           <>

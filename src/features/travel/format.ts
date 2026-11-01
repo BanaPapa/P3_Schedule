@@ -1,4 +1,4 @@
-import { addDays, daysBetween, type IsoDate } from "@/lib/dates";
+import { datesBetween, daysBetween, type IsoDate } from "@/lib/dates";
 
 export const TRIP_CATEGORIES = ["transport", "lodging", "food", "activity", "shopping", "etc"] as const;
 export type TripCategory = (typeof TRIP_CATEGORIES)[number];
@@ -14,9 +14,7 @@ export const CATEGORY_LABELS: Record<TripCategory, string> = {
 
 /** 여행 첫날부터 마지막 날까지 */
 export function tripDays(startDate: IsoDate, endDate: IsoDate): IsoDate[] {
-  const days: IsoDate[] = [];
-  for (let day = startDate; day <= endDate; day = addDays(day, 1)) days.push(day);
-  return days;
+  return datesBetween(startDate, endDate);
 }
 
 /** 여행 며칠째인지 (첫날 = 1) */

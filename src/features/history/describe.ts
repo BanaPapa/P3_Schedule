@@ -1,6 +1,7 @@
 import { formatDayLabel, formatDotDate, formatTime } from "@/lib/dates";
 import { formatWon } from "@/lib/money";
 import { SESSION_STATUS_LABELS } from "@/features/education/format";
+import { KIND_LABELS, type SchoolKind } from "@/features/school/format";
 import { CATEGORY_LABELS, type TripCategory } from "@/features/travel/format";
 
 type Data = Record<string, unknown>;
@@ -153,6 +154,44 @@ function describeTravel(entry: AuditEntry): string | null {
   }
 }
 
+function describeSchool(entry: AuditEntry, ctx: HistoryContext): string | null {
+  const data = entry.newData ?? entry.oldData;
+  const childId = str(data, "child_id");
+  const child = childId ? `${ctx.children.get(childId) ?? ""} ` : "";
+  switch (entry.tableName) {
+    case "school_events": {
+      const title = str(data, "title") ?? "";
+      const kind = KIND_LABELS[str(data, "kind") as SchoolKind] ?? "";
+      if (entry.action === "insert") return `${child}${kind} '${title}'을(를) 등록했습니다`;
+      if (entry.action === "delete") return `${child}${kind} '${title}'을(를) 지웠습니다`;
+      if (changed(entry, "score")) return `${child}'${title}' 점수를 기록했습니다`;
+      if (changed(entry, "done")) {
+        return entry.newData?.done ? `${child}과제 '${title}'을(를) 끝냈습니다` : `${child}과제 '${title}'을(를) 다시 할 일로 돌렸습니다`;
+      }
+      return ["title", "event_date", "end_date", "memo", "subject", "kind"].some((field) => changed(entry, field))
+        ? `${child}${kind} '${title}'을(를) 고쳤습니다`
+        : null;
+    }
+    case "school_event_items": {
+      // 준비물 추가는 일정 등록에 딸려 오므로 챙김 표시만 보여 준다
+      if (entry.action !== "update" || !changed(entry, "checked")) return null;
+      const label = str(data, "label") ?? "";
+      return entry.newData?.checked ? `준비물 '${label}'을(를) 챙겼습니다` : `준비물 '${label}' 챙김을 취소했습니다`;
+    }
+    case "study_subjects":
+      if (entry.action === "insert") return `${child}학습 과목 '${str(data, "name") ?? ""}'을(를) 추가했습니다`;
+      if (entry.action === "delete") return `${child}학습 과목 '${str(data, "name") ?? ""}'을(를) 지웠습니다`;
+      return null;
+    case "study_logs": {
+      if (entry.action === "delete") return "학습 기록을 지웠습니다";
+      const details = [str(data, "unit"), num(data, "minutes") ? `${num(data, "minutes")}분` : null].filter(Boolean);
+      return `학습 기록을 남겼습니다${details.length > 0 ? ` (${details.join(", ")})` : ""}`;
+    }
+    default:
+      return null;
+  }
+}
+
 /** 이력 한 줄을 사람이 읽는 문장으로. 보여 줄 필요가 없는 기록이면 null. */
 export function describeEntry(entry: AuditEntry, ctx: HistoryContext): string | null {
   const data = entry.newData ?? entry.oldData;
@@ -197,6 +236,7 @@ export function describeEntry(entry: AuditEntry, ctx: HistoryContext): string | 
         : `${label} 학원비 ${formatWon(num(data, "amount"))} 납부를 기록했습니다`;
     }
     default:
-      return entry.tableName.startsWith("trip") ? describeTravel(entry) : null;
+      if (entry.tableName.startsWith("trip")) return describeTravel(entry);
+      return describeSchool(entry, ctx);
   }
 }

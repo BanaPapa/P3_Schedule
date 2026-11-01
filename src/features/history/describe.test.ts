@@ -147,3 +147,26 @@ describe("describeEntry: travel", () => {
     expect(describeEntry(entry("trips", "update", { ...TRIP, version: 2 }, TRIP), CTX)).toBeNull();
   });
 });
+
+describe("describeEntry: school and study", () => {
+  it("describes school events, supplies, scores and study logs", () => {
+    const EXAM = { child_id: "c1", kind: "exam", title: "중간고사", event_date: "2027-04-20", done: false, score: null };
+    expect(describeEntry(entry("school_events", "insert", EXAM), CTX)).toBe("하늘 시험 '중간고사'을(를) 등록했습니다");
+    expect(describeEntry(entry("school_events", "update", { ...EXAM, score: 92 }, EXAM), CTX)).toBe(
+      "하늘 '중간고사' 점수를 기록했습니다",
+    );
+    expect(
+      describeEntry(entry("school_events", "update", { ...EXAM, kind: "homework", done: true }, { ...EXAM, kind: "homework" }), CTX),
+    ).toBe("하늘 과제 '중간고사'을(를) 끝냈습니다");
+    expect(describeEntry(entry("school_event_items", "update", { label: "사인펜", checked: true }, { label: "사인펜", checked: false }), CTX)).toBe(
+      "준비물 '사인펜'을(를) 챙겼습니다",
+    );
+    expect(describeEntry(entry("school_event_items", "insert", { label: "사인펜" }), CTX)).toBeNull();
+    expect(describeEntry(entry("study_subjects", "insert", { child_id: "c1", name: "수학" }), CTX)).toBe(
+      "하늘 학습 과목 '수학'을(를) 추가했습니다",
+    );
+    expect(describeEntry(entry("study_logs", "insert", { unit: "3단원", minutes: 40 }), CTX)).toBe(
+      "학습 기록을 남겼습니다 (3단원, 40분)",
+    );
+  });
+});

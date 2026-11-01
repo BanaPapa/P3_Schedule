@@ -233,6 +233,122 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"school_event_items": {
+                  Row: {
+                    "checked": boolean,"created_at": string,"event_id": string,"family_id": string,"id": string,"label": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "checked"?: boolean,"created_at"?: string,"event_id": string,"family_id": string,"id"?: string,"label": string
+                  }
+                  Update: {
+                    "checked"?: boolean,"created_at"?: string,"event_id"?: string,"family_id"?: string,"id"?: string,"label"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "school_event_items_event_id_family_id_fkey"
+      columns: ["event_id","family_id"]
+isOneToOne: false
+      referencedRelation: "school_event_summaries"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "school_event_items_event_id_family_id_fkey"
+      columns: ["event_id","family_id"]
+isOneToOne: false
+      referencedRelation: "school_events"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "school_event_items_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"school_events": {
+                  Row: {
+                    "child_id": string,"created_at": string,"done": boolean,"end_date": string | null,"event_date": string,"family_id": string,"id": string,"kind": Database["public"]['Enums']["school_event_kind"],"max_score": number | null,"memo": string | null,"score": number | null,"subject": string | null,"title": string,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "child_id": string,"created_at"?: string,"done"?: boolean,"end_date"?: string | null,"event_date": string,"family_id": string,"id"?: string,"kind": Database["public"]['Enums']["school_event_kind"],"max_score"?: number | null,"memo"?: string | null,"score"?: number | null,"subject"?: string | null,"title": string,"updated_at"?: string,"version"?: number
+                  }
+                  Update: {
+                    "child_id"?: string,"created_at"?: string,"done"?: boolean,"end_date"?: string | null,"event_date"?: string,"family_id"?: string,"id"?: string,"kind"?: Database["public"]['Enums']["school_event_kind"],"max_score"?: number | null,"memo"?: string | null,"score"?: number | null,"subject"?: string | null,"title"?: string,"updated_at"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "school_events_child_id_family_id_fkey"
+      columns: ["child_id","family_id"]
+isOneToOne: false
+      referencedRelation: "children"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "school_events_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"study_logs": {
+                  Row: {
+                    "content": string | null,"created_at": string,"created_by": string | null,"family_id": string,"id": string,"minutes": number | null,"progress_percent": number | null,"studied_on": string,"subject_id": string,"unit": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "content"?: string | null,"created_at"?: string,"created_by"?: string | null,"family_id": string,"id"?: string,"minutes"?: number | null,"progress_percent"?: number | null,"studied_on": string,"subject_id": string,"unit"?: string | null
+                  }
+                  Update: {
+                    "content"?: string | null,"created_at"?: string,"created_by"?: string | null,"family_id"?: string,"id"?: string,"minutes"?: number | null,"progress_percent"?: number | null,"studied_on"?: string,"subject_id"?: string,"unit"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_logs_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "study_logs_subject_id_family_id_fkey"
+      columns: ["subject_id","family_id"]
+isOneToOne: false
+      referencedRelation: "study_subject_summaries"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "study_logs_subject_id_family_id_fkey"
+      columns: ["subject_id","family_id"]
+isOneToOne: false
+      referencedRelation: "study_subjects"
+      referencedColumns: ["id","family_id"]
+    }
+                  ]
+                },"study_subjects": {
+                  Row: {
+                    "child_id": string,"created_at": string,"family_id": string,"goal": string | null,"id": string,"name": string,"textbook": string | null,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "child_id": string,"created_at"?: string,"family_id": string,"goal"?: string | null,"id"?: string,"name": string,"textbook"?: string | null,"updated_at"?: string,"version"?: number
+                  }
+                  Update: {
+                    "child_id"?: string,"created_at"?: string,"family_id"?: string,"goal"?: string | null,"id"?: string,"name"?: string,"textbook"?: string | null,"updated_at"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_subjects_child_id_family_id_fkey"
+      columns: ["child_id","family_id"]
+isOneToOne: false
+      referencedRelation: "children"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "study_subjects_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"trip_budgets": {
                   Row: {
                     "category": Database["public"]['Enums']["trip_category"],"created_at": string,"family_id": string,"id": string,"planned_amount": number,"trip_id": string,"updated_at": string,"version": number
@@ -512,6 +628,52 @@ isOneToOne: false
       referencedColumns: ["id","family_id"]
     }
                   ]
+                },"school_event_summaries": {
+                  Row: {
+                    "child_id": string,"created_at": string,"done": boolean,"end_date": string | null,"event_date": string,"family_id": string,"id": string,"item_count": number | null,"kind": Database["public"]['Enums']["school_event_kind"],"max_score": number | null,"memo": string | null,"score": number | null,"subject": string | null,"title": string,"unchecked_count": number | null,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                           "child_id"?: string | null,"created_at"?: string | null,"done"?: boolean | null,"end_date"?: string | null,"event_date"?: string | null,"family_id"?: string | null,"id"?: string | null,"item_count"?: never,"kind"?: Database["public"]['Enums']["school_event_kind"] | null,"max_score"?: number | null,"memo"?: string | null,"score"?: number | null,"subject"?: string | null,"title"?: string | null,"unchecked_count"?: never,"updated_at"?: string | null,"version"?: number | null
+                         }
+                        Update: {
+                           "child_id"?: string | null,"created_at"?: string | null,"done"?: boolean | null,"end_date"?: string | null,"event_date"?: string | null,"family_id"?: string | null,"id"?: string | null,"item_count"?: never,"kind"?: Database["public"]['Enums']["school_event_kind"] | null,"max_score"?: number | null,"memo"?: string | null,"score"?: number | null,"subject"?: string | null,"title"?: string | null,"unchecked_count"?: never,"updated_at"?: string | null,"version"?: number | null
+                         }
+                        Relationships: [
+                    {
+      foreignKeyName: "school_events_child_id_family_id_fkey"
+      columns: ["child_id","family_id"]
+isOneToOne: false
+      referencedRelation: "children"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "school_events_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"study_subject_summaries": {
+                  Row: {
+                    "child_id": string,"created_at": string,"family_id": string,"goal": string | null,"id": string,"latest_percent": number | null,"latest_studied_on": string | null,"latest_unit": string | null,"name": string,"textbook": string | null,"total_minutes": number | null,"updated_at": string,"version": number
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "study_subjects_child_id_family_id_fkey"
+      columns: ["child_id","family_id"]
+isOneToOne: false
+      referencedRelation: "children"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "study_subjects_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"trip_category_totals": {
                   Row: {
                     "category": Database["public"]['Enums']["trip_category"] | null,"planned_amount": number | null,"spent_amount": number | null,"trip_id": string | null
@@ -633,7 +795,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "class_session_kind": "regular"|"makeup"|"rescheduled","class_session_status": "scheduled"|"completed"|"absent"|"academy_cancelled"|"cancelled"|"makeup_scheduled"|"makeup_completed","family_role": "owner"|"parent","trip_category": "transport"|"lodging"|"food"|"activity"|"shopping"|"etc","tuition_item_kind": "extra"|"discount","tuition_method": "monthly"|"per_session"|"manual"
+            "class_session_kind": "regular"|"makeup"|"rescheduled","class_session_status": "scheduled"|"completed"|"absent"|"academy_cancelled"|"cancelled"|"makeup_scheduled"|"makeup_completed","family_role": "owner"|"parent","school_event_kind": "academic"|"event"|"homework"|"exam"|"holiday","trip_category": "transport"|"lodging"|"food"|"activity"|"shopping"|"etc","tuition_item_kind": "extra"|"discount","tuition_method": "monthly"|"per_session"|"manual"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -753,7 +915,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "class_session_kind": ["regular", "makeup", "rescheduled"],"class_session_status": ["scheduled", "completed", "absent", "academy_cancelled", "cancelled", "makeup_scheduled", "makeup_completed"],"family_role": ["owner", "parent"],"trip_category": ["transport", "lodging", "food", "activity", "shopping", "etc"],"tuition_item_kind": ["extra", "discount"],"tuition_method": ["monthly", "per_session", "manual"]
+            "class_session_kind": ["regular", "makeup", "rescheduled"],"class_session_status": ["scheduled", "completed", "absent", "academy_cancelled", "cancelled", "makeup_scheduled", "makeup_completed"],"family_role": ["owner", "parent"],"school_event_kind": ["academic", "event", "homework", "exam", "holiday"],"trip_category": ["transport", "lodging", "food", "activity", "shopping", "etc"],"tuition_item_kind": ["extra", "discount"],"tuition_method": ["monthly", "per_session", "manual"]
           }
         }
 } as const

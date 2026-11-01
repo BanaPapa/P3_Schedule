@@ -11,7 +11,9 @@ import { MakeupWaitlist } from "@/features/sessions/components/makeup-waitlist";
 import { getMakeupWaitlist } from "@/features/sessions/queries";
 import { MonthTotals } from "@/features/tuition/components/tuition-overview";
 import { getTuitionMonth } from "@/features/tuition/queries";
-import { formatDayLabel, formatMonthParam, monthOf } from "@/lib/dates";
+import { SchoolEventList } from "@/features/school/components/school-event-list";
+import { getSchoolEventsBetween } from "@/features/school/queries";
+import { addDays, formatDayLabel, formatMonthParam, monthOf } from "@/lib/dates";
 import { requestToday } from "@/lib/request-date";
 import { ROUTES } from "@/lib/routes";
 
@@ -53,6 +55,28 @@ async function RecentChanges() {
       }
     >
       <HistoryList items={items} now={new Date()} />
+    </Card>
+  );
+}
+
+const SCHOOL_DAYS_AHEAD = 7;
+const MAX_HOME_SCHOOL = 5;
+
+/** 일주일 안의 학교 일정 (시험·과제·준비물) */
+async function UpcomingSchool() {
+  const today = await requestToday();
+  const events = await getSchoolEventsBetween(today, addDays(today, SCHOOL_DAYS_AHEAD));
+  if (events.length === 0) return null;
+  return (
+    <Card
+      title="다가오는 학교 일정"
+      action={
+        <Link href={ROUTES.school} className="text-sm font-semibold text-primary">
+          학교
+        </Link>
+      }
+    >
+      <SchoolEventList events={events.slice(0, MAX_HOME_SCHOOL)} emptyText="" />
     </Card>
   );
 }
@@ -111,6 +135,10 @@ async function HomeContent() {
 
       <Suspense fallback={null}>
         <MakeupAlert />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <UpcomingSchool />
       </Suspense>
 
       <Suspense fallback={<CardSkeleton />}>

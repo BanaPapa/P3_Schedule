@@ -30,6 +30,9 @@ const TABS = [
 
 function isActive(pathname: string, href: string): boolean {
   if (href === ROUTES.home) return pathname === href;
+  if (href === ROUTES.education) {
+    return [ROUTES.education, ROUTES.school, ROUTES.study].some((path) => pathname.startsWith(path));
+  }
   // 교육비 화면은 비용 탭 아래에 있다
   if (href === ROUTES.costs) return pathname.startsWith(href) || pathname.startsWith(ROUTES.tuition);
   return pathname.startsWith(href);

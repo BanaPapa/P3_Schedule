@@ -9,11 +9,13 @@ interface MonthGridProps {
   sessionsByDate: Map<string, CalendarSession[]>;
   /** 여행 중인 날 */
   tripDates: Set<string>;
+  /** 학교 일정이 있는 날 */
+  schoolDates: Set<string>;
 }
 
 const MAX_DOTS = 3;
 
-export function MonthGrid({ params, today, sessionsByDate, tripDates }: MonthGridProps) {
+export function MonthGrid({ params, today, sessionsByDate, tripDates, schoolDates }: MonthGridProps) {
   const month = monthOf(params.date);
   const weeks = monthGrid(month);
 
@@ -32,7 +34,7 @@ export function MonthGrid({ params, today, sessionsByDate, tripDates }: MonthGri
           const inMonth = monthOf(date).month === month.month;
           const selected = date === params.date;
           const onTrip = tripDates.has(date);
-          const label = `${formatDayLabel(date)}, 수업 ${sessions.length}개${onTrip ? ", 여행" : ""}`;
+          const label = `${formatDayLabel(date)}, 수업 ${sessions.length}개${onTrip ? ", 여행" : ""}${schoolDates.has(date) ? ", 학교 일정" : ""}`;
           return (
             <Link
               key={date}
@@ -48,6 +50,7 @@ export function MonthGrid({ params, today, sessionsByDate, tripDates }: MonthGri
                 {Number(date.slice(8))}
               </span>
               {onTrip ? <span aria-hidden className="h-1 w-6 rounded-full bg-amber-500" /> : null}
+              {schoolDates.has(date) ? <span aria-hidden className="h-1 w-6 rounded-full bg-violet-500" /> : null}
               <span className="flex items-center gap-0.5" aria-hidden>
                 {sessions.slice(0, MAX_DOTS).map((session) => (
                   <span

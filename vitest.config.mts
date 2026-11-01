@@ -10,7 +10,7 @@ export default defineConfig({
     environment: "node",
     coverage: {
       provider: "v8",
-      include: ["src/lib/**/*.ts", "src/features/**/{schemas,format,params,calc,describe}.ts", "src/features/travel/*.ts"],
+      include: ["src/lib/**/*.ts", "src/features/**/{schemas,format,params,calc,describe}.ts", "src/features/travel/*.ts", "src/features/school/*.ts", "src/features/study/*.ts"],
       exclude: ["src/lib/supabase/**", "src/lib/logger.ts", "src/lib/request-date.ts", "**/*.test.ts", "**/queries.ts", "**/actions.ts"],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },

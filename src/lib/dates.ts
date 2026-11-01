@@ -158,3 +158,10 @@ export function formatRelative(isoDateTime: string, now: Date = new Date()): str
 export function daysBetween(a: IsoDate, b: IsoDate): number {
   return Math.round((toUtc(b).getTime() - toUtc(a).getTime()) / 86_400_000);
 }
+
+/** start ~ end 의 모든 날짜 (end 포함) */
+export function datesBetween(start: IsoDate, end: IsoDate): IsoDate[] {
+  const days: IsoDate[] = [];
+  for (let day = start; day <= end; day = addDays(day, 1)) days.push(day);
+  return days;
+}
