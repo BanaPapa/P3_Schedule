@@ -1,6 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { unstable_rethrow } from "next/navigation";
 import type { Database } from "./database.types";
 import { getSupabaseEnv } from "./env";
@@ -25,6 +26,8 @@ const prerenderSafeFetch: typeof fetch = (input, init) =>
 /** 요청마다 새로 만든다. 클라이언트를 요청 사이에 공유하면 다른 사람 세션이 섞인다. */
 export async function createClient() {
   const cookieStore = await cookies();
+  // supabase-js 는 세션 만료를 Date.now() 로 확인한다. 런타임 프리페치 단계에서 시각을 읽지 않도록 요청 시점까지 미룬다.
+  await connection();
   const { url, publishableKey } = getSupabaseEnv();
 
   return createServerClient<Database>(url, publishableKey, {
