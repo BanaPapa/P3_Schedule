@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { dbErrorMessage, ERROR_MESSAGES, FOREIGN_KEY_VIOLATION } from "@/lib/errors";
 import {
   conflict,
@@ -39,6 +40,7 @@ function dbFailure(action: string, error: PostgrestLikeError, values?: Record<st
 
 function refreshEducationPages(): void {
   revalidatePath(ROUTES.education);
+  revalidatePath(ROUTES.manage, "layout");
   revalidatePath(ROUTES.calendar);
   revalidatePath(ROUTES.home);
 }
@@ -103,7 +105,8 @@ export async function deleteAcademyAction(_prev: FormState, formData: FormData):
 
   refreshEducationPages();
   if (data.length === 0) return conflict();
-  return success("삭제했습니다.");
+  // 지운 학원의 상세 화면에 남아 있지 않게 관리 화면으로 보낸다
+  redirect(ROUTES.manage);
 }
 
 export async function createEnrollmentAction(_prev: FormState, formData: FormData): Promise<FormState> {

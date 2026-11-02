@@ -10,12 +10,6 @@ export function AppHeader() {
           Family Hub
         </Link>
         <nav aria-label="계정" className="flex items-center gap-1 text-sm">
-          <Link
-            href={ROUTES.family}
-            className="rounded-lg px-3 py-2 font-medium text-muted hover:text-foreground"
-          >
-            가족
-          </Link>
           <form action={signOutAction}>
             <button
               type="submit"

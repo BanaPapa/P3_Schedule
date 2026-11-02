@@ -81,10 +81,10 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
       {sessions.length === 0 ? (
         <p className="text-center text-sm text-muted">
           학원 수업은{" "}
-          <Link href={ROUTES.education} className="font-semibold text-primary">
-            교육
+          <Link href={ROUTES.manage} className="font-semibold text-primary">
+            관리
           </Link>
-          에서 수강 과목을 등록하면 표시됩니다.
+          에서 학원과 수강 과목을 등록하면 표시됩니다.
         </p>
       ) : null}
     </>

@@ -26,10 +26,10 @@ async function TuitionContent({ searchParams }: { searchParams: PageProps<"/tuit
       {rows.length === 0 ? (
         <p className="text-center text-sm text-muted">
           이 달에 수강 중인 과목이 없습니다.{" "}
-          <Link href={ROUTES.education} className="font-semibold text-primary">
-            교육
+          <Link href={ROUTES.manage} className="font-semibold text-primary">
+            관리
           </Link>
-          에서 수강 과목을 등록하세요.
+          에서 학원과 수강 과목을 등록하세요.
         </p>
       ) : (
         <TuitionList rows={rows} month={firstDay} />

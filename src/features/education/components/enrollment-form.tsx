@@ -15,12 +15,13 @@ interface Option {
 }
 
 interface EnrollmentFormProps {
+  /** 수강 과목을 추가할 학원 (학원 상세 화면) */
+  academyId: string;
   childOptions: Option[];
-  academyOptions: Option[];
   today: string;
 }
 
-export function EnrollmentForm({ childOptions, academyOptions, today }: EnrollmentFormProps) {
+export function EnrollmentForm({ academyId, childOptions, today }: EnrollmentFormProps) {
   const [rows, setRows] = useState<ScheduleRow[]>(() => [newScheduleRow()]);
   const [state, formAction, pending] = useActionState<FormState, FormData>(async (prev, formData) => {
     const result = await createEnrollmentAction(prev, formData);
@@ -34,24 +35,15 @@ export function EnrollmentForm({ childOptions, academyOptions, today }: Enrollme
 
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
-      <div className="grid grid-cols-2 gap-3">
-        <SelectField
-          label="자녀"
-          name="childId"
-          placeholder="선택"
-          options={childOptions.map((child) => ({ value: child.id, label: child.name }))}
-          defaultValue={values?.childId ?? onlyChild ?? ""}
-          error={fieldErrors?.childId}
-        />
-        <SelectField
-          label="학원"
-          name="academyId"
-          placeholder="선택"
-          options={academyOptions.map((academy) => ({ value: academy.id, label: academy.name }))}
-          defaultValue={values?.academyId ?? ""}
-          error={fieldErrors?.academyId}
-        />
-      </div>
+      <input type="hidden" name="academyId" value={academyId} />
+      <SelectField
+        label="자녀"
+        name="childId"
+        placeholder="선택"
+        options={childOptions.map((child) => ({ value: child.id, label: child.name }))}
+        defaultValue={values?.childId ?? onlyChild ?? ""}
+        error={fieldErrors?.childId}
+      />
       <TextField
         label="과목"
         name="subject"

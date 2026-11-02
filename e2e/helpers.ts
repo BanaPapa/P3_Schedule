@@ -73,14 +73,21 @@ export function card(page: Page, title: string) {
     .filter({ has: page.getByRole("heading", { name: title, exact: true }) });
 }
 
-/** 학원과 오늘 요일 수업(16:00-17:00, 오늘 시작)을 등록한다 */
-export async function enrollTodayClass(page: Page, academy: string, subject: string): Promise<void> {
-  await goToTab(page, "교육");
-  await expect(page.getByRole("heading", { name: "교육", level: 1 })).toBeVisible();
+/** 관리 탭에서 학원을 등록하고 그 학원 화면(수강 과목 추가)을 연다 */
+export async function addAcademy(page: Page, academy: string, phone?: string): Promise<void> {
+  await goToTab(page, "관리");
+  await expect(page.getByRole("heading", { name: "관리", level: 1 })).toBeVisible();
   await field(page, "학원 이름").fill(academy);
+  if (phone) await field(page, "전화번호 (선택)").fill(phone);
   await page.getByRole("button", { name: "학원 등록" }).click();
   await expect(page.getByRole("status").filter({ hasText: `${academy}을(를) 등록했습니다.` })).toBeVisible();
-  await page.getByRole("combobox", { name: "학원" }).selectOption({ label: academy });
+  await card(page, "학원").getByRole("link").filter({ hasText: academy }).click();
+  await expect(page.getByRole("heading", { name: academy, level: 1 })).toBeVisible();
+}
+
+/** 학원과 오늘 요일 수업(16:00-17:00, 오늘 시작)을 등록한다 */
+export async function enrollTodayClass(page: Page, academy: string, subject: string): Promise<void> {
+  await addAcademy(page, academy);
   await field(page, "과목").fill(subject);
   await page.getByRole("combobox", { name: "1번째 수업 요일" }).selectOption(String(todayIsoWeekdayInSeoul()));
   await page.getByRole("textbox", { name: "1번째 수업 시작 시각" }).fill("16:00");
@@ -89,7 +96,14 @@ export async function enrollTodayClass(page: Page, academy: string, subject: str
   await expect(page.getByRole("status").filter({ hasText: `${subject} 수업을 등록했습니다.` })).toBeVisible();
 }
 
-const TAB_PATHS = { 홈: /\/$/, 캘린더: /\/calendar/, 교육: /\/education$/, 여행: /\/travel$/, 비용: /\/costs/ } as const;
+const TAB_PATHS = {
+  홈: /\/$/,
+  캘린더: /\/calendar/,
+  교육: /\/education$/,
+  여행: /\/travel$/,
+  비용: /\/costs/,
+  관리: /\/manage$/,
+} as const;
 
 /** 비용 탭 → 교육비 상세 목록 */
 export async function goToTuition(page: Page): Promise<void> {

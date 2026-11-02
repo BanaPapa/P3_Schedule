@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { addChild, field, goToTab, newPage, signUpWithFamily, todayIsoWeekdayInSeoul } from "./helpers";
+import { addAcademy, addChild, field, goToTab, newPage, signUpWithFamily, todayIsoWeekdayInSeoul } from "./helpers";
 
 test("an enrolled class appears on today's home card and the calendar, and leaves when deleted", async ({
   browser,
@@ -8,16 +8,8 @@ test("an enrolled class appears on today's home card and the calendar, and leave
   await signUpWithFamily(page, "최씨네", "엄마");
   await addChild(page, "첫째");
 
-  // 학원 등록
-  await goToTab(page, "교육");
-  await expect(page.getByRole("heading", { name: "교육", level: 1 })).toBeVisible();
-  await field(page, "학원 이름").fill("튼튼영어");
-  await field(page, "전화번호 (선택)").fill("02-123-4567");
-  await page.getByRole("button", { name: "학원 등록" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "튼튼영어을(를) 등록했습니다." })).toBeVisible();
-
-  // 오늘 요일에 수업이 있는 과목 등록 (자녀가 한 명이면 자동 선택된다)
-  await page.getByRole("combobox", { name: "학원" }).selectOption({ label: "튼튼영어" });
+  // 관리 탭에서 학원 등록 → 학원 화면에서 오늘 요일 수업 과목 등록 (자녀가 한 명이면 자동 선택된다)
+  await addAcademy(page, "튼튼영어", "02-123-4567");
   await field(page, "과목").fill("영어");
   await page.getByRole("combobox", { name: "1번째 수업 요일" }).selectOption(String(todayIsoWeekdayInSeoul()));
   await page.getByLabel("1번째 수업 시작 시각").fill("16:00");
@@ -28,11 +20,7 @@ test("an enrolled class appears on today's home card and the calendar, and leave
 
   // 수강 과목이 있는 학원은 지울 수 없다
   page.once("dialog", (dialog) => dialog.accept());
-  await page
-    .getByRole("listitem")
-    .filter({ hasText: "02-123-4567" })
-    .getByRole("button", { name: "삭제" })
-    .click();
+  await page.getByRole("button", { name: "학원 삭제" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "수강 과목이 등록된 학원은 삭제할 수 없습니다" })).toBeVisible();
 
   // 홈: 오늘 일정

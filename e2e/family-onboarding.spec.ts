@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { signUp, signUpWithFamily, uniqueEmail } from "./helpers";
+import { card, goToTab, signUp, signUpWithFamily, uniqueEmail } from "./helpers";
 
 test("parents share a family: invite, join, edit, and detect conflicting edits", async ({ browser }) => {
   const dad = await (await browser.newContext()).newPage();
@@ -17,7 +17,8 @@ test("parents share a family: invite, join, edit, and detect conflicting edits",
   await expect(dad.getByRole("heading", { name: "김씨네" })).toBeVisible();
 
   // 아빠: 자녀 등록, 초대 링크 만들기
-  await dad.getByRole("link", { name: "가족", exact: true }).click();
+  await goToTab(dad, "관리");
+  await card(dad, "가족").getByRole("link", { name: "관리" }).click();
   await dad.getByRole("textbox", { name: "이름", exact: true }).fill("첫째");
   await dad.getByRole("button", { name: "자녀 등록" }).click();
   await expect(dad.getByRole("status").filter({ hasText: "첫째을(를) 등록했습니다." })).toBeVisible();

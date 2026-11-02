@@ -114,7 +114,8 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 - `trips`(기간 최대 60일, 전체 예산) → `trip_items`(날짜별 일정·장소, 여행 기간 밖이면 `invalid_trip_day`), `trip_budgets`(분류별 예산, 분류당 1행), `trip_expenses`(실제 지출, 여행 전 예약도 기록).
 - 합계는 `trip_summaries`, 분류별 비교는 `trip_category_totals` 뷰. 여행 기간을 줄여 일정이 밖에 남으면 `trip_items_outside`.
 - 통합: 캘린더(`getTripsBetween` → 월간 칸 표시, 날짜 목록 `TripAgenda`), 월별 비용(`/costs` = 교육비 + 지출일 기준 여행비).
-- 아래 탭은 PRD 메뉴대로 홈·캘린더·교육·여행·비용. 교육비 화면(`/tuition`)은 비용 탭 아래에 있다.
+- 아래 탭은 홈·캘린더·교육·여행·비용·관리. 교육비 화면(`/tuition`)은 비용 탭, 가족 화면(`/family`)은 관리 탭 아래에 있다.
+- 학원은 관리 탭(`/manage`)에서 추가하고, 수강 과목은 학원 상세(`/manage/academies/[id]`) 안에서 추가한다. 교육 탭은 수강 과목 보기·보강 대기·일정 변경만 맡는다.
 
 ### 학교·학습 (3차)
 
