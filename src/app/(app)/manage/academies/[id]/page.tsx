@@ -26,7 +26,7 @@ async function AcademyContent({ params }: { params: PageProps<"/manage/academies
 
   return (
     <>
-      <h1 className="text-xl font-bold">{academy.name}</h1>
+      <h1 className="page-title">{academy.name}</h1>
 
       <Card title="학원 정보">
         <AcademyInfo academy={academy} />

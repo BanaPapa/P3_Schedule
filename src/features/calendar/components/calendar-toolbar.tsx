@@ -20,7 +20,7 @@ function title(params: CalendarParams): string {
   return `${formatDayLabel(days[0])} – ${formatDayLabel(days[6])}`;
 }
 
-const PILL = "rounded-full px-3 py-1.5 text-sm font-medium";
+const PILL = "rounded-full px-3 py-1.5 text-sm font-extrabold transition";
 
 export function CalendarToolbar({ params, today, childOptions }: CalendarToolbarProps) {
   const href = (next: Partial<CalendarParams>) => calendarHref({ ...params, ...next }, today);
@@ -55,7 +55,7 @@ export function CalendarToolbar({ params, today, childOptions }: CalendarToolbar
               key={view}
               href={href({ view })}
               aria-current={params.view === view ? "true" : undefined}
-              className={`${PILL} ${params.view === view ? "bg-primary text-primary-foreground" : "text-muted"}`}
+              className={`${PILL} ${params.view === view ? "btn-primary" : "text-muted"}`}
             >
               {view === "month" ? "월간" : "주간"}
             </Link>
@@ -73,7 +73,7 @@ export function CalendarToolbar({ params, today, childOptions }: CalendarToolbar
           <Link
             href={href({ childId: null })}
             aria-current={params.childId === null ? "true" : undefined}
-            className={`${PILL} shrink-0 border ${params.childId === null ? "border-foreground" : "border-border text-muted"}`}
+            className={`${PILL} shrink-0 border ${params.childId === null ? "pill-on border-primary" : "border-border bg-surface text-muted"}`}
           >
             전체
           </Link>
@@ -82,7 +82,7 @@ export function CalendarToolbar({ params, today, childOptions }: CalendarToolbar
               key={child.id}
               href={href({ childId: child.id })}
               aria-current={params.childId === child.id ? "true" : undefined}
-              className={`${PILL} flex shrink-0 items-center gap-1.5 border ${params.childId === child.id ? "border-foreground" : "border-border text-muted"}`}
+              className={`${PILL} flex shrink-0 items-center gap-1.5 border ${params.childId === child.id ? "pill-on border-primary" : "border-border bg-surface text-muted"}`}
             >
               <span aria-hidden className="size-2.5 rounded-full" style={{ backgroundColor: child.color }} />
               {child.name}

@@ -41,7 +41,7 @@ async function TuitionContent({ searchParams }: { searchParams: PageProps<"/tuit
 export default function TuitionPage({ searchParams }: PageProps<"/tuition">) {
   return (
     <>
-      <h1 className="text-xl font-bold">교육비</h1>
+      <h1 className="page-title">교육비</h1>
       <Suspense
         fallback={
           <>

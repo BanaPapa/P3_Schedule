@@ -20,8 +20,8 @@ export function MonthGrid({ params, today, sessionsByDate, tripDates, schoolDate
   const weeks = monthGrid(month);
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-2">
-      <div className="grid grid-cols-7 pb-1 text-center text-xs font-medium text-muted" aria-hidden>
+    <div className="rounded-2xl border border-border bg-surface p-2 shadow-soft">
+      <div className="grid grid-cols-7 pb-1 text-center text-xs font-extrabold text-muted" aria-hidden>
         {CALENDAR_WEEKDAYS.map((day) => (
           <span key={day} className={day === 7 ? "text-danger" : ""}>
             {WEEKDAY_LABELS[day]}
@@ -42,15 +42,15 @@ export function MonthGrid({ params, today, sessionsByDate, tripDates, schoolDate
               aria-label={label}
               aria-current={selected ? "date" : undefined}
               scroll={false}
-              className={`flex h-14 flex-col items-center gap-1 rounded-xl pt-1.5 ${selected ? "bg-primary/10" : ""} ${inMonth ? "" : "opacity-40"}`}
+              className={`flex h-14 flex-col items-center gap-1 rounded-xl pt-1.5 ${selected ? "bg-primary-soft" : ""} ${inMonth ? "" : "opacity-40"}`}
             >
               <span
-                className={`flex size-6 items-center justify-center rounded-full text-sm tabular-nums ${date === today ? "bg-primary font-semibold text-primary-foreground" : ""}`}
+                className={`flex size-6 items-center justify-center rounded-full text-sm tabular-nums ${date === today ? "btn-primary font-extrabold" : ""}`}
               >
                 {Number(date.slice(8))}
               </span>
-              {onTrip ? <span aria-hidden className="h-1 w-6 rounded-full bg-amber-500" /> : null}
-              {schoolDates.has(date) ? <span aria-hidden className="h-1 w-6 rounded-full bg-violet-500" /> : null}
+              {onTrip ? <span aria-hidden className="h-1 w-6 rounded-full bg-peach" /> : null}
+              {schoolDates.has(date) ? <span aria-hidden className="h-1 w-6 rounded-full bg-sky" /> : null}
               <span className="flex items-center gap-0.5" aria-hidden>
                 {sessions.slice(0, MAX_DOTS).map((session) => (
                   <span

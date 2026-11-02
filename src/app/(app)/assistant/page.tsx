@@ -35,7 +35,7 @@ async function AssistantContent() {
 export default function AssistantPage() {
   return (
     <>
-      <h1 className="text-xl font-bold">AI 도우미</h1>
+      <h1 className="page-title">AI 도우미</h1>
       <Suspense fallback={<CardSkeleton />}>
         <AssistantContent />
       </Suspense>

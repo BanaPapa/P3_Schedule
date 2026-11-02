@@ -105,7 +105,7 @@ async function StudyContent() {
 export default function StudyPage() {
   return (
     <>
-      <h1 className="text-xl font-bold">교육</h1>
+      <h1 className="page-title">교육</h1>
       <EducationTabs current="study" />
       <Suspense fallback={<CardSkeleton />}>
         <StudyContent />

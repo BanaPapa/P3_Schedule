@@ -29,7 +29,7 @@ async function DetailContent({ params, searchParams }: Pick<Props, "params" | "s
         ‹ 교육비
       </Link>
       <div>
-        <h1 className="text-xl font-bold">
+        <h1 className="page-title">
           {detail.enrollment.child.name} · {detail.enrollment.subject}
         </h1>
         <p className="text-sm text-muted">{detail.enrollment.academy.name}</p>
@@ -40,7 +40,7 @@ async function DetailContent({ params, searchParams }: Pick<Props, "params" | "s
         <Card title="요금 정책 없음" description="수강료와 계산 방식을 정하면 예상 학원비가 계산됩니다.">
           <Link
             href={ROUTES.tuitionPolicy(enrollmentId)}
-            className="inline-flex h-11 items-center rounded-xl bg-primary px-4 text-[15px] font-semibold text-primary-foreground"
+            className="btn-primary inline-flex h-11 items-center rounded-full px-5 text-[15px] font-extrabold"
           >
             요금 정책 설정
           </Link>

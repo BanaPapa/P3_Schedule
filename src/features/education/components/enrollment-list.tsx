@@ -111,7 +111,7 @@ function EnrollmentRow({ enrollment, today }: { enrollment: Enrollment; today: s
           {ended ? null : (
             <Link
               href={ROUTES.scheduleChange(enrollment.id)}
-              className="inline-flex h-9 items-center rounded-xl border border-border bg-surface px-3 text-sm font-semibold"
+              className="inline-flex h-9 items-center rounded-full border-[1.5px] border-border-strong bg-surface px-3 text-sm font-extrabold transition hover:bg-surface-2"
             >
               일정 변경
             </Link>

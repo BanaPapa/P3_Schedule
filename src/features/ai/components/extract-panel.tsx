@@ -17,7 +17,7 @@ interface ChildOption {
 }
 
 const INPUT =
-  "h-10 min-w-0 rounded-lg border border-border bg-surface px-2 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
+  "h-10 min-w-0 rounded-lg border border-border bg-surface px-2 text-base outline-none transition focus:border-primary focus:ring-4 focus:ring-primary-soft";
 
 interface EditableSuggestion extends SchoolSuggestion {
   key: number;
@@ -158,7 +158,7 @@ export function ExtractPanel({ childOptions }: { childOptions: ChildOption[] }) 
             rows={6}
             maxLength={5000}
             placeholder="가정통신문, 알림장, 학원 문자를 붙여 넣으세요."
-            className="rounded-xl border border-border bg-surface px-3 py-2 text-base font-normal outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="rounded-xl border-[1.5px] border-border-strong bg-surface px-3 py-2 text-base font-normal outline-none transition focus:border-primary focus:ring-4 focus:ring-primary-soft"
           />
         </label>
         <label className="flex flex-col gap-1.5 text-sm font-medium">

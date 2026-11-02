@@ -7,8 +7,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <AppHeader />
-      {/* 아래 탭 바(h-16)와 기기 하단 안전 영역만큼 띄운다 */}
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 pt-5 pb-[calc(5rem+env(safe-area-inset-bottom))]">
+      {/* 아래 탭 바(h-16)와 기기 하단 안전 영역만큼 띄운다. PC 에서는 왼쪽 메뉴(w-60) 옆에 둔다. */}
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 pt-5 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:max-w-[63rem] lg:pb-10 lg:pl-[16rem]">
         {children}
       </main>
       {/* 동적 경로(/sessions/[id] 등)에서 주소는 요청 때 정해지므로 Suspense 안에서 읽는다 */}

@@ -59,7 +59,7 @@ async function ManageContent() {
 export default function ManagePage() {
   return (
     <>
-      <h1 className="text-xl font-bold">관리</h1>
+      <h1 className="page-title">관리</h1>
       <Suspense
         fallback={
           <>

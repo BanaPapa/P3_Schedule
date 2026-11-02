@@ -13,7 +13,7 @@ export function TextField({ label, name, error, hint, className = "", ...props }
 
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
-      <label htmlFor={id} className="text-sm font-medium">
+      <label htmlFor={id} className="text-[13px] font-extrabold text-muted">
         {label}
       </label>
       <input
@@ -22,7 +22,7 @@ export function TextField({ label, name, error, hint, className = "", ...props }
         name={name}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
-        className="h-11 rounded-xl border border-border bg-surface px-3 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 aria-invalid:border-danger"
+        className="h-11 rounded-xl border-[1.5px] border-border-strong bg-surface px-3 text-base outline-none transition focus:border-primary focus:ring-4 focus:ring-primary-soft aria-invalid:border-danger"
       />
       {error ? (
         <p id={`${id}-error`} className="text-sm text-danger">

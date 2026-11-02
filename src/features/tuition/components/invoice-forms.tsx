@@ -10,7 +10,7 @@ import { addItemAction, addPaymentAction, adjustInvoiceAction, confirmInvoiceAct
 import { MAX_INVOICE_ITEMS } from "../schemas";
 
 const SMALL_INPUT =
-  "h-11 min-w-0 rounded-xl border border-border bg-surface px-3 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
+  "h-11 min-w-0 rounded-xl border-[1.5px] border-border-strong bg-surface px-3 text-base outline-none transition focus:border-primary focus:ring-4 focus:ring-primary-soft";
 
 interface ItemRow {
   key: number;

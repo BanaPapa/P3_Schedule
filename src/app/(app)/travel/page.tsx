@@ -69,7 +69,7 @@ async function TravelContent() {
 export default function TravelPage() {
   return (
     <>
-      <h1 className="text-xl font-bold">여행</h1>
+      <h1 className="page-title">여행</h1>
       <Suspense fallback={<CardSkeleton />}>
         <TravelContent />
       </Suspense>

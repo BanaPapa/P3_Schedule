@@ -10,13 +10,13 @@ const TABS = [
 /** 교육 탭 안의 학원·학교·학습 */
 export function EducationTabs({ current }: { current: (typeof TABS)[number]["key"] }) {
   return (
-    <nav aria-label="교육 메뉴" className="flex rounded-full border border-border bg-surface p-0.5">
+    <nav aria-label="교육 메뉴" className="flex rounded-full border border-border bg-surface p-1 shadow-soft">
       {TABS.map((tab) => (
         <Link
           key={tab.key}
           href={tab.href}
           aria-current={tab.key === current ? "page" : undefined}
-          className={`flex-1 rounded-full py-2 text-center text-sm font-semibold ${tab.key === current ? "bg-primary text-primary-foreground" : "text-muted"}`}
+          className={`flex-1 rounded-full py-2 text-center text-sm font-extrabold transition ${tab.key === current ? "btn-primary" : "text-muted hover:text-foreground"}`}
         >
           {tab.label}
         </Link>

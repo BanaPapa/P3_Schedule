@@ -29,7 +29,7 @@ async function EventContent({ params }: Pick<Props, "params">) {
       </Link>
       <Card>
         <p className="text-sm font-semibold text-violet-600">{KIND_LABELS[event.kind]}</p>
-        <h1 className="text-lg font-bold">{event.title}</h1>
+        <h1 className="page-title">{event.title}</h1>
         <p className="text-sm text-muted">
           {event.child.name} · {eventDateLabel(event)}
           {event.subject ? ` · ${event.subject}` : ""}

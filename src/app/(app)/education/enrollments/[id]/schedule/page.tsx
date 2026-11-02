@@ -27,7 +27,7 @@ async function ScheduleChangeContent({
   return (
     <>
       <div>
-        <h1 className="text-xl font-bold">
+        <h1 className="page-title">
           {enrollment.child.name} · {enrollment.subject}
         </h1>
         <p className="text-sm text-muted">

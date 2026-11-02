@@ -39,7 +39,7 @@ async function PolicyContent({ params }: Pick<Props, "params">) {
         ‹ 교육비
       </Link>
       <div>
-        <h1 className="text-xl font-bold">
+        <h1 className="page-title">
           {enrollment.child.name} · {enrollment.subject} 요금 정책
         </h1>
         <p className="text-sm text-muted">{enrollment.academy.name}</p>

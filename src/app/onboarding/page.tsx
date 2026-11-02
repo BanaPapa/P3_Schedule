@@ -23,7 +23,7 @@ export default function OnboardingPage() {
   return (
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-4 px-4 py-10">
       <div>
-        <h1 className="text-xl font-bold">가족 만들기</h1>
+        <h1 className="page-title">가족 만들기</h1>
         <p className="mt-1 text-sm text-muted">
           가족을 만든 뒤 배우자를 초대하면 일정과 교육비를 함께 관리할 수 있습니다.
         </p>

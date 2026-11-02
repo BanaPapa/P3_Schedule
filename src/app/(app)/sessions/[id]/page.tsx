@@ -58,7 +58,7 @@ async function SessionContent({ params }: { params: PageProps<"/sessions/[id]">[
         <div className="flex items-start gap-3">
           <span aria-hidden className="mt-2 size-3 shrink-0 rounded-full" style={{ backgroundColor: session.child.color }} />
           <div className="min-w-0 flex-1">
-            <h1 className="text-lg font-bold">
+            <h1 className="page-title">
               {session.child.name} · {session.subject}
               {kindLabel ? <span className="ml-2 text-sm font-semibold text-primary">{kindLabel}</span> : null}
             </h1>

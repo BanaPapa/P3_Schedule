@@ -22,7 +22,7 @@ async function HistoryContent() {
 export default function HistoryPage() {
   return (
     <>
-      <h1 className="text-xl font-bold">변경 이력</h1>
+      <h1 className="page-title">변경 이력</h1>
       <Suspense fallback={<CardSkeleton />}>
         <HistoryContent />
       </Suspense>

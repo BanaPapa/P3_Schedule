@@ -59,7 +59,7 @@ async function FamilyContent() {
 
   return (
     <>
-      <h1 className="text-xl font-bold">{context.family.name}</h1>
+      <h1 className="page-title">{context.family.name}</h1>
       <MembersCard context={context} />
       <div id="children" className="scroll-mt-20">
         <Card title="자녀" description="자녀는 로그인 없이 프로필로 관리합니다. 부모 두 사람 모두 수정할 수 있습니다.">

@@ -35,7 +35,7 @@ async function TripContent({ params }: Pick<Props, "params">) {
       </Link>
       <div>
         <p className="text-sm font-semibold text-primary">{tripStatusLabel(today, trip.startDate, trip.endDate)}</p>
-        <h1 className="text-xl font-bold">{trip.title}</h1>
+        <h1 className="page-title">{trip.title}</h1>
         <p className="text-sm text-muted">
           {trip.destination ? `${trip.destination} · ` : ""}
           {formatDotDate(trip.startDate)} ~ {formatDotDate(trip.endDate)} ({days.length}일)

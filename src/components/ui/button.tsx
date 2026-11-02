@@ -8,9 +8,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-primary text-primary-foreground hover:opacity-90",
-  secondary: "border border-border bg-surface text-foreground hover:bg-background",
-  danger: "border border-border bg-surface text-danger hover:bg-background",
+  primary: "btn-primary",
+  secondary:
+    "border-[1.5px] border-border-strong bg-surface text-foreground transition hover:bg-surface-2 active:scale-[0.97]",
+  danger: "border-[1.5px] border-rose-soft bg-surface text-danger transition hover:bg-rose-soft active:scale-[0.97]",
 };
 
 export function Button({
@@ -26,7 +27,7 @@ export function Button({
       {...props}
       disabled={disabled || pending}
       aria-busy={pending || undefined}
-      className={`inline-flex h-11 items-center justify-center rounded-xl px-4 text-[15px] font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${className}`}
+      className={`inline-flex h-11 items-center justify-center rounded-full px-5 text-[15px] font-extrabold disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${className}`}
     >
       {children}
     </button>

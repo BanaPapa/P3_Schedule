@@ -11,7 +11,7 @@ export function FormMessage({ state }: FormMessageProps) {
   return (
     <p
       role={isError ? "alert" : "status"}
-      className={`rounded-xl px-3 py-2 text-sm ${isError ? "bg-danger/10 text-danger" : "bg-success/10 text-success"}`}
+      className={`rounded-xl px-3 py-2 text-sm font-bold ${isError ? "bg-rose-soft text-danger" : "bg-mint-soft text-success"}`}
     >
       {state.message}
     </p>

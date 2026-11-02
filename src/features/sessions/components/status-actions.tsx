@@ -41,7 +41,7 @@ export function StatusActions({ id, version, kind, status }: StatusActionsProps)
             name="status"
             value={choice}
             disabled={pending}
-            className="h-10 rounded-xl border border-border bg-surface px-3 text-sm font-semibold disabled:opacity-50"
+            className="h-10 rounded-full border-[1.5px] border-border-strong bg-surface px-3 text-sm font-extrabold transition hover:bg-surface-2 active:scale-[0.97] disabled:opacity-50"
           >
             {BUTTON_LABELS[choice] ?? SESSION_STATUS_LABELS[choice]}
           </button>

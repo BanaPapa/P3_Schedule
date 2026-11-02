@@ -50,7 +50,7 @@ async function EducationContent() {
 export default function EducationPage() {
   return (
     <>
-      <h1 className="text-xl font-bold">교육</h1>
+      <h1 className="page-title">교육</h1>
       <EducationTabs current="academy" />
       <Suspense
         fallback={

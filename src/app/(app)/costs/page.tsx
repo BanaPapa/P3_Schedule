@@ -98,7 +98,7 @@ async function CostsContent({ searchParams }: { searchParams: PageProps<"/costs"
 export default function CostsPage({ searchParams }: PageProps<"/costs">) {
   return (
     <>
-      <h1 className="text-xl font-bold">비용</h1>
+      <h1 className="page-title">비용</h1>
       <Suspense fallback={<CardSkeleton />}>
         <CostsContent searchParams={searchParams} />
       </Suspense>

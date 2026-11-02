@@ -54,7 +54,7 @@ async function InviteContent({ params }: { params: PageProps<"/invite/[code]">["
 export default function InvitePage({ params }: PageProps<"/invite/[code]">) {
   return (
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-4 px-4 py-10">
-      <h1 className="text-xl font-bold">가족 초대</h1>
+      <h1 className="page-title">가족 초대</h1>
       <Suspense fallback={<CardSkeleton />}>
         <InviteContent params={params} />
       </Suspense>

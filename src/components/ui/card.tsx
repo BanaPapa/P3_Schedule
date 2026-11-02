@@ -9,11 +9,11 @@ interface CardProps {
 
 export function Card({ title, description, action, children }: CardProps) {
   return (
-    <section className="rounded-2xl border border-border bg-surface p-4">
+    <section className="animate-rise rounded-2xl border border-border bg-surface p-5 shadow-soft">
       {title ? (
         <header className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold">{title}</h2>
+            <h2 className="text-[17px] font-extrabold">{title}</h2>
             {description ? <p className="mt-0.5 text-sm text-muted">{description}</p> : null}
           </div>
           {action}
@@ -25,5 +25,5 @@ export function Card({ title, description, action, children }: CardProps) {
 }
 
 export function CardSkeleton() {
-  return <div className="h-32 animate-pulse rounded-2xl border border-border bg-surface" />;
+  return <div className="h-32 animate-pulse rounded-2xl border border-border bg-surface shadow-soft" />;
 }

@@ -45,7 +45,7 @@ export function SessionNoteForm({ id, version, note }: SessionRef & { note: stri
           placeholder="예: 감기로 결석, 학원에 연락함"
           defaultValue={value ?? note ?? ""}
           aria-invalid={fieldError ? true : undefined}
-          className="rounded-xl border border-border bg-surface px-3 py-2 text-base font-normal outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="rounded-xl border-[1.5px] border-border-strong bg-surface px-3 py-2 text-base font-normal outline-none transition focus:border-primary focus:ring-4 focus:ring-primary-soft"
         />
       </label>
       {fieldError ? <p className="text-sm text-danger">{fieldError}</p> : null}

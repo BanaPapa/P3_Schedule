@@ -1,48 +1,156 @@
 @import "tailwindcss";
 
+/*
+ * 몽글 디자인 (P2_Study 기본 스킨에서 가져옴): 라벤더 강조색, 민트·복숭아 빛 배경,
+ * 둥근 카드와 알약 모양 버튼, 은은한 보랏빛 그림자, 제목은 Jua.
+ */
 :root {
-  --background: #f6f7f9;
-  --surface: #ffffff;
-  --foreground: #16181d;
-  --muted: #5f6673;
-  --border: #e3e6eb;
-  --primary: #2563eb;
-  --primary-foreground: #ffffff;
-  --danger: #c2261d;
-  --success: #15803d;
+  --background: oklch(98% 0.012 300);
+  --surface: oklch(100% 0 0);
+  --surface-2: oklch(98.5% 0.008 300);
+  --foreground: oklch(32% 0.03 300);
+  --muted: oklch(56% 0.025 300);
+  --faint: oklch(72% 0.02 300);
+  --border: oklch(92% 0.012 300);
+  --border-strong: oklch(88% 0.016 300);
+  --primary: oklch(64% 0.15 300);
+  --primary-soft: oklch(94% 0.04 300);
+  --primary-foreground: oklch(100% 0 0);
+  --danger: oklch(58% 0.19 20);
+  --success: oklch(52% 0.12 160);
+  --mint: oklch(78% 0.11 165);
+  --mint-soft: oklch(95% 0.05 165);
+  --peach: oklch(82% 0.09 55);
+  --peach-soft: oklch(95% 0.045 55);
+  --sky: oklch(80% 0.09 230);
+  --sky-soft: oklch(95% 0.045 230);
+  --lemon: oklch(88% 0.1 95);
+  --rose: oklch(80% 0.1 15);
+  --rose-soft: oklch(95% 0.04 15);
+  --panel: oklch(100% 0 0 / 0.72);
+  --btn-grad: linear-gradient(135deg, var(--primary), oklch(70% 0.14 330));
+  --btn-shadow: 0 6px 18px oklch(64% 0.15 300 / 0.35);
+  --shadow-soft-value: 0 1px 2px oklch(50% 0.05 300 / 0.06), 0 8px 24px oklch(50% 0.05 300 / 0.08);
+  --shadow-lift-value: 0 12px 40px oklch(50% 0.08 300 / 0.18);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0f1115;
-    --surface: #181b21;
-    --foreground: #eceef2;
-    --muted: #9aa1ad;
-    --border: #2a2f38;
-    --primary: #5b8cff;
-    --primary-foreground: #0f1115;
-    --danger: #ff7a70;
-    --success: #4ade80;
+    --background: oklch(18% 0.018 270);
+    --surface: oklch(24% 0.015 270);
+    --surface-2: oklch(21% 0.015 270);
+    --foreground: oklch(93% 0.01 270);
+    --muted: oklch(68% 0.018 270);
+    --faint: oklch(50% 0.015 270);
+    --border: oklch(32% 0.018 270);
+    --border-strong: oklch(38% 0.022 270);
+    --primary: oklch(68% 0.16 280);
+    --primary-soft: oklch(28% 0.06 280);
+    --primary-foreground: oklch(100% 0 0);
+    --danger: oklch(72% 0.16 20);
+    --success: oklch(74% 0.13 160);
+    --mint-soft: oklch(26% 0.06 165);
+    --peach-soft: oklch(26% 0.05 55);
+    --sky-soft: oklch(26% 0.06 230);
+    --rose-soft: oklch(26% 0.06 15);
+    --panel: oklch(24% 0.015 270 / 0.78);
+    --btn-shadow: 0 6px 18px oklch(20% 0.1 280 / 0.5);
+    --shadow-soft-value: 0 1px 2px oklch(0% 0 0 / 0.2), 0 8px 24px oklch(0% 0 0 / 0.25);
+    --shadow-lift-value: 0 12px 40px oklch(0% 0 0 / 0.4);
   }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
+  --color-faint: var(--faint);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
   --color-primary-foreground: var(--primary-foreground);
   --color-danger: var(--danger);
   --color-success: var(--success);
-  --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic",
-    "Noto Sans KR", sans-serif;
+  --color-mint: var(--mint);
+  --color-mint-soft: var(--mint-soft);
+  --color-peach: var(--peach);
+  --color-peach-soft: var(--peach-soft);
+  --color-sky: var(--sky);
+  --color-sky-soft: var(--sky-soft);
+  --color-lemon: var(--lemon);
+  --color-rose: var(--rose);
+  --color-rose-soft: var(--rose-soft);
+  --color-panel: var(--panel);
+  --shadow-soft: var(--shadow-soft-value);
+  --shadow-lift: var(--shadow-lift-value);
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --font-display: var(--font-jua), "Pretendard Variable", Pretendard, system-ui, sans-serif;
+}
+
+/* 몽글 모서리: 입력칸 14px, 카드 22px */
+@theme {
+  --radius-xl: 14px;
+  --radius-2xl: 22px;
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-rise: rise 0.32s both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   word-break: keep-all;
+  background:
+    radial-gradient(900px 600px at 88% -10%, var(--mint-soft), transparent 60%),
+    radial-gradient(800px 600px at -5% 110%, var(--peach-soft), transparent 55%),
+    var(--background);
+  background-attachment: fixed;
+}
+
+@layer components {
+  /* 화면 제목 */
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.15;
+  }
+
+  /* 주요 버튼(그라데이션 알약). <Button> 과 버튼 모양 링크가 함께 쓴다. */
+  .btn-primary {
+    color: var(--primary-foreground);
+    background-image: var(--btn-grad);
+    box-shadow: var(--btn-shadow);
+    transition:
+      transform 0.14s var(--ease-pop),
+      filter 0.15s,
+      box-shadow 0.2s;
+  }
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  /* 고른 알약(세그먼트·탭) */
+  .pill-on {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
 }

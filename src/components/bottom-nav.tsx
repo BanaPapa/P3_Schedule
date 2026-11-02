@@ -50,13 +50,14 @@ export function BottomNav() {
   return <BottomNavView pathname={usePathname()} />;
 }
 
+/** 휴대폰에서는 아래 탭 바, PC(lg 이상)에서는 왼쪽 메뉴로 보인다 */
 export function BottomNavView({ pathname }: { pathname: string | null }) {
   return (
     <nav
       aria-label="주요 메뉴"
-      className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-panel pb-[env(safe-area-inset-bottom)] backdrop-blur-lg lg:inset-x-auto lg:top-14 lg:left-0 lg:w-60 lg:border-t-0 lg:border-r lg:pb-0"
     >
-      <ul className="mx-auto grid h-16 max-w-2xl grid-cols-6">
+      <ul className="mx-auto grid h-16 max-w-2xl grid-cols-6 px-1 lg:flex lg:h-auto lg:flex-col lg:gap-1 lg:p-3">
         {TABS.map((tab) => {
           const active = pathname !== null && isActive(pathname, tab.href);
           return (
@@ -64,20 +65,24 @@ export function BottomNavView({ pathname }: { pathname: string | null }) {
               <Link
                 href={tab.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex h-full flex-col items-center justify-center gap-1 text-xs font-medium ${active ? "text-primary" : "text-muted"}`}
+                className={`group flex h-full flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition lg:h-11 lg:flex-row lg:justify-start lg:gap-3 lg:rounded-xl lg:px-3 lg:text-[15px] ${active ? "text-primary lg:bg-primary-soft lg:font-extrabold" : "text-faint hover:text-muted lg:text-muted lg:hover:bg-surface-2"}`}
               >
-                <svg
-                  aria-hidden
-                  viewBox="0 0 24 24"
-                  className="size-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={1.8}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                <span
+                  className={`grid h-7 w-12 place-items-center rounded-2xl transition lg:h-auto lg:w-auto ${active ? "bg-primary-soft lg:bg-transparent" : ""}`}
                 >
-                  <path d={tab.icon} />
-                </svg>
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 24 24"
+                    className="size-[22px]"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.9}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d={tab.icon} />
+                  </svg>
+                </span>
                 {tab.label}
               </Link>
             </li>
