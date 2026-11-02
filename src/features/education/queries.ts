@@ -18,7 +18,8 @@ export type ClassRule = Pick<
 
 export interface Enrollment {
   id: string;
-  subject: string;
+  /** 비고. 과목명은 따로 두지 않고 학원 이름으로 부른다. */
+  memo: string | null;
   startDate: string;
   endDate: string | null;
   version: number;
@@ -48,7 +49,7 @@ export const getEnrollments = cache(async (): Promise<Enrollment[]> => {
   const { data, error } = await supabase
     .from("enrollments")
     .select(
-      `id, subject, start_date, end_date, version,
+      `id, memo, start_date, end_date, version,
        child:children!inner (id, name, color),
        academy:academies!inner (id, name),
        rules:class_rules (id, weekday, start_time, end_time, effective_from, effective_until)`,
@@ -58,7 +59,7 @@ export const getEnrollments = cache(async (): Promise<Enrollment[]> => {
 
   return data.map((row) => ({
     id: row.id,
-    subject: row.subject,
+    memo: row.memo,
     startDate: row.start_date,
     endDate: row.end_date,
     version: row.version,

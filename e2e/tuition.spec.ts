@@ -7,11 +7,11 @@ test("PRD: a confirmed invoice stays fixed when the schedule changes until the p
   const page = await newPage(browser);
   await signUpWithFamily(page, "윤씨네", "엄마");
   await addChild(page, "첫째");
-  await enrollTodayClass(page, "튼튼영어", "영어");
+  await enrollTodayClass(page, "튼튼영어");
 
   // 요금 정책: 회차별 4만원, 결제일 5일
   await goToTuition(page);
-  await page.getByRole("link").filter({ hasText: "첫째 · 영어" }).click();
+  await page.getByRole("link").filter({ hasText: "첫째" }).click();
   await page.getByRole("link", { name: "요금 정책 설정" }).click();
   await page.getByRole("radio", { name: /회차별/ }).check();
   await field(page, "회당 수강료 (원)").fill("40,000");
@@ -35,13 +35,13 @@ test("PRD: a confirmed invoice stays fixed when the schedule changes until the p
 
   // 오늘 수업을 취소한다 → 예상액만 바뀌고 확정액은 그대로
   await page.goto(`/calendar?date=${seoulDate(0)}`);
-  await page.locator("section").filter({ visible: true }).getByRole("link").filter({ hasText: "영어" }).first().click();
+  await page.locator("section").filter({ visible: true }).getByRole("link").filter({ hasText: "튼튼영어" }).first().click();
   await card(page, "상태 바꾸기").getByRole("button", { name: "취소" }).click();
   await expect(page.getByRole("status").filter({ hasText: "'취소'(으)로 바꿨습니다." })).toBeVisible();
 
   await goToTuition(page);
   await expect(page.getByText("일정이 바뀌어 예상액이 달라졌습니다")).toBeVisible();
-  await page.getByRole("link").filter({ hasText: "첫째 · 영어" }).click();
+  await page.getByRole("link").filter({ hasText: "첫째" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "확정 뒤 일정이 바뀌어" })).toBeVisible();
   await expect(card(page, "확정 청구").locator("div").filter({ hasText: "청구 합계" }).getByText(estimate)).toBeVisible();
 

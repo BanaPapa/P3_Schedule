@@ -61,7 +61,7 @@ function EnrollmentRow({ enrollment, today }: { enrollment: Enrollment; today: s
   );
   const ended = isEnded(enrollment.endDate, today);
   const rules = ended ? enrollment.rules : currentRules(enrollment.rules, today);
-  const title = `${enrollment.child.name} ${enrollment.subject}`;
+  const title = `${enrollment.child.name} ${enrollment.academy.name}`;
 
   function confirmDelete(event: FormEvent<HTMLFormElement>) {
     if (!window.confirm(`${title}을(를) 삭제할까요? 예정된 수업도 함께 지워집니다.`)) event.preventDefault();
@@ -77,13 +77,12 @@ function EnrollmentRow({ enrollment, today }: { enrollment: Enrollment; today: s
         />
         <div className="min-w-0 flex-1">
           <p className="font-medium">
-            {enrollment.subject}
-            <span className="ml-1.5 text-sm font-normal text-muted">
-              {enrollment.child.name} · {enrollment.academy.name}
-            </span>
+            {enrollment.academy.name}
+            <span className="ml-1.5 text-sm font-normal text-muted">{enrollment.child.name}</span>
           </p>
           <p className="text-sm">{scheduleSummary(rules)}</p>
           <p className="text-sm text-muted">{enrollmentPeriodLabel(enrollment.startDate, enrollment.endDate, today)}</p>
+          {enrollment.memo ? <p className="mt-0.5 text-sm whitespace-pre-line text-muted">비고: {enrollment.memo}</p> : null}
         </div>
       </div>
 

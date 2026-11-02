@@ -62,10 +62,10 @@ select throws_ok(
   'P0001', 'invalid_period', 'end date cannot be before start date'
 );
 select throws_ok(
-  format($$select public.create_enrollment(%L, %L, '  ', %L, null,
+  format($$select public.create_enrollment(%L, %L, repeat('가', 31), %L, null,
     '[{"weekday":2,"start_time":"16:00","end_time":"17:00"}]'::jsonb)$$,
     current_setting('test.child_a'), current_setting('test.academy_a'), current_setting('test.start')),
-  'P0001', 'invalid_subject', 'blank subject is rejected'
+  'P0001', 'invalid_subject', 'overlong subject is rejected'
 );
 
 -- 다른 가족의 자녀·학원으로는 만들 수 없다

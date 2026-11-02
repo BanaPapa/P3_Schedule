@@ -177,7 +177,7 @@ async function recentCosts(): Promise<MonthCost[]> {
         tuition: tuition.expected,
         travel: trips.reduce((sum, trip) => sum + trip.amount, 0),
         subjects: rows.map((row) => ({
-          label: `${row.enrollment.child.name} ${row.enrollment.subject}`,
+          label: `${row.enrollment.child.name} ${row.enrollment.academy.name}`,
           amount: row.invoice?.totalAmount ?? row.estimate.estimatedAmount ?? 0,
         })),
       };

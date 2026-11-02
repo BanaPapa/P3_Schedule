@@ -115,7 +115,8 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 - 합계는 `trip_summaries`, 분류별 비교는 `trip_category_totals` 뷰. 여행 기간을 줄여 일정이 밖에 남으면 `trip_items_outside`.
 - 통합: 캘린더(`getTripsBetween` → 월간 칸 표시, 날짜 목록 `TripAgenda`), 월별 비용(`/costs` = 교육비 + 지출일 기준 여행비).
 - 아래 탭은 홈·캘린더·교육·여행·비용·관리. 교육비 화면(`/tuition`)은 비용 탭, 가족 화면(`/family`)은 관리 탭 아래에 있다.
-- 학원은 관리 탭(`/manage`)에서 추가하고, 수강 과목은 학원 상세(`/manage/academies/[id]`) 안에서 추가한다. 교육 탭은 수강 과목 보기·보강 대기·일정 변경만 맡는다.
+- 학원 등록·수정·삭제는 관리 탭(`/manage`, 학원 상세 `/manage/academies/[id]`)에서만 한다. 수강 과목은 교육 탭의 + (`/education/enrollments/new`)에서 등록된 학원을 골라 추가한다.
+- 수강 과목에는 과목명이 없다(피아노 학원이면 수업도 그냥 피아노). 화면은 학원 이름으로 부르고, 필요한 내용은 비고(`enrollments.memo`)에 적는다. `subject` 컬럼은 지난 데이터 때문에 nullable 로 남겨 두었고 앱은 쓰지 않는다(`create_enrollment` 는 `p_subject` 빈 값 → null, `p_memo` 선택).
 
 ### 학교·학습 (3차)
 

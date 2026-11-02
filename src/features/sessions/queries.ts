@@ -21,7 +21,6 @@ export interface SessionDetail extends SessionSummary {
   enrollmentId: string;
   note: string | null;
   makeupWaived: boolean;
-  subject: string;
   academyName: string;
   child: { id: string; name: string; color: string };
   /** 이 회차가 보강·변경 회차면 원 회차 */
@@ -35,7 +34,6 @@ export interface WaitingSession {
   date: string;
   startTime: string;
   status: SessionStatus;
-  subject: string;
   academyName: string;
   child: { id: string; name: string; color: string };
 }
@@ -75,7 +73,6 @@ export async function getSessionDetail(id: string): Promise<SessionDetail | null
     .select(
       `${SUMMARY_COLUMNS}, version, note, makeup_waived, origin_session_id, enrollment_id,
        enrollment:enrollments!inner (
-         subject,
          child:children!inner (id, name, color),
          academy:academies!inner (name)
        )`,
@@ -100,7 +97,6 @@ export async function getSessionDetail(id: string): Promise<SessionDetail | null
     enrollmentId: row.enrollment_id,
     note: row.note,
     makeupWaived: row.makeup_waived,
-    subject: row.enrollment.subject,
     academyName: row.enrollment.academy.name,
     child: row.enrollment.child,
     origin: origin.data ? toSummary(origin.data) : null,
@@ -116,7 +112,6 @@ export async function getMakeupWaitlist(): Promise<WaitingSession[]> {
     .select(
       `id, session_date, start_time, status,
        enrollment:enrollments!inner (
-         subject,
          child:children!inner (id, name, color),
          academy:academies!inner (name)
        )`,
@@ -130,7 +125,6 @@ export async function getMakeupWaitlist(): Promise<WaitingSession[]> {
     date: row.session_date as string,
     startTime: row.start_time as string,
     status: row.status as SessionStatus,
-    subject: row.enrollment.subject,
     academyName: row.enrollment.academy.name,
     child: row.enrollment.child,
   }));

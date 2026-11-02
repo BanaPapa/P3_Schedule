@@ -29,10 +29,9 @@ export function SessionItem({ session, showChild }: SessionItemProps) {
         <div className="min-w-0 flex-1">
           <p className={`font-medium ${inactive ? "text-muted line-through" : ""}`}>
             {showChild ? `${session.child.name} · ` : ""}
-            {session.subject}
+            {session.academyName}
             {kindLabel ? <span className="ml-1.5 text-xs font-semibold text-primary no-underline">{kindLabel}</span> : null}
           </p>
-          <p className="text-sm text-muted">{session.academyName}</p>
         </div>
         {session.status !== "scheduled" ? (
           <span className="shrink-0 rounded-full bg-background px-2 py-0.5 text-xs text-muted">

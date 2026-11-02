@@ -169,14 +169,14 @@ isOneToOne: false
                   ]
                 },"enrollments": {
                   Row: {
-                    "academy_id": string,"child_id": string,"created_at": string,"end_date": string | null,"family_id": string,"id": string,"memo": string | null,"start_date": string,"subject": string,"updated_at": string,"version": number
+                    "academy_id": string,"child_id": string,"created_at": string,"end_date": string | null,"family_id": string,"id": string,"memo": string | null,"start_date": string,"subject": string | null,"updated_at": string,"version": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "academy_id": string,"child_id": string,"created_at"?: string,"end_date"?: string | null,"family_id": string,"id"?: string,"memo"?: string | null,"start_date": string,"subject": string,"updated_at"?: string,"version"?: number
+                    "academy_id": string,"child_id": string,"created_at"?: string,"end_date"?: string | null,"family_id": string,"id"?: string,"memo"?: string | null,"start_date": string,"subject"?: string | null,"updated_at"?: string,"version"?: number
                   }
                   Update: {
-                    "academy_id"?: string,"child_id"?: string,"created_at"?: string,"end_date"?: string | null,"family_id"?: string,"id"?: string,"memo"?: string | null,"start_date"?: string,"subject"?: string,"updated_at"?: string,"version"?: number
+                    "academy_id"?: string,"child_id"?: string,"created_at"?: string,"end_date"?: string | null,"family_id"?: string,"id"?: string,"memo"?: string | null,"start_date"?: string,"subject"?: string | null,"updated_at"?: string,"version"?: number
                   }
                   Relationships: [
                     {
@@ -761,7 +761,7 @@ isOneToOne: false
 { Args: { "p_base_amount": number,"p_enrollment_id": string,"p_items": Json,"p_month": string,"p_reason": string }; Returns: string
                            },
 "create_enrollment":
-{ Args: { "p_academy_id": string,"p_child_id": string,"p_end_date": string,"p_rules": Json,"p_start_date": string,"p_subject": string }; Returns: string
+{ Args: { "p_academy_id": string,"p_child_id": string,"p_end_date": string,"p_memo"?: string,"p_rules": Json,"p_start_date": string,"p_subject": string }; Returns: string
                            },
 "create_family":
 { Args: { "p_display_name": string,"p_name": string }; Returns: string

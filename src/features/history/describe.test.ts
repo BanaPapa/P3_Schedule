@@ -3,7 +3,8 @@ import { describeEntry, type AuditEntry, type HistoryContext } from "./describe"
 
 const CTX: HistoryContext = {
   children: new Map([["c1", "하늘"]]),
-  enrollments: new Map([["e1", { subject: "영어", childId: "c1" }]]),
+  academies: new Map([["a1", "튼튼영어"]]),
+  enrollments: new Map([["e1", { academyName: "튼튼영어", childId: "c1" }]]),
   invoices: new Map([["i1", { enrollmentId: "e1", billingMonth: "2026-11-01" }]]),
 };
 
@@ -44,40 +45,45 @@ describe("describeEntry: family and children", () => {
 });
 
 describe("describeEntry: classes", () => {
-  it("describes enrollments with child and subject", () => {
-    expect(describeEntry(entry("enrollments", "insert", { child_id: "c1", subject: "영어" }), CTX)).toBe(
-      "하늘 · 영어 수강을 등록했습니다",
+  it("describes enrollments with child and academy", () => {
+    const base = { child_id: "c1", academy_id: "a1", subject: null, memo: null, end_date: null };
+    expect(describeEntry(entry("enrollments", "insert", base), CTX)).toBe("하늘 · 튼튼영어 수강을 등록했습니다");
+    expect(describeEntry(entry("enrollments", "update", { ...base, end_date: "2026-12-31" }, base), CTX)).toBe(
+      "하늘 · 튼튼영어 수강 종료일을 2026. 12. 31.(으)로 정했습니다",
     );
+    expect(describeEntry(entry("enrollments", "update", { ...base, memo: "토요일 보충" }, base), CTX)).toBe(
+      "하늘 · 튼튼영어 비고를 수정했습니다",
+    );
+  });
+
+  it("falls back to the old subject when the academy is gone", () => {
     expect(
-      describeEntry(
-        entry("enrollments", "update", { child_id: "c1", subject: "영어", end_date: "2026-12-31" }, { child_id: "c1", subject: "영어", end_date: null }),
-        CTX,
-      ),
-    ).toBe("하늘 · 영어 수강 종료일을 2026. 12. 31.(으)로 정했습니다");
+      describeEntry(entry("enrollments", "delete", null, { child_id: "c1", academy_id: "gone", subject: "영어" }), CTX),
+    ).toBe("하늘 · 영어 수강을 삭제했습니다");
   });
 
   it("describes session status, time, note and makeup changes", () => {
     expect(describeEntry(entry("class_sessions", "update", { ...SESSION, status: "absent" }, SESSION), CTX)).toBe(
-      "하늘 · 영어 11월 3일 (화) 수업을 '결석'(으)로 바꿨습니다",
+      "하늘 · 튼튼영어 11월 3일 (화) 수업을 '결석'(으)로 바꿨습니다",
     );
     expect(
       describeEntry(entry("class_sessions", "update", { ...SESSION, start_time: "18:00:00" }, SESSION), CTX),
-    ).toBe("하늘 · 영어 11월 3일 (화) 수업 시간을 18:00(으)로 바꿨습니다");
+    ).toBe("하늘 · 튼튼영어 11월 3일 (화) 수업 시간을 18:00(으)로 바꿨습니다");
     expect(
       describeEntry(entry("class_sessions", "update", { ...SESSION, session_date: "2026-11-04" }, SESSION), CTX),
-    ).toBe("하늘 · 영어 11월 3일 (화) 수업을 11월 4일 (수) 16:00(으)로 바꿨습니다");
+    ).toBe("하늘 · 튼튼영어 11월 3일 (화) 수업을 11월 4일 (수) 16:00(으)로 바꿨습니다");
     expect(describeEntry(entry("class_sessions", "update", { ...SESSION, note: "감기" }, SESSION), CTX)).toBe(
-      "하늘 · 영어 11월 3일 (화) 수업에 메모를 남겼습니다",
+      "하늘 · 튼튼영어 11월 3일 (화) 수업에 메모를 남겼습니다",
     );
     expect(
       describeEntry(
         entry("class_sessions", "insert", { ...SESSION, kind: "makeup", session_date: "2026-11-06", status: "makeup_scheduled" }),
         CTX,
       ),
-    ).toBe("하늘 · 영어 보강을 11월 6일 (금) 16:00에 잡았습니다");
+    ).toBe("하늘 · 튼튼영어 보강을 11월 6일 (금) 16:00에 잡았습니다");
     expect(
       describeEntry(entry("class_sessions", "insert", { ...SESSION, kind: "rescheduled", session_date: "2026-11-05" }), CTX),
-    ).toBe("하늘 · 영어 수업을 11월 5일 (목) 16:00(으)로 옮겼습니다");
+    ).toBe("하늘 · 튼튼영어 수업을 11월 5일 (목) 16:00(으)로 옮겼습니다");
   });
 
   it("hides generated or bookkeeping changes", () => {
@@ -101,20 +107,20 @@ describe("describeEntry: tuition", () => {
 
   it("describes confirmation, adjustment, items and payments", () => {
     expect(describeEntry(entry("tuition_invoices", "insert", INVOICE), CTX)).toBe(
-      "하늘 · 영어 11월 청구를 확정했습니다 (320,000원)",
+      "하늘 · 튼튼영어 11월 청구를 확정했습니다 (320,000원)",
     );
     expect(
       describeEntry(entry("tuition_invoices", "update", { ...INVOICE, base_amount: 280000 }, INVOICE), CTX),
-    ).toBe("하늘 · 영어 11월 확정액을 280,000원(으)로 조정했습니다");
+    ).toBe("하늘 · 튼튼영어 11월 확정액을 280,000원(으)로 조정했습니다");
     expect(describeEntry(entry("tuition_invoices", "update", { ...INVOICE, version: 2 }, INVOICE), CTX)).toBeNull();
     expect(
       describeEntry(entry("tuition_invoice_items", "insert", { invoice_id: "i1", kind: "extra", label: "교재비", amount: 20000 }), CTX),
-    ).toBe("하늘 · 영어 11월 청구에 추가 '교재비' 20,000원을 넣었습니다");
+    ).toBe("하늘 · 튼튼영어 11월 청구에 추가 '교재비' 20,000원을 넣었습니다");
     expect(
       describeEntry(entry("tuition_payments", "insert", { invoice_id: "i1", amount: 100000 }), CTX),
-    ).toBe("하늘 · 영어 11월 학원비 100,000원 납부를 기록했습니다");
+    ).toBe("하늘 · 튼튼영어 11월 학원비 100,000원 납부를 기록했습니다");
     expect(describeEntry(entry("tuition_policies", "insert", { enrollment_id: "e1" }), CTX)).toBe(
-      "하늘 · 영어 요금 정책을 바꿨습니다",
+      "하늘 · 튼튼영어 요금 정책을 바꿨습니다",
     );
   });
 

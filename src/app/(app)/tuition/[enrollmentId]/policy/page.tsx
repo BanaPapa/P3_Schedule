@@ -40,9 +40,8 @@ async function PolicyContent({ params }: Pick<Props, "params">) {
       </Link>
       <div>
         <h1 className="page-title">
-          {enrollment.child.name} · {enrollment.subject} 요금 정책
+          {enrollment.child.name} · {enrollment.academy.name} 요금 정책
         </h1>
-        <p className="text-sm text-muted">{enrollment.academy.name}</p>
       </div>
       <Card description="수강료가 바뀌면 적용 시작 월을 바꿔 새로 저장하세요. 이전 달 계산은 이전 정책을 따릅니다.">
         <PolicyForm enrollmentId={enrollmentId} current={current} defaultMonth={formatMonthParam(monthOf(today))} />

@@ -6,6 +6,8 @@ export const MAX_WEEKLY_SCHEDULES = 14;
 /** 시작일 허용 범위. DB create_enrollment 와 같은 값 */
 const MAX_PAST_START_DAYS = 366;
 const MAX_FUTURE_START_DAYS = 400;
+/** DB enrollments.memo 제약과 같게 둔다 */
+const MAX_ENROLLMENT_MEMO_LENGTH = 500;
 
 export const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 const PHONE_PATTERN = /^[0-9+\-() ]{2,30}$/;
@@ -69,11 +71,11 @@ function enrollmentSchema(today: Date) {
     .object({
       childId: z.uuid({ error: "자녀를 골라 주세요." }),
       academyId: z.uuid({ error: "학원을 골라 주세요." }),
-      subject: z
+      memo: z
         .string()
         .trim()
-        .min(1, { error: "과목을 입력해 주세요." })
-        .max(30, { error: "과목은 30자 이하로 입력해 주세요." }),
+        .max(MAX_ENROLLMENT_MEMO_LENGTH, { error: `비고는 ${MAX_ENROLLMENT_MEMO_LENGTH}자 이하로 입력해 주세요.` })
+        .transform((value) => (value === "" ? null : value)),
       startDate: isoDate.refine((value) => value >= earliestStart && value <= latestStart, {
         error: "시작일은 앞뒤 1년 이내로 입력해 주세요.",
       }),
@@ -115,7 +117,7 @@ export function parseEnrollmentForm(formData: FormData, today: Date = new Date()
   return enrollmentSchema(today).safeParse({
     childId: text(formData, "childId"),
     academyId: text(formData, "academyId"),
-    subject: text(formData, "subject"),
+    memo: text(formData, "memo"),
     startDate: text(formData, "startDate"),
     endDate: text(formData, "endDate"),
     rules: readScheduleRows(formData),

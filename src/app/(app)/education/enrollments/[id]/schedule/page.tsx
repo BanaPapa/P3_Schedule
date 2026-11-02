@@ -28,10 +28,10 @@ async function ScheduleChangeContent({
     <>
       <div>
         <h1 className="page-title">
-          {enrollment.child.name} · {enrollment.subject}
+          {enrollment.child.name} · {enrollment.academy.name}
         </h1>
         <p className="text-sm text-muted">
-          {enrollment.academy.name} · 지금 {scheduleSummary(rules)}
+          지금 {scheduleSummary(rules)}
         </p>
       </div>
       <Card title="앞으로 전체 변경" description="학원 시간표가 바뀌었을 때 고른 날부터 새 요일·시간으로 바꿉니다.">

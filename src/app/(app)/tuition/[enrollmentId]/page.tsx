@@ -30,9 +30,8 @@ async function DetailContent({ params, searchParams }: Pick<Props, "params" | "s
       </Link>
       <div>
         <h1 className="page-title">
-          {detail.enrollment.child.name} · {detail.enrollment.subject}
+          {detail.enrollment.child.name} · {detail.enrollment.academy.name}
         </h1>
-        <p className="text-sm text-muted">{detail.enrollment.academy.name}</p>
       </div>
       <MonthNav month={month} hrefFor={(value) => ROUTES.tuitionDetail(enrollmentId, value)} />
 

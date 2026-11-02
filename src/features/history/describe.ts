@@ -19,7 +19,9 @@ export interface AuditEntry {
 /** 이력 문장에 이름을 붙이는 데 쓰는 현재 데이터 */
 export interface HistoryContext {
   children: Map<string, string>;
-  enrollments: Map<string, { subject: string; childId: string }>;
+  academies: Map<string, string>;
+  /** 수업은 학원 이름으로 부른다 */
+  enrollments: Map<string, { academyName: string; childId: string }>;
   invoices: Map<string, { enrollmentId: string; billingMonth: string }>;
 }
 
@@ -43,7 +45,7 @@ function classLabel(enrollmentId: string | null, ctx: HistoryContext): string {
   const enrollment = enrollmentId ? ctx.enrollments.get(enrollmentId) : undefined;
   if (!enrollment) return MISSING_CLASS;
   const child = ctx.children.get(enrollment.childId);
-  return child ? `${child} · ${enrollment.subject}` : enrollment.subject;
+  return child ? `${child} · ${enrollment.academyName}` : enrollment.academyName;
 }
 
 function monthNumber(isoDate: string | null): string {
@@ -100,16 +102,17 @@ function describeEnrollment(entry: AuditEntry, ctx: HistoryContext): string | nu
   const data = entry.newData ?? entry.oldData;
   const childId = str(data, "child_id");
   const child = childId ? ctx.children.get(childId) : undefined;
-  const label = `${child ? `${child} · ` : ""}${str(data, "subject") ?? ""}`;
+  const academyId = str(data, "academy_id");
+  // 학원이 지워졌으면 예전 기록의 과목명을 대신 쓴다
+  const name = (academyId ? ctx.academies.get(academyId) : undefined) ?? str(data, "subject") ?? "학원";
+  const label = `${child ? `${child} · ` : ""}${name}`;
   if (entry.action === "insert") return `${label} 수강을 등록했습니다`;
   if (entry.action === "delete") return `${label} 수강을 삭제했습니다`;
   if (changed(entry, "end_date")) {
     const end = str(entry.newData, "end_date");
     return end ? `${label} 수강 종료일을 ${formatDotDate(end)}(으)로 정했습니다` : `${label} 수강 종료일을 지웠습니다`;
   }
-  if (changed(entry, "subject")) {
-    return `${child ? `${child} · ` : ""}${str(entry.oldData, "subject") ?? ""} 과목 이름을 '${str(entry.newData, "subject")}'(으)로 바꿨습니다`;
-  }
+  if (changed(entry, "memo")) return `${label} 비고를 수정했습니다`;
   return null;
 }
 

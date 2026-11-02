@@ -18,7 +18,7 @@ export function MakeupWaitlist({ sessions }: MakeupWaitlistProps) {
             <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: session.child.color }} />
             <div className="min-w-0 flex-1">
               <p className="font-medium">
-                {session.child.name} · {session.subject}
+                {session.child.name} · {session.academyName}
               </p>
               <p className="text-sm text-muted">
                 {formatDayLabel(session.date)} {formatTime(session.startTime)} · {session.academyName}

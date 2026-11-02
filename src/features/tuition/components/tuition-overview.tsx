@@ -86,7 +86,10 @@ export function TuitionList({ rows, month }: TuitionListProps) {
                     />
                     <div className="min-w-0 flex-1">
                       <p className="font-medium">
-                        {row.enrollment.child.name} · {row.enrollment.subject}
+                        {row.enrollment.child.name}
+                        {row.enrollment.memo ? (
+                          <span className="ml-1.5 text-sm font-normal text-muted">{row.enrollment.memo}</span>
+                        ) : null}
                       </p>
                       <p className="text-sm text-muted">
                         {row.estimate.method ? describeEstimate(row.estimate) : "요금 정책을 설정해 주세요"}

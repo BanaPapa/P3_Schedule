@@ -39,7 +39,7 @@ async function ManageContent() {
         <p className="text-sm text-muted">{family.name} 구성원과 자녀 프로필, 배우자 초대를 관리합니다.</p>
       </Card>
 
-      <Card title="학원" description="학원을 눌러 그 학원의 수강 과목을 추가하고 관리하세요.">
+      <Card title="학원" description="학원 등록·수정·삭제는 여기서 합니다. 수강 과목은 교육 탭에서 + 로 추가하세요.">
         <AcademyList
           academies={academies.map((academy) => ({
             id: academy.id,

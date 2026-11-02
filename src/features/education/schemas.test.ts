@@ -16,7 +16,7 @@ function enrollmentForm(overrides: Record<string, string | string[]> = {}): Form
   const fields: Record<string, string | string[]> = {
     childId: UUID_A,
     academyId: UUID_B,
-    subject: " 영어 ",
+    memo: " 토요일 보충 ",
     startDate: "2026-11-02",
     endDate: "",
     weekday: ["2", "4"],
@@ -69,7 +69,7 @@ describe("parseEnrollmentForm", () => {
     expect(result.data).toEqual({
       childId: UUID_A,
       academyId: UUID_B,
-      subject: "영어",
+      memo: "토요일 보충",
       startDate: "2026-11-02",
       endDate: null,
       rules: [
@@ -77,6 +77,19 @@ describe("parseEnrollmentForm", () => {
         { weekday: 4, startTime: "16:00", endTime: "17:30" },
       ],
     });
+  });
+
+  it("treats a blank memo as empty and rejects an overlong memo", () => {
+    expect(parseEnrollmentForm(enrollmentForm({ memo: "   " }), TODAY).data?.memo).toBeNull();
+    const result = parseEnrollmentForm(enrollmentForm({ memo: "가".repeat(501) }), TODAY);
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.path).toEqual(["memo"]);
+  });
+
+  it("does not need a subject", () => {
+    const form = enrollmentForm();
+    form.delete("memo");
+    expect(parseEnrollmentForm(form, TODAY).success).toBe(true);
   });
 
   it("requires at least one schedule row", () => {

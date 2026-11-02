@@ -8,7 +8,7 @@ interface AcademySummary {
   activeCount: number;
 }
 
-/** 관리 화면의 학원 목록. 누르면 학원 상세(수강 과목 추가)로 간다. */
+/** 관리 화면의 학원 목록. 누르면 학원 상세(정보 수정·삭제)로 간다. */
 export function AcademyList({ academies }: { academies: AcademySummary[] }) {
   if (academies.length === 0) {
     return <p className="text-sm text-muted">아직 등록한 학원이 없습니다. 아래에서 학원을 추가하세요.</p>;

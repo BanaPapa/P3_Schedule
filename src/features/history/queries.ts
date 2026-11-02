@@ -29,7 +29,7 @@ type Json = Record<string, unknown> | null;
 export async function getHistory(limit: number): Promise<HistoryItem[]> {
   const { user, members } = await requireFamily();
   const supabase = await createClient();
-  const [logs, children, enrollments, invoices] = await Promise.all([
+  const [logs, children, academies, enrollments, invoices] = await Promise.all([
     supabase
       .from("audit_logs")
       .select("id, table_name, action, actor_id, old_data, new_data, created_at")
@@ -37,17 +37,22 @@ export async function getHistory(limit: number): Promise<HistoryItem[]> {
       .order("id", { ascending: false })
       .limit(limit * FETCH_MULTIPLIER),
     supabase.from("children").select("id, name"),
-    supabase.from("enrollments").select("id, subject, child_id"),
+    supabase.from("academies").select("id, name"),
+    supabase.from("enrollments").select("id, child_id, academy:academies!inner (name)"),
     supabase.from("tuition_invoices").select("id, enrollment_id, billing_month"),
   ]);
   if (logs.error) loadFailed("audit logs", logs.error.code);
   if (children.error) loadFailed("children", children.error.code);
+  if (academies.error) loadFailed("academies", academies.error.code);
   if (enrollments.error) loadFailed("enrollments", enrollments.error.code);
   if (invoices.error) loadFailed("invoices", invoices.error.code);
 
   const context: HistoryContext = {
     children: new Map(children.data.map((child) => [child.id, child.name])),
-    enrollments: new Map(enrollments.data.map((row) => [row.id, { subject: row.subject, childId: row.child_id }])),
+    academies: new Map(academies.data.map((academy) => [academy.id, academy.name])),
+    enrollments: new Map(
+      enrollments.data.map((row) => [row.id, { academyName: row.academy.name, childId: row.child_id }]),
+    ),
     invoices: new Map(
       invoices.data.map((row) => [row.id, { enrollmentId: row.enrollment_id, billingMonth: row.billing_month }]),
     ),

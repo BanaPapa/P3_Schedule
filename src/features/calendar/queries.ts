@@ -16,7 +16,6 @@ export interface CalendarSession {
   endTime: string;
   status: SessionStatus;
   kind: Database["public"]["Enums"]["class_session_kind"];
-  subject: string;
   academyName: string;
   child: { id: string; name: string; color: string };
 }
@@ -46,7 +45,6 @@ export async function getSessionsBetween(
     .select(
       `id, session_date, start_time, end_time, status, kind,
        enrollment:enrollments!inner (
-         subject,
          child_id,
          child:children!inner (id, name, color),
          academy:academies!inner (name)
@@ -71,7 +69,6 @@ export async function getSessionsBetween(
     endTime: row.end_time,
     status: row.status,
     kind: row.kind,
-    subject: row.enrollment.subject,
     academyName: row.enrollment.academy.name,
     child: row.enrollment.child,
   }));

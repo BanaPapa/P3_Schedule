@@ -59,10 +59,9 @@ async function SessionContent({ params }: { params: PageProps<"/sessions/[id]">[
           <span aria-hidden className="mt-2 size-3 shrink-0 rounded-full" style={{ backgroundColor: session.child.color }} />
           <div className="min-w-0 flex-1">
             <h1 className="page-title">
-              {session.child.name} · {session.subject}
+              {session.child.name} · {session.academyName}
               {kindLabel ? <span className="ml-2 text-sm font-semibold text-primary">{kindLabel}</span> : null}
             </h1>
-            <p className="text-sm text-muted">{session.academyName}</p>
             <p className="mt-2">{summaryLabel(session)}</p>
           </div>
           <span className="shrink-0 rounded-full bg-background px-3 py-1 text-sm font-semibold">

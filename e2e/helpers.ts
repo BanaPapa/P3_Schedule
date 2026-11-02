@@ -73,7 +73,7 @@ export function card(page: Page, title: string) {
     .filter({ has: page.getByRole("heading", { name: title, exact: true }) });
 }
 
-/** 관리 탭에서 학원을 등록하고 그 학원 화면(수강 과목 추가)을 연다 */
+/** 관리 탭에서 학원을 등록하고 그 학원 화면(정보 수정·삭제)을 연다 */
 export async function addAcademy(page: Page, academy: string, phone?: string): Promise<void> {
   await goToTab(page, "관리");
   await expect(page.getByRole("heading", { name: "관리", level: 1 })).toBeVisible();
@@ -85,15 +85,25 @@ export async function addAcademy(page: Page, academy: string, phone?: string): P
   await expect(page.getByRole("heading", { name: academy, level: 1 })).toBeVisible();
 }
 
-/** 학원과 오늘 요일 수업(16:00-17:00, 오늘 시작)을 등록한다 */
-export async function enrollTodayClass(page: Page, academy: string, subject: string): Promise<void> {
-  await addAcademy(page, academy);
-  await field(page, "과목").fill(subject);
+/** 교육 탭의 + 로 등록된 학원의 오늘 요일 수업(16:00-17:00, 오늘 시작)을 추가한다 */
+export async function enrollInAcademy(page: Page, academy: string, memo?: string): Promise<void> {
+  await goToTab(page, "교육");
+  await page.getByRole("link", { name: "수강 과목 추가" }).click();
+  await expect(page.getByRole("heading", { name: "수강 과목 추가", level: 1 })).toBeVisible();
+  await page.getByRole("combobox", { name: "학원" }).selectOption({ label: academy });
   await page.getByRole("combobox", { name: "1번째 수업 요일" }).selectOption(String(todayIsoWeekdayInSeoul()));
   await page.getByRole("textbox", { name: "1번째 수업 시작 시각" }).fill("16:00");
   await page.getByRole("textbox", { name: "1번째 수업 종료 시각" }).fill("17:00");
+  if (memo) await field(page, "비고 (선택)").fill(memo);
   await page.getByRole("button", { name: "수강 과목 등록" }).click();
-  await expect(page.getByRole("status").filter({ hasText: `${subject} 수업을 등록했습니다.` })).toBeVisible();
+  await expect(page).toHaveURL(/\/education\?added=1$/);
+  await expect(page.getByRole("status").filter({ hasText: "수업을 등록했습니다." })).toBeVisible();
+}
+
+/** 관리 탭에서 학원을 등록하고, 교육 탭에서 그 학원의 오늘 요일 수업을 추가한다 */
+export async function enrollTodayClass(page: Page, academy: string, memo?: string): Promise<void> {
+  await addAcademy(page, academy);
+  await enrollInAcademy(page, academy, memo);
 }
 
 const TAB_PATHS = {

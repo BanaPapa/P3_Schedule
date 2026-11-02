@@ -26,7 +26,7 @@ import {
 } from "./schemas";
 
 const ACADEMY_FIELDS = ["name", "phone", "contactName", "memo"] as const;
-const ENROLLMENT_FIELDS = ["childId", "academyId", "subject", "startDate", "endDate"] as const;
+const ENROLLMENT_FIELDS = ["childId", "academyId", "memo", "startDate", "endDate"] as const;
 
 interface PostgrestLikeError {
   code?: string;
@@ -114,12 +114,15 @@ export async function createEnrollmentAction(_prev: FormState, formData: FormDat
   const parsed = parseEnrollmentForm(formData);
   if (!parsed.success) return validationError(parsed.error, values);
 
-  const { childId, academyId, subject, startDate, endDate, rules } = parsed.data;
+  const { childId, academyId, memo, startDate, endDate, rules } = parsed.data;
   const supabase = await createClient();
   const { error } = await supabase.rpc("create_enrollment", {
     p_child_id: childId,
     p_academy_id: academyId,
-    p_subject: subject,
+    // 과목명은 받지 않는다. 학원 이름이 곧 수업 이름이고, 빈 값은 DB 에서 null 로 저장된다.
+    p_subject: "",
+    // RPC 인자 타입은 string 이지만 SQL 은 null 을 받는다(비고 없음)
+    p_memo: memo as string,
     p_start_date: startDate,
     // RPC 인자 타입은 string 이지만 SQL 은 null 을 받는다(종료일 없음)
     p_end_date: endDate as string,
@@ -132,7 +135,8 @@ export async function createEnrollmentAction(_prev: FormState, formData: FormDat
   if (error) return dbFailure("create_enrollment", error, values);
 
   refreshEducationPages();
-  return success(`${subject} 수업을 등록했습니다. 캘린더에서 확인할 수 있습니다.`);
+  // 등록 화면은 폼만 있으므로 교육 탭으로 돌아가 새 수강 과목을 보여준다
+  redirect(`${ROUTES.education}?added=1`);
 }
 
 export async function changeScheduleAction(_prev: FormState, formData: FormData): Promise<FormState> {
