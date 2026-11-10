@@ -19,12 +19,11 @@ M1(가족 계정), M2(학원·수강 과목·반복 수업·통합 캘린더), M
 
 ## 명령어
 
-로컬 Supabase(Docker 필요)를 먼저 띄운다. `.env.local` 은 `.env.example` 을 보고 `pnpm exec supabase status` 값으로 채운다.
+로컬 Docker Supabase 는 쓰지 않는다. 원격 Supabase 프로젝트(`hhhkgcxldvcqqeanolox`)에 연결한다. `.env.local` 은 `.env.example` 을 보고 원격 프로젝트의 URL·publishable key 로 채운다.
+`supabase/migrations/` 는 그대로 스키마의 진실로 유지하며, 원격 적용은 `pnpm exec supabase link --project-ref <ref>` 후 `pnpm exec supabase db push`(또는 대시보드)로 한다.
 
 ```bash
-pnpm db:start            # 로컬 Supabase 시작 (Studio: http://127.0.0.1:54323)
-pnpm db:reset            # 마이그레이션을 처음부터 다시 적용
-pnpm db:types            # DB 스키마 → src/lib/supabase/database.types.ts (마이그레이션 후 반드시 실행)
+pnpm db:types            # 원격 스키마 → src/lib/supabase/database.types.ts (마이그레이션 적용 후 실행)
 pnpm dev                 # 개발 서버 (http://localhost:3000)
 
 pnpm lint
@@ -33,12 +32,11 @@ pnpm test                # Vitest 단위 테스트
 pnpm test -- src/lib/routes.test.ts      # 파일 하나
 pnpm test -- -t "safeNextPath"           # 이름으로 하나
 pnpm test:coverage       # 80% 기준 (src/lib, features/**/schemas·format)
-pnpm test:db             # pgTAP: supabase/tests/database/*.test.sql
-pnpm test:e2e            # Playwright: build 후 3100 포트에서 실행. 로컬 Supabase 필요
+pnpm test:e2e            # Playwright: build 후 3100 포트에서 실행. .env.local 의 원격 Supabase 사용(원격 DB에 데이터가 생기니 신중히)
 pnpm exec playwright test -g "invite link"   # E2E 하나
 ```
 
-pgTAP 파일은 `begin` 직후 `truncate public.families, public.audit_logs cascade;` 로 시작한다. 로컬 DB에 남은 개발·E2E 데이터와 섞이지 않게 하기 위해서이며, 끝에서 rollback 된다. 사용자 흉내는 `set_config('request.jwt.claims', ...)` + `set local role authenticated` 로 한다.
+pgTAP 테스트(`supabase/tests/database/*.test.sql`)는 파일만 유지한다. 로컬 DB 전용이던 `test:db` 스크립트는 없앴다. 각 파일은 `begin` 직후 `truncate public.families, public.audit_logs cascade;` 로 시작하므로 **원격(운영) DB에 그대로 돌리지 않는다**(끝에서 rollback 되지만 위험). 사용자 흉내는 `set_config('request.jwt.claims', ...)` + `set local role authenticated` 로 한다.
 
 E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExistingServer`). 코드를 바꿨는데 결과가 그대로면 3100 포트의 오래된 서버를 먼저 끈다.
 

@@ -3,7 +3,10 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = 3100;
 const BASE_URL = `http://localhost:${PORT}`;
 
-/** 로컬 Supabase(`supabase start`)가 떠 있어야 한다. */
+/**
+ * `.env.local` 의 원격 Supabase 에 연결되어야 한다.
+ * E2E 는 원격 DB 에 데이터를 만들므로 CI/로컬 어디서든 신중히 돌린다.
+ */
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,

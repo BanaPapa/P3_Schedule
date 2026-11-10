@@ -1,6 +1,6 @@
 # 배포 (Supabase + Vercel)
 
-로컬은 `pnpm db:start` 로 충분하다. 실제 사용하려면 Supabase 클라우드 프로젝트와 Vercel 이 필요하다.
+로컬 개발도 원격 Supabase 클라우드 프로젝트를 쓴다(로컬 Docker Supabase 는 쓰지 않는다). 실제 사용하려면 Supabase 클라우드 프로젝트와 Vercel 이 필요하다.
 
 ## 1. Supabase 프로젝트
 
@@ -43,5 +43,5 @@
 - `FAMILY_HUB_FAKE_AI` 는 E2E 테스트 전용이다(실제 키가 있으면 무시된다). 운영 환경 변수에 넣지 않는다.
 - AI 사용량은 가족당 하루 30회(`record_ai_request`). 비용 상한을 바꾸려면 마이그레이션 상수를 바꾼다.
 - 서비스 키(`service_role`, `sb_secret_…`)는 앱에 쓰지 않는다. 모든 접근은 로그인한 사용자 권한 + RLS 로 한다.
-- 스키마를 바꿀 때는 새 마이그레이션 파일을 추가하고 `pnpm test:db` 를 통과시킨 뒤 `supabase db push`.
+- 스키마를 바꿀 때는 새 마이그레이션 파일을 추가하고 검토한 뒤 `supabase db push`.
 - 로그인 세션 토큰 만료(기본 1시간) 전까지는 로그아웃해도 이미 발급된 토큰이 유효하다(Supabase 기본 동작).
