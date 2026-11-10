@@ -6,7 +6,7 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-panel backdrop-blur-lg">
       <div className="mx-auto flex h-14 w-full max-w-2xl items-center justify-between px-4 lg:max-w-none lg:px-6">
-        <Link href={ROUTES.home} className="flex items-center gap-2 font-display text-[22px]">
+        <Link href={ROUTES.home} className="flex items-center gap-2 font-display text-[length:calc(22px+var(--fs-up))]">
           <span aria-hidden>🏡</span>
           Family Hub
         </Link>

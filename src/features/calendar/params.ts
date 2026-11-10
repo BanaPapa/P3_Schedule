@@ -30,7 +30,7 @@ function single(value: string | string[] | undefined): string | undefined {
 }
 
 export function parseCalendarParams(searchParams: SearchParams, today: IsoDate): CalendarParams {
-  const view = single(searchParams.view) === "week" ? "week" : "month";
+  const view = single(searchParams.view) === "month" ? "month" : "week";
   const rawDate = single(searchParams.date);
   const latest = addDays(today, MAX_DAYS_AHEAD);
   const date = rawDate && isIsoDate(rawDate) ? (rawDate > latest ? latest : rawDate) : today;
@@ -56,7 +56,7 @@ export function shiftCalendar(params: CalendarParams, step: 1 | -1): CalendarPar
 
 export function calendarHref(params: CalendarParams, today: IsoDate): string {
   const query = new URLSearchParams();
-  if (params.view !== "month") query.set("view", params.view);
+  if (params.view !== "week") query.set("view", params.view);
   if (params.date !== today) query.set("date", params.date);
   if (params.childId) query.set("child", params.childId);
   const search = query.toString();

@@ -45,20 +45,21 @@ describe("addDays / isoWeekday", () => {
 });
 
 describe("weekDates", () => {
-  it("returns Sunday through Saturday around the date", () => {
+  it("returns Monday through Sunday around the date", () => {
     expect(weekDates("2026-11-04")).toEqual([
-      "2026-11-01",
       "2026-11-02",
       "2026-11-03",
       "2026-11-04",
       "2026-11-05",
       "2026-11-06",
       "2026-11-07",
+      "2026-11-08",
     ]);
   });
 
-  it("treats Sunday as the first day", () => {
-    expect(weekDates("2026-11-08")[0]).toBe("2026-11-08");
+  it("treats Monday as the first day and Sunday as the last", () => {
+    expect(weekDates("2026-11-09")[0]).toBe("2026-11-09");
+    expect(weekDates("2026-11-08")[0]).toBe("2026-11-02");
   });
 });
 
@@ -79,16 +80,16 @@ describe("months", () => {
     expect(monthBounds({ year: 2026, month: 2 })).toEqual({ first: "2026-02-01", last: "2026-02-28" });
   });
 
-  it("builds a Sunday-first grid of whole weeks", () => {
+  it("builds a Monday-first grid of whole weeks", () => {
     const grid = monthGrid({ year: 2026, month: 11 });
-    expect(grid).toHaveLength(5);
-    expect(grid[0][0]).toBe("2026-11-01");
-    expect(grid.at(-1)?.at(-1)).toBe("2026-12-05");
+    expect(grid).toHaveLength(6);
+    expect(grid[0][0]).toBe("2026-10-26");
+    expect(grid.at(-1)?.at(-1)).toBe("2026-12-06");
     expect(grid.every((week) => week.length === 7)).toBe(true);
   });
 
   it("pads the first week with the previous month", () => {
-    expect(monthGrid({ year: 2026, month: 12 })[0][0]).toBe("2026-11-29");
+    expect(monthGrid({ year: 2026, month: 12 })[0][0]).toBe("2026-11-30");
   });
 });
 

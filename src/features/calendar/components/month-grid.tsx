@@ -60,7 +60,7 @@ export function MonthGrid({ params, today, sessionsByDate, tripDates, schoolDate
                   />
                 ))}
                 {sessions.length > MAX_DOTS ? (
-                  <span className="text-[10px] leading-none text-muted">+{sessions.length - MAX_DOTS}</span>
+                  <span className="text-[length:calc(10px+var(--fs-up))] leading-none text-muted">+{sessions.length - MAX_DOTS}</span>
                 ) : null}
               </span>
             </Link>

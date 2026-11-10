@@ -23,7 +23,7 @@ export function SessionItem({ session, showChild }: SessionItemProps) {
           className="mt-1.5 size-2.5 shrink-0 rounded-full"
           style={{ backgroundColor: session.child.color }}
         />
-        <div className="w-24 shrink-0 text-sm tabular-nums text-muted">
+        <div className="w-28 shrink-0 whitespace-nowrap text-sm lg:w-36 tabular-nums text-muted">
           {formatTime(session.startTime)}–{formatTime(session.endTime)}
         </div>
         <div className="min-w-0 flex-1">

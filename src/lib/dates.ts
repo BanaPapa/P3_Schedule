@@ -22,8 +22,8 @@ export const WEEKDAY_LABELS: Readonly<Record<number, string>> = {
   7: "일",
 };
 
-/** 캘린더 머리글 순서(일요일 시작) */
-export const CALENDAR_WEEKDAYS = [7, 1, 2, 3, 4, 5, 6] as const;
+/** 캘린더 머리글 순서(월요일 시작) */
+export const CALENDAR_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
 
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const YEAR_MONTH = /^(\d{4})-(\d{2})$/;
@@ -63,10 +63,10 @@ export function isoWeekday(iso: IsoDate): number {
   return day === 0 ? 7 : day;
 }
 
-/** 날짜가 속한 주(일~토) 7일 */
+/** 날짜가 속한 주(월~일) 7일 */
 export function weekDates(iso: IsoDate): IsoDate[] {
-  const sunday = addDays(iso, -(isoWeekday(iso) % 7));
-  return Array.from({ length: 7 }, (_, index) => addDays(sunday, index));
+  const monday = addDays(iso, 1 - isoWeekday(iso));
+  return Array.from({ length: 7 }, (_, index) => addDays(monday, index));
 }
 
 export function parseMonth(value: string | undefined | null): YearMonth | null {
@@ -96,7 +96,7 @@ export function monthBounds(value: YearMonth): { first: IsoDate; last: IsoDate }
   return { first, last: addDays(`${formatMonthParam(next)}-01`, -1) };
 }
 
-/** 일요일 시작, 7일씩 끊은 달력 칸. 앞뒤는 이웃 달 날짜로 채운다. */
+/** 월요일 시작, 7일씩 끊은 달력 칸. 앞뒤는 이웃 달 날짜로 채운다. */
 export function monthGrid(value: YearMonth): IsoDate[][] {
   const { first, last } = monthBounds(value);
   const start = weekDates(first)[0];

@@ -29,7 +29,7 @@ test("school exam with supplies and score, and a study log with progress", async
   // 홈과 캘린더에 보인다
   await goToTab(page, "홈");
   await expect(card(page, "다가오는 학교 일정").getByText("수학 단원평가")).toBeVisible();
-  await page.goto(`/calendar?date=${seoulDate(3)}`);
+  await page.goto(`/calendar?view=month&date=${seoulDate(3)}`);
   await expect(page.getByText("첫째 · 수학 단원평가").filter({ visible: true })).toBeVisible();
 
   // 학습: 과목 추가 후 진도 기록

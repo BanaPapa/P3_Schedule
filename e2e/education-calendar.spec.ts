@@ -35,12 +35,12 @@ test("an enrolled class appears on today's home card and the calendar, and leave
   await expect(todayCard.getByText("튼튼영어", { exact: true })).toBeVisible();
   await expect(todayCard.getByText("16:00–17:00")).toBeVisible();
 
-  // 캘린더: 월간 아래 목록과 주간
+  // 캘린더: 기본은 주간(월요일 시작), 월간은 아래 목록
   await goToTab(page, "캘린더");
-  await expect(page.getByText("튼튼영어", { exact: true }).filter({ visible: true })).toBeVisible();
-  await page.getByRole("link", { name: "주간" }).click();
   await expect(page.getByRole("region").filter({ hasText: "오늘" }).getByText("튼튼영어", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "다음 주" }).click();
+  await expect(page.getByText("튼튼영어", { exact: true }).filter({ visible: true }).first()).toBeVisible();
+  await page.getByRole("link", { name: "월간" }).click();
   await expect(page.getByText("튼튼영어", { exact: true }).filter({ visible: true }).first()).toBeVisible();
 
   // 오늘 시작해 지난 수업이 없으니 삭제할 수 있고, 캘린더에서도 빠진다
@@ -54,12 +54,12 @@ test("an enrolled class appears on today's home card and the calendar, and leave
     .click();
   await expect(page.getByText("아직 등록한 수강 과목이 없습니다.")).toBeVisible();
   await goToTab(page, "캘린더");
-  await expect(page.getByText("이날은 수업이 없습니다.").filter({ visible: true })).toBeVisible();
+  await expect(page.getByRole("region").filter({ hasText: "오늘" }).getByText("수업 없음")).toBeVisible();
 });
 
 test("a family cannot filter the calendar by another family's child", async ({ browser }) => {
   const page = await newPage(browser);
   await signUpWithFamily(page, "정씨네", "아빠");
   await page.goto("/calendar?child=6f1c2f0e-8f43-4c1e-9d55-3f0f6c2f9a11");
-  await expect(page.getByText("이날은 수업이 없습니다.").filter({ visible: true })).toBeVisible();
+  await expect(page.getByRole("region").filter({ hasText: "오늘" }).getByText("수업 없음")).toBeVisible();
 });

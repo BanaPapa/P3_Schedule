@@ -13,7 +13,7 @@ export function Card({ title, description, action, children }: CardProps) {
       {title ? (
         <header className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-[17px] font-extrabold">{title}</h2>
+            <h2 className="text-[length:calc(17px+var(--fs-up))] font-extrabold">{title}</h2>
             {description ? <p className="mt-0.5 text-sm text-muted">{description}</p> : null}
           </div>
           {action}

@@ -13,7 +13,7 @@ export function TextField({ label, name, error, hint, className = "", ...props }
 
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
-      <label htmlFor={id} className="text-[13px] font-extrabold text-muted">
+      <label htmlFor={id} className="text-[length:calc(13px+var(--fs-up))] font-extrabold text-muted">
         {label}
       </label>
       <input

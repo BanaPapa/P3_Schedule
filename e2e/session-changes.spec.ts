@@ -12,7 +12,7 @@ import {
 
 /** 캘린더에서 그 날짜를 열고 학원 수업을 누른다 */
 async function openSession(page: Page, date: string, academy: string): Promise<void> {
-  await page.goto(`/calendar?date=${date}`);
+  await page.goto(`/calendar?view=month&date=${date}`);
   await card(page, dayTitle(date)).getByRole("link").filter({ hasText: academy }).first().click();
   await expect(page.getByRole("heading", { level: 1 }).filter({ hasText: academy })).toBeVisible();
 }
@@ -57,9 +57,9 @@ test("PRD scenario: an absence waits for a makeup, and the makeup is linked and 
   await expect(page.getByRole("link").filter({ hasText: "보강" }).filter({ hasText: "보강 예정" })).toBeVisible();
 
   // ④ 통합 캘린더: 원래 수업은 결석, 보강일에는 보강 수업
-  await page.goto(`/calendar?date=${missedDate}`);
+  await page.goto(`/calendar?view=month&date=${missedDate}`);
   await expect(card(page, dayTitle(missedDate)).getByText("결석")).toBeVisible();
-  await page.goto(`/calendar?date=${makeupDate}`);
+  await page.goto(`/calendar?view=month&date=${makeupDate}`);
   const makeupDay = card(page, dayTitle(makeupDate));
   await expect(makeupDay.getByText("보강", { exact: true })).toBeVisible();
   await expect(makeupDay.getByText("보강 예정")).toBeVisible();
@@ -86,7 +86,7 @@ test("a single session can move to another day, and the weekly schedule can chan
   await card(page, "이번 수업만 변경").getByRole("button", { name: "이번 수업만 변경" }).click();
   // 새로 생긴 변경 수업 화면으로 이동하고, 원래 수업(취소)과 연결되어 있다
   await expect(page.getByRole("link").filter({ hasText: "원래 수업" }).filter({ hasText: "취소" })).toBeVisible();
-  await page.goto(`/calendar?date=${moved}`);
+  await page.goto(`/calendar?view=month&date=${moved}`);
   await expect(card(page, dayTitle(moved)).getByText("18:00–19:00")).toBeVisible();
   await expect(card(page, dayTitle(moved)).getByText("변경", { exact: true })).toBeVisible();
 
@@ -100,11 +100,11 @@ test("a single session can move to another day, and the weekly schedule can chan
   await page.getByRole("button", { name: "앞으로 전체 변경" }).click();
   await expect(page.getByRole("status").filter({ hasText: "일정을 바꿨습니다." })).toBeVisible();
 
-  await page.goto(`/calendar?date=${seoulDate(22)}`);
+  await page.goto(`/calendar?view=month&date=${seoulDate(22)}`);
   await expect(card(page, dayTitle(seoulDate(22))).getByText("17:00–18:00")).toBeVisible();
-  await page.goto(`/calendar?date=${seoulDate(21)}`);
+  await page.goto(`/calendar?view=month&date=${seoulDate(21)}`);
   await expect(card(page, dayTitle(seoulDate(21))).getByText("이날은 수업이 없습니다.")).toBeVisible();
   // 변경 전 수업은 그대로
-  await page.goto(`/calendar?date=${seoulDate(7)}`);
+  await page.goto(`/calendar?view=month&date=${seoulDate(7)}`);
   await expect(card(page, dayTitle(seoulDate(7))).getByText("16:00–17:00")).toBeVisible();
 });

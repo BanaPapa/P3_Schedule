@@ -34,7 +34,7 @@ test("PRD: a confirmed invoice stays fixed when the schedule changes until the p
   await expect(card(page, "납부").getByText(/^일부 납부/)).toBeVisible();
 
   // 오늘 수업을 취소한다 → 예상액만 바뀌고 확정액은 그대로
-  await page.goto(`/calendar?date=${seoulDate(0)}`);
+  await page.goto(`/calendar?view=month&date=${seoulDate(0)}`);
   await page.locator("section").filter({ visible: true }).getByRole("link").filter({ hasText: "튼튼영어" }).first().click();
   await card(page, "상태 바꾸기").getByRole("button", { name: "취소" }).click();
   await expect(page.getByRole("status").filter({ hasText: "'취소'(으)로 바꿨습니다." })).toBeVisible();

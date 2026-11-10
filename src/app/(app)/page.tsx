@@ -164,7 +164,7 @@ async function HomeContent() {
         <Card title="배우자를 초대하세요" description="함께 쓰면 한 사람이 바꾼 일정과 교육비가 서로에게 바로 보입니다.">
           <Link
             href={ROUTES.family}
-            className="btn-primary inline-flex h-11 items-center rounded-full px-5 text-[15px] font-extrabold"
+            className="btn-primary inline-flex h-11 items-center rounded-full px-5 text-[length:calc(15px+var(--fs-up))] font-extrabold"
           >
             초대 링크 만들기
           </Link>

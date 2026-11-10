@@ -65,7 +65,7 @@ export function BottomNavView({ pathname }: { pathname: string | null }) {
               <Link
                 href={tab.href}
                 aria-current={active ? "page" : undefined}
-                className={`group flex h-full flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition lg:h-11 lg:flex-row lg:justify-start lg:gap-3 lg:rounded-xl lg:px-3 lg:text-[15px] ${active ? "text-primary lg:bg-primary-soft lg:font-extrabold" : "text-faint hover:text-muted lg:text-muted lg:hover:bg-surface-2"}`}
+                className={`group flex h-full flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition lg:h-11 lg:flex-row lg:justify-start lg:gap-3 lg:rounded-xl lg:px-3 lg:text-[18px] ${active ? "text-primary lg:bg-primary-soft lg:font-extrabold" : "text-faint hover:text-muted lg:text-muted lg:hover:bg-surface-2"}`}
               >
                 <span
                   className={`grid h-7 w-12 place-items-center rounded-2xl transition lg:h-auto lg:w-auto ${active ? "bg-primary-soft lg:bg-transparent" : ""}`}

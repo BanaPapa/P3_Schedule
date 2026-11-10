@@ -5,13 +5,13 @@ const TODAY = "2026-11-04";
 const CHILD = "6f1c2f0e-8f43-4c1e-9d55-3f0f6c2f9a11";
 
 describe("parseCalendarParams", () => {
-  it("defaults to this month and today", () => {
-    expect(parseCalendarParams({}, TODAY)).toEqual({ view: "month", date: TODAY, childId: null });
+  it("defaults to this week and today", () => {
+    expect(parseCalendarParams({}, TODAY)).toEqual({ view: "week", date: TODAY, childId: null });
   });
 
   it("reads view, date and child", () => {
-    expect(parseCalendarParams({ view: "week", date: "2026-12-01", child: CHILD }, TODAY)).toEqual({
-      view: "week",
+    expect(parseCalendarParams({ view: "month", date: "2026-12-01", child: CHILD }, TODAY)).toEqual({
+      view: "month",
       date: "2026-12-01",
       childId: CHILD,
     });
@@ -20,8 +20,8 @@ describe("parseCalendarParams", () => {
   it("ignores invalid values and repeated params", () => {
     expect(
       parseCalendarParams({ view: "year", date: "2026-02-30", child: "x' or 1=1" }, TODAY),
-    ).toEqual({ view: "month", date: TODAY, childId: null });
-    expect(parseCalendarParams({ view: ["week", "month"] }, TODAY).view).toBe("month");
+    ).toEqual({ view: "week", date: TODAY, childId: null });
+    expect(parseCalendarParams({ view: ["month", "week"] }, TODAY).view).toBe("week");
   });
 
   it("does not go further than a year ahead", () => {
@@ -32,15 +32,15 @@ describe("parseCalendarParams", () => {
 describe("calendarRange", () => {
   it("covers the whole month grid", () => {
     expect(calendarRange({ view: "month", date: "2026-11-18", childId: null })).toEqual({
-      from: "2026-11-01",
-      to: "2026-12-05",
+      from: "2026-10-26",
+      to: "2026-12-06",
     });
   });
 
-  it("covers Sunday to Saturday for a week", () => {
+  it("covers Monday to Sunday for a week", () => {
     expect(calendarRange({ view: "week", date: "2026-11-04", childId: null })).toEqual({
-      from: "2026-11-01",
-      to: "2026-11-07",
+      from: "2026-11-02",
+      to: "2026-11-08",
     });
   });
 });
@@ -62,12 +62,12 @@ describe("shiftCalendar", () => {
 
 describe("calendarHref", () => {
   it("omits defaults", () => {
-    expect(calendarHref({ view: "month", date: TODAY, childId: null }, TODAY)).toBe("/calendar");
+    expect(calendarHref({ view: "week", date: TODAY, childId: null }, TODAY)).toBe("/calendar");
   });
 
   it("keeps non-default values", () => {
-    expect(calendarHref({ view: "week", date: "2026-11-10", childId: CHILD }, TODAY)).toBe(
-      `/calendar?view=week&date=2026-11-10&child=${CHILD}`,
+    expect(calendarHref({ view: "month", date: "2026-11-10", childId: CHILD }, TODAY)).toBe(
+      `/calendar?view=month&date=2026-11-10&child=${CHILD}`,
     );
   });
 });

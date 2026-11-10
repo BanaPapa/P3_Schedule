@@ -42,7 +42,7 @@ test("a family trip with itinerary, budget and spending shows up in the calendar
   await expect(page.getByText("남은 예산 450,000원")).toBeVisible();
 
   // 통합 캘린더: 2일차 일정
-  await page.goto(`/calendar?date=${seoulDate(15)}`);
+  await page.goto(`/calendar?view=month&date=${seoulDate(15)}`);
   await expect(page.getByText("✈ 제주 여름 여행 · 2일차").filter({ visible: true })).toBeVisible();
   await expect(page.getByText("성산일출봉", { exact: true }).filter({ visible: true })).toBeVisible();
 
