@@ -4,6 +4,7 @@ import { Card, CardSkeleton } from "@/components/ui/card";
 import { ChildForm } from "@/features/family/components/child-form";
 import { ChildList } from "@/features/family/components/child-list";
 import { InvitePanel } from "@/features/family/components/invite-panel";
+import { isAutoLoginEnabled } from "@/lib/auto-login";
 import { formatExpiry, roleLabel } from "@/features/family/format";
 import {
   getActiveInvitation,
@@ -31,9 +32,16 @@ async function InviteSection({ familyId }: { familyId: string }) {
 function MembersCard({ context }: { context: FamilyContext }) {
   const { me, members } = context;
   const full = members.length >= MAX_PARENTS;
+  // 로그인 화면 없는 모드에서는 배우자도 같은 주소를 열기만 하면 되므로 초대가 필요 없다
+  const shared = isAutoLoginEnabled();
+  const description = shared
+    ? "이 주소를 배우자와 함께 쓰면 로그인 없이 같은 내용을 봅니다."
+    : full
+      ? "부모 두 명이 모두 등록되었습니다."
+      : "배우자를 초대해 함께 관리하세요.";
 
   return (
-    <Card title="부모" description={full ? "부모 두 명이 모두 등록되었습니다." : "배우자를 초대해 함께 관리하세요."}>
+    <Card title="부모" description={description}>
       <ul className="mb-4 flex flex-col divide-y divide-border">
         {members.map((member) => (
           <li key={member.id} className="flex items-center justify-between py-2.5">
@@ -45,7 +53,7 @@ function MembersCard({ context }: { context: FamilyContext }) {
           </li>
         ))}
       </ul>
-      {full ? null : (
+      {full || shared ? null : (
         <Suspense fallback={<div className="h-24 animate-pulse rounded-xl bg-background" />}>
           <InviteSection familyId={context.family.id} />
         </Suspense>

@@ -9,18 +9,22 @@ interface RealtimeRefresherProps {
   userId: string;
   /** user_id → 호칭 */
   memberNames: Record<string, string>;
+  /** 로그인 화면 없이 부부가 한 계정을 같이 쓰는 모드. 행위자로 배우자를 구분할 수 없다. */
+  sharedAccount?: boolean;
 }
 
 /** 배우자 변경을 한데 모아 한 번만 새로 고친다 */
 const REFRESH_DELAY_MS = 400;
 const MAX_REFRESH_WAIT_MS = 2000;
 const NOTICE_MS = 4000;
+/** 같은 계정 모드: 이 화면에서 저장한 직후 들어온 이력은 내 변경으로 본다 */
+const OWN_CHANGE_WINDOW_MS = 5000;
 
 /**
  * 가족의 변경 이력(audit_logs) 추가를 실시간으로 받아 화면을 새로 고친다.
  * 내 변경은 서버 액션이 이미 새로 고치므로 배우자 변경일 때만 알림과 함께 새로 고친다.
  */
-export function RealtimeRefresher({ familyId, userId, memberNames }: RealtimeRefresherProps) {
+export function RealtimeRefresher({ familyId, userId, memberNames, sharedAccount = false }: RealtimeRefresherProps) {
   const router = useRouter();
   const [notice, setNotice] = useState<string | null>(null);
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -37,6 +41,12 @@ export function RealtimeRefresher({ familyId, userId, memberNames }: RealtimeRef
     let channel: ReturnType<typeof supabase.channel> | null = null;
     let cancelled = false;
     let firstPendingAt: number | null = null;
+    let lastSubmitAt = 0;
+
+    function handleSubmit() {
+      lastSubmitAt = Date.now();
+    }
+    if (sharedAccount) document.addEventListener("submit", handleSubmit, true);
 
     // 연결이 끊긴 사이의 변경을 놓치지 않도록 앱으로 돌아오면 한 번 새로 고친다
     function handleVisibility() {
@@ -53,7 +63,7 @@ export function RealtimeRefresher({ familyId, userId, memberNames }: RealtimeRef
 
     function handleChange(payload: { new: Record<string, unknown> }) {
       const actorId = (payload.new.actor_id as string | null | undefined) ?? null;
-      if (actorId === userId) return;
+      if (sharedAccount ? Date.now() - lastSubmitAt < OWN_CHANGE_WINDOW_MS : actorId === userId) return;
 
       // 변경이 계속 들어와도 너무 오래 미루지 않는다
       firstPendingAt ??= Date.now();
@@ -65,7 +75,11 @@ export function RealtimeRefresher({ familyId, userId, memberNames }: RealtimeRef
       }
 
       const name = (actorId && namesRef.current[actorId]) || "가족";
-      setNotice(`${name}님이 내용을 바꿔 화면을 새로 고쳤습니다.`);
+      setNotice(
+        sharedAccount
+          ? "다른 기기에서 내용을 바꿔 화면을 새로 고쳤습니다."
+          : `${name}님이 내용을 바꿔 화면을 새로 고쳤습니다.`,
+      );
       if (noticeTimer.current) clearTimeout(noticeTimer.current);
       noticeTimer.current = setTimeout(() => setNotice(null), NOTICE_MS);
     }
@@ -91,11 +105,12 @@ export function RealtimeRefresher({ familyId, userId, memberNames }: RealtimeRef
     return () => {
       cancelled = true;
       document.removeEventListener("visibilitychange", handleVisibility);
+      document.removeEventListener("submit", handleSubmit, true);
       if (refreshTimer.current) clearTimeout(refreshTimer.current);
       if (noticeTimer.current) clearTimeout(noticeTimer.current);
       if (channel) void supabase.removeChannel(channel);
     };
-  }, [familyId, userId, router]);
+  }, [familyId, userId, sharedAccount, router]);
 
   if (!notice) return null;
   return (

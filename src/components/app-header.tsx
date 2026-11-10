@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signOutAction } from "@/features/auth/actions";
+import { isAutoLoginEnabled } from "@/lib/auto-login";
 import { ROUTES } from "@/lib/routes";
 
 export function AppHeader() {
@@ -10,6 +11,8 @@ export function AppHeader() {
           <span aria-hidden>🏡</span>
           Family Hub
         </Link>
+        {/* 자동 로그인 모드에서는 로그아웃해도 바로 다시 로그인되므로 버튼을 두지 않는다 */}
+        {!isAutoLoginEnabled() && (
         <form action={signOutAction}>
           <button
             type="submit"
@@ -18,6 +21,7 @@ export function AppHeader() {
             로그아웃
           </button>
         </form>
+        )}
       </div>
     </header>
   );

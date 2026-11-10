@@ -1,8 +1,26 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { getAutoLoginCredentials } from "@/lib/auto-login";
+import { logger } from "@/lib/logger";
 import { resolveRouteAccess } from "@/lib/routes";
 import type { Database } from "./database.types";
 import { getSupabaseEnv } from "./env";
+
+/**
+ * 로그인 화면 없이 쓰는 모드: 세션이 없으면 고정 계정으로 바로 로그인한다.
+ * 세션 쿠키는 createServerClient 의 setAll 로 응답에 실린다. 실패하면 로그인 화면으로 떨어진다.
+ */
+async function autoSignIn(supabase: SupabaseClient<Database>): Promise<boolean> {
+  const credentials = getAutoLoginCredentials();
+  if (!credentials) return false;
+  const { data, error } = await supabase.auth.signInWithPassword(credentials);
+  if (error) {
+    logger.error("auto sign in failed", { code: error.code, status: error.status });
+    return false;
+  }
+  return Boolean(data.session);
+}
 
 /** 만료된 토큰을 갱신해 쿠키에 다시 쓰고, 로그인 여부에 따라 경로 접근을 정한다. */
 export async function updateSession(request: NextRequest): Promise<NextResponse> {
@@ -29,7 +47,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
 
   // createServerClient 와 getClaims 사이에 다른 코드를 넣지 않는다 (세션 갱신 누락 방지)
   const { data } = await supabase.auth.getClaims();
-  const isAuthenticated = Boolean(data?.claims?.sub);
+  const isAuthenticated = Boolean(data?.claims?.sub) || (await autoSignIn(supabase));
 
   const access = resolveRouteAccess(
     request.nextUrl.pathname,

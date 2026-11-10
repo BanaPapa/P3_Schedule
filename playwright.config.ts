@@ -23,7 +23,8 @@ export default defineConfig({
   webServer: {
     command: `pnpm build && pnpm start --port ${PORT}`,
     // AI 는 API 를 부르지 않는 가짜 구현으로 시험한다 (운영에는 절대 설정하지 않는다)
-    env: { FAMILY_HUB_FAKE_AI: "1" },
+    // E2E 는 테스트마다 새 계정으로 가입하므로 로그인 화면 없는 자동 로그인을 끈다
+    env: { FAMILY_HUB_FAKE_AI: "1", FAMILY_HUB_DISABLE_AUTO_LOGIN: "1" },
     url: `${BASE_URL}/login`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

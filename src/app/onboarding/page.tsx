@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { CardSkeleton } from "@/components/ui/card";
 import { CreateFamilyForm } from "@/features/family/components/create-family-form";
 import { getFamilyContext } from "@/features/family/queries";
+import { isAutoLoginEnabled } from "@/lib/auto-login";
 import { ROUTES } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "가족 만들기" };
@@ -20,20 +21,25 @@ async function OnboardingContent() {
 }
 
 export default function OnboardingPage() {
+  const shared = isAutoLoginEnabled();
   return (
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-4 px-4 py-10">
       <div>
         <h1 className="page-title">가족 만들기</h1>
         <p className="mt-1 text-sm text-muted">
-          가족을 만든 뒤 배우자를 초대하면 일정과 교육비를 함께 관리할 수 있습니다.
+          {shared
+            ? "가족을 한 번만 만들면 배우자도 같은 주소로 바로 함께 봅니다."
+            : "가족을 만든 뒤 배우자를 초대하면 일정과 교육비를 함께 관리할 수 있습니다."}
         </p>
       </div>
       <Suspense fallback={<CardSkeleton />}>
         <OnboardingContent />
       </Suspense>
-      <p className="text-sm text-muted">
-        배우자에게 초대 링크를 받으셨나요? 가족을 만들지 말고 받은 링크를 열어 주세요.
-      </p>
+      {shared ? null : (
+        <p className="text-sm text-muted">
+          배우자에게 초대 링크를 받으셨나요? 가족을 만들지 말고 받은 링크를 열어 주세요.
+        </p>
+      )}
     </main>
   );
 }
