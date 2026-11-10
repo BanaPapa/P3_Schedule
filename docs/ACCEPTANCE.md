@@ -1,7 +1,7 @@
 # PRD 인수 기준 ↔ 자동 테스트
 
 PRD 10장 "개발 완료 기준"의 상황별 질문을 어떤 자동 테스트가 확인하는지 정리한다.
-`pnpm test:db`(pgTAP), `pnpm test`(Vitest), `pnpm test:e2e`(Playwright, 모바일 화면)로 돌린다.
+`pnpm test`(Vitest), `pnpm test:e2e`(Playwright, 모바일 화면)로 돌린다. pgTAP(`supabase/tests/database/`)은 파일만 남아 있고 운영 DB에서는 돌리지 않는다(테스트가 `truncate` 로 시작한다).
 
 | PRD 질문 | 확인하는 테스트 |
 |---|---|
