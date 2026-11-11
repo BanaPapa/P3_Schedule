@@ -57,8 +57,20 @@ interface ProviderProps {
  */
 export function TimetableEditorProvider({ childOptions, children }: ProviderProps) {
   const [state, setState] = useState<EditorState>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const dragging = useRef<DragInfo | null>(null);
   const close = useCallback(() => setState(null), []);
+  // 저장하면 모달을 닫고 결과(언제부터 바뀌는지)를 잠깐 띄운다. 지난 수업은 그대로라 화면만 보면 안 바뀐 듯 보일 수 있다.
+  const saved = useCallback((message: string) => {
+    setState(null);
+    setNotice(message);
+  }, []);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => setNotice(null), NOTICE_MS);
+    return () => clearTimeout(timer);
+  }, [notice]);
 
   const api = useMemo<EditorApi>(
     () => ({
@@ -97,15 +109,28 @@ export function TimetableEditorProvider({ childOptions, children }: ProviderProp
           fromDrag={state.fromDrag}
           childOptions={childOptions}
           onClose={close}
+          onSaved={saved}
         />
       ) : null}
       {state?.kind === "delete" ? (
-        <SessionDeleteModal key={state.session.id} session={state.session} onClose={close} />
+        <SessionDeleteModal key={state.session.id} session={state.session} onClose={close} onSaved={saved} />
+      ) : null}
+      {notice ? (
+        <div
+          role="status"
+          className="fixed inset-x-4 bottom-6 z-50 mx-auto flex max-w-md items-start gap-3 rounded-xl bg-foreground px-4 py-3 text-sm text-surface shadow-lift"
+        >
+          <span className="flex-1">{notice}</span>
+          <button type="button" onClick={() => setNotice(null)} className="font-bold opacity-80 hover:opacity-100">
+            닫기
+          </button>
+        </div>
       ) : null}
     </EditorContext.Provider>
   );
 }
 
+const NOTICE_MS = 6000;
 const MENU_WIDTH = 176;
 const MENU_HEIGHT = 140;
 

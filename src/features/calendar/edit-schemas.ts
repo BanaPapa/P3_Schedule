@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { addDays, isIsoDate, todayInSeoul, type IsoDate } from "@/lib/dates";
+import { addDays, isIsoDate, isoWeekday, todayInSeoul, type IsoDate } from "@/lib/dates";
 import { TIME_PATTERN } from "@/features/education/schemas";
 
 /** 반복 수업을 고칠 때 범위: 이번 회차만 / 이 요일·시간 수업을 앞으로 매주 */
@@ -58,4 +58,10 @@ export const sessionDeleteSchema = z.object({
 export function weeklyFrom(originalDate: IsoDate, newDate: IsoDate, today: IsoDate): IsoDate {
   const earlier = originalDate < newDate ? originalDate : newDate;
   return earlier > today ? earlier : today;
+}
+
+/** 기준일 이후 처음으로 그 요일(ISO 1=월…7=일)이 오는 날. "언제부터 바뀌는지" 알려 줄 때 쓴다 */
+export function firstClassDate(from: IsoDate, weekday: number): IsoDate {
+  const gap = (weekday - isoWeekday(from) + 7) % 7;
+  return addDays(from, gap);
 }

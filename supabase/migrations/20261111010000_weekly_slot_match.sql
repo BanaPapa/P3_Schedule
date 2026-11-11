@@ -60,13 +60,21 @@ set search_path = ''
 as $$
 declare
   v_session public.class_sessions;
+  v_others jsonb;
 begin
   v_session := private.lock_regular_session(p_session_id, p_version);
+  v_others := private.rules_except_slot(v_session.enrollment_id, p_from, v_session.rule_id);
+  -- 옮길 요일·시각에 이 과목의 다른 수업이 이미 있으면 겹친다
+  if exists (
+    select 1 from jsonb_array_elements(v_others) o
+    where (o ->> 'weekday')::smallint = p_weekday and (o ->> 'start_time')::time = p_start
+  ) then
+    raise exception 'slot_taken';
+  end if;
   perform private.replace_rules_from(
     v_session.enrollment_id,
     p_from,
-    private.rules_except_slot(v_session.enrollment_id, p_from, v_session.rule_id)
-      || private.single_rule(p_weekday, p_start, p_end)
+    v_others || private.single_rule(p_weekday, p_start, p_end)
   );
 end;
 $$;
@@ -89,6 +97,7 @@ declare
   v_session public.class_sessions;
   v_enrollment public.enrollments;
   v_target uuid;
+  v_remaining jsonb;
   v_new jsonb := private.single_rule(p_weekday, p_start, p_end);
 begin
   v_session := private.lock_regular_session(p_session_id, p_version);
@@ -104,11 +113,8 @@ begin
     raise exception 'same_child';
   end if;
 
-  perform private.replace_rules_from(
-    v_enrollment.id,
-    p_from,
-    private.rules_except_slot(v_enrollment.id, p_from, v_session.rule_id)
-  );
+  -- 먼저 원래 아이에게 지금도 이 수업이 있는지 확인한다(없으면 slot_not_current)
+  v_remaining := private.rules_except_slot(v_enrollment.id, p_from, v_session.rule_id);
 
   select e.id into v_target
   from public.enrollments e
@@ -120,6 +126,19 @@ begin
   order by e.start_date desc
   limit 1
   for update;
+
+  -- 옮겨 갈 아이가 이미 그 요일·시각에 같은 학원 수업이 있으면(예: 이미 옮겨 둠) 알려 준다
+  if v_target is not null and exists (
+    select 1 from public.class_rules r
+    where r.enrollment_id = v_target
+      and (r.effective_until is null or r.effective_until >= p_from)
+      and r.weekday = p_weekday
+      and r.start_time = p_start
+  ) then
+    raise exception 'target_slot_exists';
+  end if;
+
+  perform private.replace_rules_from(v_enrollment.id, p_from, v_remaining);
 
   if v_target is null then
     v_target := public.create_enrollment(

@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/ui/form-message";
 import { Modal } from "@/components/ui/modal";
 import { TextField } from "@/components/ui/text-field";
-import { formatDayLabel, isoWeekday, isIsoDate, WEEKDAY_LABELS } from "@/lib/dates";
+import { formatDayLabel, isoWeekday, isIsoDate, todayInSeoul, WEEKDAY_LABELS } from "@/lib/dates";
 import { IDLE } from "@/lib/form-state";
 import { editSessionAction } from "../actions";
-import { CHILD_CHANGE_NEEDS_WEEKLY, type EditScope } from "../edit-schemas";
+import { CHILD_CHANGE_NEEDS_WEEKLY, firstClassDate, weeklyFrom, type EditScope } from "../edit-schemas";
 import type { CalendarSession } from "../queries";
 import type { ChildOption } from "./timetable-editor";
 
@@ -26,6 +26,8 @@ interface Props {
   fromDrag: boolean;
   childOptions: readonly ChildOption[];
   onClose: () => void;
+  /** 저장 성공: 모달을 닫고 결과 문장을 보인다 */
+  onSaved: (message: string) => void;
 }
 
 const hhmm = (time: string) => time.slice(0, 5);
@@ -67,7 +69,7 @@ function ScopeOption({
 }
 
 /** 더블클릭 편집·끌어 옮기기 확인. 이번만 / 앞으로 매주 중에서 고른다(반복 수업 규칙) */
-export function SessionEditModal({ session, draft, fromDrag, childOptions, onClose }: Props) {
+export function SessionEditModal({ session, draft, fromDrag, childOptions, onClose, onSaved }: Props) {
   const [state, formAction, pending] = useActionState(editSessionAction, IDLE);
   const [childId, setChildId] = useState(draft?.childId ?? session.child.id);
   const [date, setDate] = useState(draft?.date ?? session.date);
@@ -79,12 +81,19 @@ export function SessionEditModal({ session, draft, fromDrag, childOptions, onClo
   const effectiveScope: EditScope = childChanged ? "weekly" : scope;
 
   useEffect(() => {
-    if (state.status === "success") onClose();
-  }, [state, onClose]);
+    if (state.status === "success") onSaved(state.message);
+  }, [state, onSaved]);
 
   const values = state.status === "error" ? state.values : undefined;
   const errors = state.status === "error" ? state.fieldErrors : undefined;
   const weekday = isIsoDate(date) ? WEEKDAY_LABELS[isoWeekday(date)] : "";
+  // "앞으로 매주" 가 실제로 시작되는 날. 지난 수업은 그대로라 화면에서 바로 안 바뀌어 보일 수 있어 미리 알린다.
+  const today = todayInSeoul();
+  const firstLabel = isIsoDate(date)
+    ? formatDayLabel(firstClassDate(weeklyFrom(session.date, date, today), isoWeekday(date)))
+    : "";
+  const pastNote =
+    session.date < today ? `이미 지난 ${formatDayLabel(session.date)} 수업은 기록으로 그대로 남습니다.` : "지난 기록은 그대로 둡니다.";
   const original = `${session.child.name} · ${session.academyName} · ${formatDayLabel(session.date)} ${hhmm(session.startTime)}–${hhmm(session.endTime)}`;
 
   return (
@@ -176,9 +185,9 @@ export function SessionEditModal({ session, draft, fromDrag, childOptions, onClo
             detail={
               !regular
                 ? "보강·변경된 수업은 이번만 바꿀 수 있습니다."
-                : `이 수업(매주 ${WEEKDAY_LABELS[isoWeekday(session.date)]} ${hhmm(session.startTime)})을 앞으로 매주 ${weekday ? `${weekday}요일 ` : ""}${
-                    childChanged ? `${targetChildName} 수업으로 옮깁니다` : "새 시간으로 바꿉니다"
-                  }. 지난 기록은 그대로 둡니다.`
+                : `매주 ${WEEKDAY_LABELS[isoWeekday(session.date)]} ${hhmm(session.startTime)} 수업을 ${firstLabel ? `${firstLabel}부터` : "앞으로"} ${
+                    childChanged ? `${targetChildName} 수업으로 옮깁니다` : `매주 ${weekday ? `${weekday}요일 ` : ""}새 시간으로 바꿉니다`
+                  }. ${pastNote}`
             }
             onSelect={setScope}
           />

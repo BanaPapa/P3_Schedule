@@ -13,14 +13,22 @@ import type { CalendarSession } from "../queries";
 const hhmm = (time: string) => time.slice(0, 5);
 
 /** 우클릭 → 삭제. 이번만은 취소로 남기고(기록·학원비 계산), 앞으로 매주는 그 요일·시간 수업을 없앤다 */
-export function SessionDeleteModal({ session, onClose }: { session: CalendarSession; onClose: () => void }) {
+export function SessionDeleteModal({
+  session,
+  onClose,
+  onSaved,
+}: {
+  session: CalendarSession;
+  onClose: () => void;
+  onSaved: (message: string) => void;
+}) {
   const [state, formAction, pending] = useActionState(deleteSessionAction, IDLE);
   const regular = session.kind === "regular";
   const [scope, setScope] = useState<EditScope>("once");
 
   useEffect(() => {
-    if (state.status === "success") onClose();
-  }, [state, onClose]);
+    if (state.status === "success") onSaved(state.message);
+  }, [state, onSaved]);
 
   const options: { value: EditScope; title: string; detail: string; disabled: boolean }[] = [
     {

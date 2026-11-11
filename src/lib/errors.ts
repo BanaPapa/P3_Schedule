@@ -40,7 +40,10 @@ export const ERROR_MESSAGES = {
   trip_items_outside: "바꾼 기간 밖에 일정이 남아 있습니다. 그 일정을 먼저 옮기거나 지워 주세요.",
   only_regular_session: "보강·변경된 수업은 '이번만'으로만 바꿀 수 있습니다.",
   same_child: "이미 그 아이의 수업입니다.",
-  slot_not_current: "이 시간 수업은 지금은 다른 시간으로 바뀌어 있습니다. 이번 주 이후의 수업을 골라 바꿔 주세요.",
+  slot_not_current:
+    "이 수업은 이미 다른 시간·다른 아이로 바뀌었거나 끝났습니다. 다음 주 이후 수업에서 확인해 주세요.",
+  target_slot_exists: "옮겨 갈 아이에게 이미 같은 요일·시각의 이 학원 수업이 있습니다.",
+  slot_taken: "그 요일·시각에는 이미 이 학원 수업이 있습니다.",
   // 앱
   academy_in_use: "수강 과목이 등록된 학원은 삭제할 수 없습니다. 먼저 수강 과목을 정리해 주세요.",
   child_in_use: "수강 과목이 등록된 자녀는 삭제할 수 없습니다. 먼저 수강 과목을 정리해 주세요.",
@@ -100,6 +103,8 @@ const RPC_ERROR_CODES: ReadonlySet<string> = new Set<ErrorCode>([
   "only_regular_session",
   "same_child",
   "slot_not_current",
+  "target_slot_exists",
+  "slot_taken",
 ]);
 
 /** 회차를 읽은 뒤 다른 사람이 먼저 바꿨을 때 RPC 가 던지는 코드. 화면은 conflict() 로 처리한다. */

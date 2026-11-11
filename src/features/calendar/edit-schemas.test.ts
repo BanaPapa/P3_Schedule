@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { CHILD_CHANGE_NEEDS_WEEKLY, sessionDeleteSchema, sessionEditSchema, weeklyFrom } from "./edit-schemas";
+import {
+  CHILD_CHANGE_NEEDS_WEEKLY,
+  firstClassDate,
+  sessionDeleteSchema,
+  sessionEditSchema,
+  weeklyFrom,
+} from "./edit-schemas";
 
 const NOW = new Date("2026-11-11T03:00:00Z"); // 서울 2026-11-11
 const ID = "6f1c2f0e-8f43-4c1e-9d55-3f0f6c2f9a11";
@@ -47,6 +53,15 @@ describe("sessionDeleteSchema", () => {
   it("id·version·범위를 받는다", () => {
     expect(sessionDeleteSchema.safeParse({ id: ID, version: "3", scope: "weekly" }).success).toBe(true);
     expect(sessionDeleteSchema.safeParse({ id: "x", version: "3", scope: "weekly" }).success).toBe(false);
+  });
+});
+
+describe("firstClassDate", () => {
+  it("기준일 이후 처음 오는 그 요일", () => {
+    // 2026-11-11 은 수요일
+    expect(firstClassDate("2026-11-11", 1)).toBe("2026-11-16");
+    expect(firstClassDate("2026-11-11", 3)).toBe("2026-11-11");
+    expect(firstClassDate("2026-11-11", 5)).toBe("2026-11-13");
   });
 });
 
