@@ -6,7 +6,7 @@ import { CalendarToolbar } from "@/features/calendar/components/calendar-toolbar
 import { MonthGrid } from "@/features/calendar/components/month-grid";
 import { SessionList } from "@/features/calendar/components/session-item";
 import { calendarHref, calendarRange, groupByDate, parseCalendarParams } from "@/features/calendar/params";
-import { DayAgenda, DayStrip } from "@/features/calendar/components/day-view";
+import { DayFlow, DayStrip } from "@/features/calendar/components/day-view";
 import { getSessionsBetween } from "@/features/calendar/queries";
 import { TripAgenda } from "@/features/calendar/components/trip-agenda";
 import { SchoolAgenda } from "@/features/calendar/components/school-agenda";
@@ -42,6 +42,11 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
   );
   const byDate = groupByDate(sessions);
   const showChild = params.childId === null && children.length > 1;
+  // 주간 보기의 자녀 줄: 고른 자녀 한 명, 아니면 이번 주 수업이 있는 자녀(자녀 순서대로)
+  const childIdsWithSessions = new Set(sessions.map((session) => session.child.id));
+  const lanes = children
+    .filter((child) => (params.childId ? child.id === params.childId : childIdsWithSessions.has(child.id)))
+    .map(({ id, name, color }) => ({ id, name, color }));
 
   return (
     <>
@@ -62,7 +67,7 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
         </>
       ) : (
         <>
-          {/* 휴대폰: 요일 줄 + 고른 날의 수업 목록 */}
+          {/* 휴대폰: 요일 줄 + 고른 날의 자녀별 하루 흐름 */}
           <div className="flex flex-col gap-3 md:hidden">
             <DayStrip
               days={weekDates(params.date).map((date) => ({ date, href: calendarHref({ ...params, date }, today) }))}
@@ -70,11 +75,11 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
               today={today}
               sessionsByDate={byDate}
             />
-            <DayAgenda
+            <DayFlow
               date={params.date}
               today={today}
               sessions={byDate.get(params.date) ?? []}
-              showChild={showChild}
+              lanes={lanes}
               allDay={
                 <>
                   <TripAgenda date={params.date} data={trips} />
@@ -86,7 +91,7 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
 
           {/* 태블릿·PC: 요일 × 시간 격자. 시간이 없는 여행·학교 일정은 아래 날짜별 카드로 */}
           <div className="hidden flex-col gap-3 md:flex">
-            <WeekTimetable dates={weekDates(params.date)} today={today} sessionsByDate={byDate} showChild={showChild} />
+            <WeekTimetable dates={weekDates(params.date)} today={today} sessionsByDate={byDate} lanes={lanes} />
             {weekDates(params.date)
               .filter((date) => tripDates.has(date) || schoolDates.has(date))
               .map((date) => (

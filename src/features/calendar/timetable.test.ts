@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { CASCADE_INDENT, childTone, findOverlaps, hourRange, layoutDay, seoulMinutes, toMinutes } from "./timetable";
+import {
+  CASCADE_INDENT,
+  childTone,
+  dayFlow,
+  findOverlaps,
+  hourRange,
+  layoutDay,
+  seoulMinutes,
+  toMinutes,
+} from "./timetable";
 
 const item = (id: string, startTime: string, endTime: string) => ({ id, startTime, endTime });
 
@@ -76,6 +85,27 @@ describe("layoutDay", () => {
     );
     expect(placed.map((p) => Number(p.width.toFixed(2)))).toEqual([1, 0.78, 0.56, 0.5]);
     expect(placed.map((p) => p.z)).toEqual([0, 1, 2, 3]);
+  });
+});
+
+describe("dayFlow", () => {
+  it("시작 순으로 놓고 앞 수업과의 빈 시간을 잰다", () => {
+    const flow = dayFlow([item("c", "16:00", "16:50"), item("a", "13:30", "14:30"), item("b", "14:50", "15:30")]);
+    expect(flow.map((step) => [step.item.id, step.gapBefore])).toEqual([
+      ["a", null],
+      ["b", 20],
+      ["c", 30],
+    ]);
+  });
+
+  it("바로 이어지면 0, 겹치면 음수", () => {
+    const flow = dayFlow([item("a", "13:30", "14:30"), item("b", "14:00", "14:50"), item("c", "14:50", "15:30")]);
+    expect(flow.map((step) => step.gapBefore)).toEqual([null, -30, 0]);
+  });
+
+  it("긴 수업 안에 든 짧은 수업 다음도 긴 수업 끝을 기준으로 잰다", () => {
+    const flow = dayFlow([item("a", "10:00", "12:00"), item("b", "10:30", "11:00"), item("c", "11:30", "12:30")]);
+    expect(flow.map((step) => step.gapBefore)).toEqual([null, -90, -30]);
   });
 });
 

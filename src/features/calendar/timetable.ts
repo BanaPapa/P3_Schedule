@@ -130,6 +130,25 @@ export function childTone(color: string): Tone {
   };
 }
 
+export interface FlowStep<T extends TimedItem> {
+  item: T;
+  /** 앞 수업이 끝나고 이 수업이 시작하기까지(분). 첫 수업은 null, 음수면 겹침 */
+  gapBefore: number | null;
+}
+
+/**
+ * 한 아이의 하루 흐름: 시작 순으로 놓고 수업 사이 빈 시간을 잰다.
+ * 앞 수업들 중 가장 늦게 끝나는 시각을 기준으로 해서, 긴 수업 안에 짧은 수업이 들어 있어도 겹침으로 잡는다.
+ */
+export function dayFlow<T extends TimedItem>(items: readonly T[]): FlowStep<T>[] {
+  const sorted = [...items].sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime));
+  return sorted.map((item, index) => {
+    if (index === 0) return { item, gapBefore: null };
+    const latestEnd = Math.max(...sorted.slice(0, index).map((prev) => toMinutes(prev.endTime)));
+    return { item, gapBefore: toMinutes(item.startTime) - latestEnd };
+  });
+}
+
 /** 서울 기준 지금 시각(분). 시간표의 현재 시각 선에 쓴다. */
 export function seoulMinutes(now: Date): number {
   const parts = new Intl.DateTimeFormat("en-GB", {
