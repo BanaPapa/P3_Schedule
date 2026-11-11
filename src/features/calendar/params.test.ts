@@ -43,6 +43,25 @@ describe("calendarRange", () => {
       to: "2026-11-08",
     });
   });
+
+  it("covers the same week for the table view", () => {
+    expect(calendarRange({ view: "table", date: "2026-11-04", childId: null })).toEqual({
+      from: "2026-11-02",
+      to: "2026-11-08",
+    });
+  });
+});
+
+describe("table view", () => {
+  it("reads view=table", () => {
+    expect(parseCalendarParams({ view: "table" }, TODAY).view).toBe("table");
+  });
+
+  it("moves by a week and keeps view=table in the link", () => {
+    const next = shiftCalendar({ view: "table", date: "2026-11-04", childId: null }, 1);
+    expect(next).toEqual({ view: "table", date: "2026-11-11", childId: null });
+    expect(calendarHref(next, TODAY)).toBe("/calendar?view=table&date=2026-11-11");
+  });
 });
 
 describe("shiftCalendar", () => {

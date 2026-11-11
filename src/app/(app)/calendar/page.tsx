@@ -7,6 +7,7 @@ import { MonthGrid } from "@/features/calendar/components/month-grid";
 import { SessionList } from "@/features/calendar/components/session-item";
 import { calendarHref, calendarRange, groupByDate, parseCalendarParams } from "@/features/calendar/params";
 import { DayFlow, DayStrip } from "@/features/calendar/components/day-view";
+import { WeekTable } from "@/features/calendar/components/week-table";
 import { getSessionsBetween } from "@/features/calendar/queries";
 import { TripAgenda } from "@/features/calendar/components/trip-agenda";
 import { SchoolAgenda } from "@/features/calendar/components/school-agenda";
@@ -65,6 +66,14 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
             <SessionList sessions={byDate.get(params.date) ?? []} showChild={showChild} emptyText="이날은 수업이 없습니다." />
           </Card>
         </>
+      ) : params.view === "table" ? (
+        // 표: 자녀·학원 × 요일. 휴대폰·PC 같은 모양(휴대폰은 옆으로 넘김)
+        <WeekTable
+          dates={weekDates(params.date)}
+          today={today}
+          sessions={sessions}
+          childOrder={children.map((child) => child.id)}
+        />
       ) : (
         <>
           {/* 휴대폰: 요일 줄 + 고른 날의 자녀별 하루 흐름 */}

@@ -11,11 +11,17 @@ import {
 } from "@/lib/dates";
 import { ROUTES } from "@/lib/routes";
 
-export type CalendarView = "month" | "week";
+/** 월간 / 주간 캘린더 / 주간 표(자녀·학원 × 요일) */
+export type CalendarView = "month" | "week" | "table";
+
+const VIEWS: readonly CalendarView[] = ["month", "week", "table"];
+
+/** 주 단위로 움직이는 보기 */
+export const isWeekly = (view: CalendarView) => view !== "month";
 
 export interface CalendarParams {
   view: CalendarView;
-  /** 보고 있는 날짜. 월간이면 그 달, 주간이면 그 주, 아래 목록은 이 날짜 */
+  /** 보고 있는 날짜. 월간이면 그 달, 주간·표면 그 주, 아래 목록은 이 날짜 */
   date: IsoDate;
   childId: string | null;
 }
@@ -30,7 +36,8 @@ function single(value: string | string[] | undefined): string | undefined {
 }
 
 export function parseCalendarParams(searchParams: SearchParams, today: IsoDate): CalendarParams {
-  const view = single(searchParams.view) === "month" ? "month" : "week";
+  const rawView = single(searchParams.view);
+  const view = VIEWS.find((candidate) => candidate === rawView) ?? "week";
   const rawDate = single(searchParams.date);
   const latest = addDays(today, MAX_DAYS_AHEAD);
   const date = rawDate && isIsoDate(rawDate) ? (rawDate > latest ? latest : rawDate) : today;
@@ -40,7 +47,7 @@ export function parseCalendarParams(searchParams: SearchParams, today: IsoDate):
 
 /** 화면에 보이는 칸 전체(월간은 앞뒤 이웃 달 포함) */
 export function calendarRange({ view, date }: CalendarParams): { from: IsoDate; to: IsoDate } {
-  if (view === "week") {
+  if (isWeekly(view)) {
     const days = weekDates(date);
     return { from: days[0], to: days[6] };
   }
@@ -49,7 +56,7 @@ export function calendarRange({ view, date }: CalendarParams): { from: IsoDate; 
 }
 
 export function shiftCalendar(params: CalendarParams, step: 1 | -1): CalendarParams {
-  if (params.view === "week") return { ...params, date: addDays(params.date, 7 * step) };
+  if (isWeekly(params.view)) return { ...params, date: addDays(params.date, 7 * step) };
   const month = addMonths(monthOf(params.date), step);
   return { ...params, date: `${formatMonthParam(month)}-01` };
 }

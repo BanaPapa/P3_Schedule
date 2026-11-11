@@ -186,9 +186,9 @@ body {
     --tt-hour: 4.75rem;
   }
 }
-/* 넓은 PC 화면: 하루 칸을 자녀별로 나누므로 주간 시간표가 있는 화면만 본문을 넓힌다 */
+/* 넓은 PC 화면: 주간 시간표(자녀별로 나눈 칸)나 주간 표가 있는 화면만 본문을 넓힌다 */
 @media (min-width: 1280px) {
-  main:has(.timetable) {
+  main:has(.timetable, .week-table) {
     max-width: 84rem;
   }
 }

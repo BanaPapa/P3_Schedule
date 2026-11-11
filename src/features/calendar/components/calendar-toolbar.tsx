@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { formatDayLabel, formatMonthLabel, monthOf, weekDates } from "@/lib/dates";
-import { calendarHref, shiftCalendar, type CalendarParams } from "../params";
+import { calendarHref, shiftCalendar, type CalendarParams, type CalendarView } from "../params";
 
 interface ChildOption {
   id: string;
@@ -21,6 +21,12 @@ function title(params: CalendarParams): string {
 }
 
 const PILL = "rounded-full px-3 py-1.5 text-sm font-extrabold transition";
+
+const VIEW_OPTIONS: readonly { view: CalendarView; label: string }[] = [
+  { view: "month", label: "월간" },
+  { view: "week", label: "주간" },
+  { view: "table", label: "표" },
+];
 
 export function CalendarToolbar({ params, today, childOptions }: CalendarToolbarProps) {
   const href = (next: Partial<CalendarParams>) => calendarHref({ ...params, ...next }, today);
@@ -50,14 +56,14 @@ export function CalendarToolbar({ params, today, childOptions }: CalendarToolbar
 
       <div className="flex items-center justify-between gap-2">
         <div className="flex rounded-full border border-border bg-surface p-0.5" role="group" aria-label="보기">
-          {(["month", "week"] as const).map((view) => (
+          {VIEW_OPTIONS.map(({ view, label }) => (
             <Link
               key={view}
               href={href({ view })}
               aria-current={params.view === view ? "true" : undefined}
               className={`${PILL} ${params.view === view ? "btn-primary" : "text-muted"}`}
             >
-              {view === "month" ? "월간" : "주간"}
+              {label}
             </Link>
           ))}
         </div>
