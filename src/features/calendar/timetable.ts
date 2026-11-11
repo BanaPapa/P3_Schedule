@@ -30,6 +30,9 @@ export interface HourRange {
 const DEFAULT_RANGE: HourRange = { startHour: 9, endHour: 18 };
 /** 수업이 몰려 있어도 시간표가 너무 납작하지 않도록 최소 시간 수 */
 const MIN_HOURS = 6;
+/** 수업 앞뒤로 비워 두는 시간(끌어 옮길 자리) */
+const PADDING_HOURS = 1;
+const FIRST_HOUR = 6;
 const LAST_HOUR = 24;
 
 /** "14:30" 또는 "14:30:00" → 870 */
@@ -38,13 +41,16 @@ export function toMinutes(time: string): number {
   return Number(hours) * 60 + Number(minutes);
 }
 
-/** 수업이 걸친 시간대(정각 단위). 최소 MIN_HOURS 시간을 보여 준다. */
+/**
+ * 수업이 걸친 시간대(정각 단위)에 앞뒤로 PADDING_HOURS 씩 여유를 둔다. 최소 MIN_HOURS 시간.
+ * 여유가 없으면 가장 이른 수업을 늦출 때 위쪽 줄이 통째로 사라져 보이고, 더 이른 시간으로 끌어 놓을 자리도 없다.
+ */
 export function hourRange(items: readonly TimedItem[]): HourRange {
   if (items.length === 0) return DEFAULT_RANGE;
   const earliest = Math.min(...items.map((item) => toMinutes(item.startTime)));
   const latest = Math.max(...items.map((item) => toMinutes(item.endTime)));
-  const startHour = Math.floor(earliest / 60);
-  const endHour = Math.min(LAST_HOUR, Math.max(Math.ceil(latest / 60), startHour + MIN_HOURS));
+  const startHour = Math.max(FIRST_HOUR, Math.floor(earliest / 60) - PADDING_HOURS);
+  const endHour = Math.min(LAST_HOUR, Math.max(Math.ceil(latest / 60) + PADDING_HOURS, startHour + MIN_HOURS));
   return { startHour, endHour };
 }
 

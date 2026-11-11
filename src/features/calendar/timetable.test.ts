@@ -26,16 +26,21 @@ describe("hourRange", () => {
     expect(hourRange([])).toEqual({ startHour: 9, endHour: 18 });
   });
 
-  it("가장 이른 시작과 가장 늦은 끝을 정각으로 넓힌다", () => {
+  it("가장 이른 시작과 가장 늦은 끝을 정각으로 넓히고 앞뒤로 1시간 여유를 둔다", () => {
     expect(hourRange([item("a", "13:30:00", "14:20:00"), item("b", "21:00:00", "21:50:00")])).toEqual({
-      startHour: 13,
-      endHour: 22,
+      startHour: 12,
+      endHour: 23,
     });
   });
 
-  it("최소 6시간은 보여 주되 24시를 넘지 않는다", () => {
-    expect(hourRange([item("a", "15:00", "16:00")])).toEqual({ startHour: 15, endHour: 21 });
-    expect(hourRange([item("a", "22:00", "23:30")])).toEqual({ startHour: 22, endHour: 24 });
+  it("가장 이른 수업을 늦춰도 그 앞 한 시간은 남는다(위 줄이 통째로 사라지지 않게)", () => {
+    expect(hourRange([item("a", "14:00", "15:00"), item("b", "21:00", "21:50")]).startHour).toBe(13);
+  });
+
+  it("최소 6시간은 보여 주되 6시~24시를 넘지 않는다", () => {
+    expect(hourRange([item("a", "15:00", "16:00")])).toEqual({ startHour: 14, endHour: 20 });
+    expect(hourRange([item("a", "22:00", "23:30")])).toEqual({ startHour: 21, endHour: 24 });
+    expect(hourRange([item("a", "06:00", "07:00")]).startHour).toBe(6);
   });
 });
 
