@@ -15,6 +15,9 @@ import { logger } from "@/lib/logger";
 import { ROUTES } from "@/lib/routes";
 import { createClient } from "@/lib/supabase/server";
 import { requireFamily } from "@/features/family/queries";
+import { todayInSeoul } from "@/lib/dates";
+import { enrollmentOverlapNotice } from "./overlap";
+import { getEnrollments } from "./queries";
 import {
   academyCreateSchema,
   academyDeleteSchema,
@@ -116,7 +119,7 @@ export async function createEnrollmentAction(_prev: FormState, formData: FormDat
 
   const { childId, academyId, memo, startDate, endDate, rules } = parsed.data;
   const supabase = await createClient();
-  const { error } = await supabase.rpc("create_enrollment", {
+  const { data: enrollmentId, error } = await supabase.rpc("create_enrollment", {
     p_child_id: childId,
     p_academy_id: academyId,
     // 과목명은 받지 않는다. 학원 이름이 곧 수업 이름이고, 빈 값은 DB 에서 null 로 저장된다.
@@ -135,8 +138,9 @@ export async function createEnrollmentAction(_prev: FormState, formData: FormDat
   if (error) return dbFailure("create_enrollment", error, values);
 
   refreshEducationPages();
-  // 등록 화면은 폼만 있으므로 교육 탭으로 돌아가 새 수강 과목을 보여준다
-  redirect(`${ROUTES.education}?added=1`);
+  // 등록 화면은 폼만 있으므로 교육 탭으로 돌아가 새 수강 과목을 보여준다.
+  // id 를 넘겨 교육 탭이 같은 자녀의 다른 수업과 시간이 겹치는지 알려 준다.
+  redirect(`${ROUTES.education}?added=1&id=${enrollmentId}`);
 }
 
 export async function changeScheduleAction(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -158,7 +162,9 @@ export async function changeScheduleAction(_prev: FormState, formData: FormData)
 
   refreshEducationPages();
   revalidatePath(ROUTES.scheduleChange(parsed.data.enrollmentId));
-  return success("일정을 바꿨습니다. 캘린더에 새 일정이 반영되었습니다.");
+  // 같은 자녀의 다른 수업과 겹치면 막지 않고 알려만 준다
+  const notice = enrollmentOverlapNotice(parsed.data.enrollmentId, await getEnrollments(), todayInSeoul());
+  return success(`일정을 바꿨습니다. 캘린더에 새 일정이 반영되었습니다.${notice ? ` ${notice}` : ""}`);
 }
 
 export async function endEnrollmentAction(_prev: FormState, formData: FormData): Promise<FormState> {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { childTone, hourRange, layoutDay, seoulMinutes, toMinutes } from "./timetable";
+import { CASCADE_INDENT, childTone, findOverlaps, hourRange, layoutDay, seoulMinutes, toMinutes } from "./timetable";
 
 const item = (id: string, startTime: string, endTime: string) => ({ id, startTime, endTime });
 
@@ -29,41 +29,86 @@ describe("hourRange", () => {
 });
 
 describe("layoutDay", () => {
-  it("겹치지 않으면 한 칸에 세로 위치만 계산한다", () => {
+  const row = (p: { item: { id: string }; left: number; width: number; z: number }) => [
+    p.item.id,
+    Number(p.left.toFixed(2)),
+    Number(p.width.toFixed(2)),
+    p.z,
+  ];
+
+  it("겹치지 않으면 칸 폭을 다 쓰고 세로 위치만 계산한다", () => {
     const placed = layoutDay([item("b", "16:00", "16:50"), item("a", "13:30", "14:20")], 13);
-    expect(placed.map((p) => [p.item.id, p.top, p.height, p.lane, p.lanes])).toEqual([
+    expect(placed.map((p) => [p.item.id, p.top, p.height, p.left, p.width])).toEqual([
       ["a", 30, 50, 0, 1],
       ["b", 180, 50, 0, 1],
     ]);
   });
 
-  it("겹치는 수업은 옆 칸으로 나눈다", () => {
+  it("나중에 시작한 수업은 오른쪽으로 조금 밀어 위에 겹쳐 쌓는다", () => {
     const placed = layoutDay(
-      [item("a", "13:30", "14:20"), item("b", "14:00", "14:50"), item("c", "14:50", "15:30")],
+      [item("a", "13:30", "14:30"), item("b", "14:00", "14:50"), item("c", "14:50", "15:30")],
       13,
     );
-    expect(placed.map((p) => [p.item.id, p.lane, p.lanes])).toEqual([
-      ["a", 0, 2],
-      ["b", 1, 2],
-      ["c", 0, 1],
+    expect(placed.map(row)).toEqual([
+      ["a", 0, 1, 0],
+      ["b", CASCADE_INDENT, 1 - CASCADE_INDENT, 1],
+      ["c", 0, 1, 0],
+    ]);
+  });
+
+  it("시작 시각이 가까우면 나란히 반씩 나눈다", () => {
+    const placed = layoutDay([item("a", "15:00", "17:00"), item("b", "15:10", "16:00")], 15);
+    expect(placed.map(row)).toEqual([
+      ["a", 0, 0.5, 0],
+      ["b", 0.5, 0.5, 1],
     ]);
   });
 
   it("끝나자마자 시작하는 수업은 겹치지 않는다", () => {
     const placed = layoutDay([item("a", "14:00", "14:50"), item("b", "14:50", "15:30")], 14);
-    expect(placed.every((p) => p.lanes === 1)).toBe(true);
+    expect(placed.every((p) => p.left === 0 && p.width === 1)).toBe(true);
   });
 
-  it("빈 칸을 다시 쓴다", () => {
+  it("여러 번 겹쳐도 절반 폭보다 좁아지지 않는다", () => {
     const placed = layoutDay(
-      [item("a", "10:00", "12:00"), item("b", "10:00", "10:30"), item("c", "10:30", "11:00")],
+      [item("a", "10:00", "13:00"), item("b", "10:30", "13:00"), item("c", "11:00", "13:00"), item("d", "11:30", "13:00")],
       10,
     );
-    expect(placed.map((p) => [p.item.id, p.lane, p.lanes])).toEqual([
-      ["a", 0, 2],
-      ["b", 1, 2],
-      ["c", 1, 2],
-    ]);
+    expect(placed.map((p) => Number(p.width.toFixed(2)))).toEqual([1, 0.78, 0.56, 0.5]);
+    expect(placed.map((p) => p.z)).toEqual([0, 1, 2, 3]);
+  });
+});
+
+describe("findOverlaps", () => {
+  const session = (id: string, child: string, startTime: string, endTime: string, active = true) => ({
+    id,
+    child,
+    startTime,
+    endTime,
+    active,
+  });
+
+  it("같은 자녀 겹침과 형제 동시 수업을 나눈다", () => {
+    const { sameChild, concurrent } = findOverlaps(
+      [
+        session("a", "수호", "13:30", "14:30"),
+        session("b", "수호", "14:00", "14:50"),
+        session("c", "예린", "14:10", "15:00"),
+        session("d", "예린", "16:00", "17:00"),
+      ],
+      (s) => s.child,
+    );
+    expect([...sameChild].sort()).toEqual(["a", "b"]);
+    expect([...concurrent].sort()).toEqual(["a", "b", "c"]);
+  });
+
+  it("가지 않는 수업(취소·결석)은 겹침으로 보지 않는다", () => {
+    const { sameChild } = findOverlaps(
+      [session("a", "수호", "14:00", "15:00"), session("b", "수호", "14:30", "15:30", false)],
+      (s) => s.child,
+      (s) => s.active,
+    );
+    expect(sameChild.size).toBe(0);
   });
 });
 

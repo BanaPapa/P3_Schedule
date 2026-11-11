@@ -96,7 +96,7 @@ export async function enrollInAcademy(page: Page, academy: string, memo?: string
   await page.getByRole("textbox", { name: "1번째 수업 종료 시각" }).fill("17:00");
   if (memo) await field(page, "비고 (선택)").fill(memo);
   await page.getByRole("button", { name: "수강 과목 등록" }).click();
-  await expect(page).toHaveURL(/\/education\?added=1$/);
+  await expect(page).toHaveURL(/\/education\?added=1&id=[0-9a-f-]{36}$/);
   await expect(page.getByRole("status").filter({ hasText: "수업을 등록했습니다." })).toBeVisible();
 }
 

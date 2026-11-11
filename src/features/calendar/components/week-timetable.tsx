@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import { formatTime, isoWeekday, WEEKDAY_LABELS, type IsoDate } from "@/lib/dates";
 import { ROUTES } from "@/lib/routes";
 import type { CalendarSession } from "../queries";
-import { INACTIVE_STATUSES, sessionBadge, sessionLabel } from "../session-display";
+import { dayOverlaps, INACTIVE_STATUSES, sessionBadge, sessionLabel } from "../session-display";
 import { childTone, hourRange, layoutDay } from "../timetable";
 import { NowLine } from "./now-line";
 
@@ -24,16 +24,28 @@ interface BlockProps {
   session: CalendarSession;
   top: number;
   height: number;
-  lane: number;
-  lanes: number;
+  left: number;
+  width: number;
+  z: number;
   showChild: boolean;
+  /** 같은 자녀의 다른 수업과 시간이 겹침 */
+  conflict: boolean;
 }
 
-function SessionBlock({ session, top, height, lane, lanes, showChild }: BlockProps) {
+/** 겹쳐 쌓인 칸은 바탕색 테두리로 아래 칸과 떼어 보이게, 겹침 경고는 빨간 안쪽 선 */
+function blockOutline(z: number, conflict: boolean): string | undefined {
+  const lines = [
+    z > 0 ? "0 0 0 1.5px var(--surface)" : null,
+    conflict ? "inset 0 0 0 1px var(--danger)" : null,
+  ].filter(Boolean);
+  return lines.length > 0 ? lines.join(", ") : undefined;
+}
+
+function SessionBlock({ session, top, height, left, width, z, showChild, conflict }: BlockProps) {
   const tone = childTone(session.child.color);
   const inactive = INACTIVE_STATUSES.has(session.status);
   const badge = sessionBadge(session);
-  const label = sessionLabel(session, showChild);
+  const label = sessionLabel(session, showChild, conflict);
   const oneLine = height < ONE_LINE_MINUTES;
 
   return (
@@ -45,14 +57,26 @@ function SessionBlock({ session, top, height, lane, lanes, showChild }: BlockPro
       style={{
         top: `calc(var(--tt-hour) * ${top / 60} + 1px)`,
         height: `calc(var(--tt-hour) * ${height / 60} - 2px)`,
-        left: `calc(${(lane / lanes) * 100}% + 2px)`,
-        width: `calc(${100 / lanes}% - 4px)`,
-        backgroundColor: tone.background,
+        left: `calc(${left * 100}% + 2px)`,
+        width: `calc(${width * 100}% - 4px)`,
+        zIndex: z + 1,
+        // 겹쳐 쌓인 칸은 아래 칸이 비치지 않도록 바탕을 먼저 깐다
+        background: `linear-gradient(${tone.background}, ${tone.background}), var(--surface)`,
         borderLeftColor: tone.accent,
         color: tone.text,
+        boxShadow: blockOutline(z, conflict),
       }}
     >
       <span className={`block truncate text-xs font-bold ${inactive ? "line-through" : ""}`}>
+        {/* 겹쳐 쌓이면 아래 줄이 가려질 수 있어, 겹침 경고는 제목 줄 맨 앞에 둔다 */}
+        {conflict ? (
+          <span
+            aria-hidden
+            className="mr-1 inline-flex size-3.5 items-center justify-center rounded-full bg-danger align-[-2px] text-[length:calc(10px+var(--fs-up))] leading-none text-surface"
+          >
+            !
+          </span>
+        ) : null}
         {session.academyName}
         {oneLine ? (
           <span className="ml-1 font-medium tabular-nums opacity-80">{formatTime(session.startTime)}</span>
@@ -122,7 +146,9 @@ export function WeekTimetable({ dates, today, sessionsByDate, showChild }: WeekT
           ))}
         </div>
         {visibleDates.map((date) => {
-          const placed = layoutDay(sessionsByDate.get(date) ?? [], startHour);
+          const daySessions = sessionsByDate.get(date) ?? [];
+          const placed = layoutDay(daySessions, startHour);
+          const { sameChild } = dayOverlaps(daySessions);
           const isToday = date === today;
           return (
             <section
@@ -137,9 +163,11 @@ export function WeekTimetable({ dates, today, sessionsByDate, showChild }: WeekT
                   session={entry.item}
                   top={entry.top}
                   height={entry.height}
-                  lane={entry.lane}
-                  lanes={entry.lanes}
+                  left={entry.left}
+                  width={entry.width}
+                  z={entry.z}
                   showChild={showChild}
+                  conflict={sameChild.has(entry.item.id)}
                 />
               ))}
               {isToday ? <NowLine startHour={startHour} endHour={endHour} /> : null}

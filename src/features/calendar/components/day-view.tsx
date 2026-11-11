@@ -3,7 +3,13 @@ import type { ReactNode } from "react";
 import { formatDayLabel, formatTime, isoWeekday, WEEKDAY_LABELS, type IsoDate } from "@/lib/dates";
 import { ROUTES } from "@/lib/routes";
 import type { CalendarSession } from "../queries";
-import { INACTIVE_STATUSES, sessionBadge, sessionLabel } from "../session-display";
+import {
+  dayOverlaps,
+  INACTIVE_STATUSES,
+  SAME_CHILD_OVERLAP_LABEL,
+  sessionBadge,
+  sessionLabel,
+} from "../session-display";
 import { childTone, toMinutes } from "../timetable";
 
 interface StripDay {
@@ -80,6 +86,7 @@ function durationLabel(session: CalendarSession): string {
 /** 휴대폰 주간 보기 아래쪽: 고른 날의 수업을 시간 순으로. 왼쪽 시각, 오른쪽 자녀 색 카드 */
 export function DayAgenda({ date, today, sessions, showChild, allDay }: DayAgendaProps) {
   const isToday = date === today;
+  const overlaps = dayOverlaps(sessions);
   return (
     <section
       aria-label={`${formatDayLabel(date)}${isToday ? " 오늘" : ""}, 수업 ${sessions.length}개`}
@@ -103,6 +110,9 @@ export function DayAgenda({ date, today, sessions, showChild, allDay }: DayAgend
             const tone = childTone(session.child.color);
             const inactive = INACTIVE_STATUSES.has(session.status);
             const badge = sessionBadge(session);
+            const conflict = overlaps.sameChild.has(session.id);
+            // 형제 동시 수업은 정상이라 조용히 알려만 준다(같은 자녀 겹침이 있으면 그쪽을 보인다)
+            const concurrent = !conflict && overlaps.concurrent.has(session.id);
             return (
               <li key={session.id} className="grid grid-cols-[3.25rem_1fr] items-stretch gap-2">
                 <div className="pt-2 text-right tabular-nums">
@@ -111,14 +121,27 @@ export function DayAgenda({ date, today, sessions, showChild, allDay }: DayAgend
                 </div>
                 <Link
                   href={ROUTES.session(session.id)}
-                  aria-label={sessionLabel(session, showChild)}
+                  aria-label={sessionLabel(session, showChild, conflict)}
                   className={`block rounded-lg border-l-4 px-3 py-2.5 transition-[filter] hover:brightness-[0.97] ${inactive ? "opacity-55" : ""}`}
-                  style={{ backgroundColor: tone.background, borderLeftColor: tone.accent, color: tone.text }}
+                  style={{
+                    backgroundColor: tone.background,
+                    borderLeftColor: tone.accent,
+                    color: tone.text,
+                    boxShadow: conflict ? "inset 0 0 0 1px var(--danger)" : undefined,
+                  }}
                 >
-                  <span className="flex items-center gap-2">
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <span className={`font-bold ${inactive ? "line-through" : ""}`}>{session.academyName}</span>
                     {badge ? (
                       <span className="rounded-sm bg-surface/70 px-1.5 text-xs font-semibold">{badge}</span>
+                    ) : null}
+                    {conflict ? (
+                      <span className="rounded-sm bg-danger px-1.5 text-xs font-semibold text-surface">
+                        {SAME_CHILD_OVERLAP_LABEL}
+                      </span>
+                    ) : null}
+                    {concurrent ? (
+                      <span className="rounded-sm bg-surface/70 px-1.5 text-xs font-medium opacity-80">동시간</span>
                     ) : null}
                   </span>
                   <span className="mt-0.5 block text-sm opacity-80">

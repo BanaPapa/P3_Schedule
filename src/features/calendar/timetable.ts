@@ -14,9 +14,11 @@ export interface PlacedItem<T extends TimedItem> {
   top: number;
   /** 길이(분) */
   height: number;
-  /** 겹치는 수업끼리 나눈 칸 번호와 칸 수 */
-  lane: number;
-  lanes: number;
+  /** 칸 안의 가로 위치와 폭(0~1) */
+  left: number;
+  width: number;
+  /** 쌓인 순서. 클수록 위에 그린다 */
+  z: number;
 }
 
 export interface HourRange {
@@ -46,48 +48,65 @@ export function hourRange(items: readonly TimedItem[]): HourRange {
   return { startHour, endHour };
 }
 
+/** 겹쳐 쌓을 때 나중 칸을 오른쪽으로 미는 정도(칸 폭 대비) */
+export const CASCADE_INDENT = 0.22;
+/** 시작 시각이 이보다 가까우면 제목끼리 부딪히므로 겹쳐 쌓지 않고 나란히 놓는다 */
+export const SIDE_BY_SIDE_MINUTES = 20;
+/** 여러 번 밀려도 이 폭보다 좁아지지 않게 한다 */
+const MIN_CASCADE_WIDTH = 0.5;
+
+const overlaps = (a: TimedItem, b: TimedItem) =>
+  toMinutes(a.startTime) < toMinutes(b.endTime) && toMinutes(b.startTime) < toMinutes(a.endTime);
+
 /**
- * 하루치 수업을 세로 위치와 칸으로 배치한다. 시간이 겹치는 수업 묶음은 옆으로 나눠 놓는다.
+ * 하루치 수업을 세로 위치와 가로 자리로 배치한다(Google 캘린더 식).
+ * - 겹치지 않으면 칸 폭을 다 쓴다.
+ * - 먼저 시작한 수업 위에 나중 수업을 오른쪽으로 조금 밀어 겹쳐 쌓는다(두 제목이 모두 보인다).
+ * - 시작 시각이 SIDE_BY_SIDE_MINUTES 안쪽으로 가까우면 그 자리를 반씩 나란히 나눈다.
  */
 export function layoutDay<T extends TimedItem>(items: readonly T[], startHour: number): PlacedItem<T>[] {
   const sorted = [...items].sort(
     (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime) || toMinutes(b.endTime) - toMinutes(a.endTime),
   );
 
-  const placed: PlacedItem<T>[] = [];
-  let cluster: { item: T; lane: number }[] = [];
-  let laneEnds: number[] = [];
-  let clusterEnd = -1;
-
-  const flush = () => {
-    const lanes = Math.max(1, laneEnds.length);
-    for (const { item, lane } of cluster) {
-      const start = toMinutes(item.startTime);
-      placed.push({
-        item,
-        top: start - startHour * 60,
-        height: Math.max(0, toMinutes(item.endTime) - start),
-        lane,
-        lanes,
-      });
-    }
-    cluster = [];
-    laneEnds = [];
-  };
-
-  for (const item of sorted) {
+  return sorted.reduce<PlacedItem<T>[]>((placed, item) => {
     const start = toMinutes(item.startTime);
-    const end = toMinutes(item.endTime);
-    if (cluster.length > 0 && start >= clusterEnd) flush();
-    const free = laneEnds.findIndex((laneEnd) => laneEnd <= start);
-    const lane = free === -1 ? laneEnds.length : free;
-    laneEnds = laneEnds.map((laneEnd, index) => (index === lane ? end : laneEnd));
-    if (lane === laneEnds.length) laneEnds = [...laneEnds, end];
-    cluster = [...cluster, { item, lane }];
-    clusterEnd = cluster.length === 1 ? end : Math.max(clusterEnd, end);
-  }
-  if (cluster.length > 0) flush();
-  return placed;
+    const base = { item, top: start - startHour * 60, height: Math.max(0, toMinutes(item.endTime) - start) };
+    // 겹치는 것 중 가장 위에 쌓인 수업을 기준으로 삼는다
+    const parent = placed
+      .filter((other) => overlaps(other.item, item))
+      .reduce<PlacedItem<T> | null>((top, other) => (!top || other.z >= top.z ? other : top), null);
+
+    if (!parent) return [...placed, { ...base, left: 0, width: 1, z: 0 }];
+
+    if (start - toMinutes(parent.item.startTime) < SIDE_BY_SIDE_MINUTES) {
+      const half = parent.width / 2;
+      return [
+        ...placed.map((other) => (other === parent ? { ...other, width: half } : other)),
+        { ...base, left: parent.left + half, width: half, z: parent.z + 1 },
+      ];
+    }
+
+    const left = Math.min(parent.left + CASCADE_INDENT, 1 - MIN_CASCADE_WIDTH);
+    return [...placed, { ...base, left, width: 1 - left, z: parent.z + 1 }];
+  }, []);
+}
+
+/**
+ * 같은 날 수업의 겹침. 취소·결석처럼 실제로 가지 않는 수업은 빼고 본다.
+ * - sameChild: 같은 자녀 수업끼리 겹침(한 아이가 동시에 두 곳에 갈 수 없으니 입력 확인 필요)
+ * - concurrent: 다른 자녀 수업과 시간이 겹침(형제 동시 수업, 정상)
+ */
+export function findOverlaps<T extends TimedItem>(
+  items: readonly T[],
+  childOf: (item: T) => string,
+  isActive: (item: T) => boolean = () => true,
+): { sameChild: ReadonlySet<string>; concurrent: ReadonlySet<string> } {
+  const active = items.filter(isActive);
+  const pairs = active.flatMap((a, index) => active.slice(index + 1).filter((b) => overlaps(a, b)).map((b) => [a, b] as const));
+  const ids = (same: boolean) =>
+    new Set(pairs.filter(([a, b]) => (childOf(a) === childOf(b)) === same).flatMap(([a, b]) => [a.id, b.id]));
+  return { sameChild: ids(true), concurrent: ids(false) };
 }
 
 export interface Tone {

@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { EducationTabs } from "@/components/education-tabs";
 import { Card, CardSkeleton } from "@/components/ui/card";
 import { EnrollmentList } from "@/features/education/components/enrollment-list";
+import { enrollmentOverlapNotice } from "@/features/education/overlap";
 import { getEnrollments } from "@/features/education/queries";
 import { MakeupWaitlist } from "@/features/sessions/components/makeup-waitlist";
 import { getMakeupWaitlist } from "@/features/sessions/queries";
@@ -29,12 +30,20 @@ async function EducationContent({ searchParams }: { searchParams: PageProps<"/ed
   const [enrollments, waiting, query] = await Promise.all([getEnrollments(), getMakeupWaitlist(), searchParams]);
   const today = await requestToday();
   const added = query.added === "1";
+  // 방금 등록한 수강 과목이 같은 자녀의 다른 수업과 겹치는지 (주소의 id 는 우리 목록에 있을 때만 쓴다)
+  const addedId = typeof query.id === "string" ? query.id : null;
+  const overlap = added && addedId ? enrollmentOverlapNotice(addedId, enrollments, today) : null;
 
   return (
     <>
       {added ? (
         <p role="status" className="rounded-xl bg-mint-soft px-4 py-3 text-sm font-semibold">
           수업을 등록했습니다. 캘린더에서 확인할 수 있습니다.
+        </p>
+      ) : null}
+      {overlap ? (
+        <p role="alert" className="rounded-xl bg-rose-soft px-4 py-3 text-sm font-semibold text-danger">
+          {overlap}
         </p>
       ) : null}
 

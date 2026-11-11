@@ -80,7 +80,8 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
   - 수강 과목당 규칙은 60개까지(`too_many_schedule_changes`).
 - 수강 종료 때도 손대지 않은 회차만 지우고, 손댄 미래 정규 회차는 `cancelled` 로 남긴다.
 - 원 회차 FK(`origin_session_id`)는 cascade 하지 않는다. 보강·변경 이력이 원 회차와 함께 사라지면 안 된다.
-- 알려진 미처리(LOW): 같은 자녀의 시간 겹침 검사 없음, 미래 회차를 `completed` 로 표시 가능, 메모 저장은 version 검사를 거치지 않을 수 있음(직접 update).
+- 같은 자녀의 시간 겹침은 **막지 않고 알린다**: 등록·일정 변경 직후 안내(`education/overlap.ts`), 캘린더 칸에 빨간 표시(`calendar/session-display.ts` 의 `dayOverlaps`). 형제 동시 수업은 정상으로 보고 PC 격자에서 겹쳐 쌓는다(`calendar/timetable.ts` 의 `layoutDay`).
+- 알려진 미처리(LOW): 미래 회차를 `completed` 로 표시 가능, 메모 저장은 version 검사를 거치지 않을 수 있음(직접 update).
 - **보강 대기**: `makeup_waitlist` 뷰(security_invoker, RLS 적용) = 결석·휴강 + 살아 있는 보강 없음 + `makeup_waived = false`.
 - 회차 RPC 는 화면이 읽은 `version` 을 받는다. 다르면 `session_conflict` 를 던지고, 앱은 `conflict()` 로 처리한다.
 - 메모(`note`)만 직접 update 할 수 있다(컬럼 권한).
