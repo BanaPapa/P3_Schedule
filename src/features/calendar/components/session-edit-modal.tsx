@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/ui/form-message";
 import { Modal } from "@/components/ui/modal";
@@ -93,7 +93,15 @@ export function SessionEditModal({ session, draft, fromDrag, childOptions, onClo
       description={<>지금: {original}</>}
       onClose={onClose}
     >
-      <form action={formAction} className="flex flex-col gap-4">
+      {/* action= 대신 직접 보낸다: React 가 제출 후 폼을 초기화하면 라디오 표시와 고른 범위가 어긋난다 */}
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          const formData = new FormData(event.currentTarget);
+          startTransition(() => formAction(formData));
+        }}
+        className="flex flex-col gap-4"
+      >
         <input type="hidden" name="id" value={session.id} />
         <input type="hidden" name="version" value={session.version} />
         <input type="hidden" name="originalChildId" value={session.child.id} />
