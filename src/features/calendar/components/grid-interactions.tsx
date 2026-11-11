@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type DragEvent, type ReactNode } from "react";
+import { useState, type ButtonHTMLAttributes, type DragEvent, type ReactNode } from "react";
 import { formatTime } from "@/lib/dates";
 import type { CalendarSession } from "../queries";
 import { INACTIVE_STATUSES, sessionBadge, sessionLabel } from "../session-display";
@@ -23,52 +23,60 @@ interface BlockProps {
 }
 
 /**
- * PC 주간 격자의 수업 칸. 더블클릭(또는 Enter) 편집, 끌어 옮기기, 우클릭(또는 메뉴 키) 메뉴,
- * Delete 키 삭제. 화면을 바꾸지 않고 그 위에 모달을 띄운다.
+ * 수업 칸(주간 격자·표 공통)의 조작: 더블클릭(또는 Enter) 편집, 끌어 옮기기, 우클릭(또는 메뉴 키) 메뉴,
+ * Delete 키 삭제. 화면을 바꾸지 않고 그 위에 모달을 띄운다. 버튼에 그대로 펼쳐 쓴다.
  */
-export function EditableSessionBlock({ session, top, height, left, width, z, conflict }: BlockProps) {
+export function useSessionGestures(session: CalendarSession, label: string) {
   const { openEdit, openDelete, openMenu, startDrag, endDrag } = useTimetableEditor();
   const [isDragging, setIsDragging] = useState(false);
+  const props: ButtonHTMLAttributes<HTMLButtonElement> = {
+    type: "button",
+    draggable: true,
+    "aria-label": label,
+    "aria-describedby": EDIT_HINT_ID,
+    title: `${label}\n${HINT}`,
+    onDoubleClick: () => openEdit(session),
+    onContextMenu: (event) => {
+      event.preventDefault();
+      // 메뉴 키로 열면 좌표가 0 이라 칸 위치에 띄운다
+      const rect = event.currentTarget.getBoundingClientRect();
+      const fromKeyboard = event.clientX === 0 && event.clientY === 0;
+      openMenu(session, fromKeyboard ? rect.left : event.clientX, fromKeyboard ? rect.bottom : event.clientY);
+    },
+    onKeyDown: (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        openEdit(session);
+      } else if (event.key === "Delete" || event.key === "Backspace") {
+        event.preventDefault();
+        openDelete(session);
+      }
+    },
+    onDragStart: (event) => {
+      event.dataTransfer.setData("text/plain", session.id);
+      event.dataTransfer.effectAllowed = "move";
+      startDrag({ session, grabOffsetPx: event.clientY - event.currentTarget.getBoundingClientRect().top });
+      setIsDragging(true);
+    },
+    onDragEnd: () => {
+      endDrag();
+      setIsDragging(false);
+    },
+  };
+  return { props, isDragging };
+}
+
+/** PC 주간 격자의 수업 칸 */
+export function EditableSessionBlock({ session, top, height, left, width, z, conflict }: BlockProps) {
   const tone = childTone(session.child.color);
   const inactive = INACTIVE_STATUSES.has(session.status);
   const badge = sessionBadge(session);
-  const label = sessionLabel(session, true, conflict);
   const oneLine = height < ONE_LINE_MINUTES;
+  const { props, isDragging } = useSessionGestures(session, sessionLabel(session, true, conflict));
 
   return (
     <button
-      type="button"
-      draggable
-      aria-label={label}
-      aria-describedby={EDIT_HINT_ID}
-      title={`${label}\n${HINT}`}
-      onDoubleClick={() => openEdit(session)}
-      onContextMenu={(event) => {
-        event.preventDefault();
-        // 메뉴 키로 열면 좌표가 0 이라 칸 위치에 띄운다
-        const rect = event.currentTarget.getBoundingClientRect();
-        const fromKeyboard = event.clientX === 0 && event.clientY === 0;
-        openMenu(session, fromKeyboard ? rect.left : event.clientX, fromKeyboard ? rect.bottom : event.clientY);
-      }}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          openEdit(session);
-        } else if (event.key === "Delete" || event.key === "Backspace") {
-          event.preventDefault();
-          openDelete(session);
-        }
-      }}
-      onDragStart={(event) => {
-        event.dataTransfer.setData("text/plain", session.id);
-        event.dataTransfer.effectAllowed = "move";
-        startDrag({ session, grabOffsetPx: event.clientY - event.currentTarget.getBoundingClientRect().top });
-        setIsDragging(true);
-      }}
-      onDragEnd={() => {
-        endDrag();
-        setIsDragging(false);
-      }}
+      {...props}
       className={`absolute cursor-grab overflow-hidden rounded-md border-l-[3px] px-1.5 py-1 text-left leading-snug transition-[filter,opacity] select-none hover:brightness-[0.97] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary active:cursor-grabbing ${inactive ? "opacity-55" : ""} ${isDragging ? "opacity-40" : ""}`}
       style={{
         top: `calc(var(--tt-hour) * ${top / 60} + 1px)`,

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ROUTES } from "@/lib/routes";
 import type { CalendarSession } from "../queries";
@@ -61,10 +62,16 @@ export function TimetableEditorProvider({ childOptions, children }: ProviderProp
   const dragging = useRef<DragInfo | null>(null);
   const close = useCallback(() => setState(null), []);
   // 저장하면 모달을 닫고 결과(언제부터 바뀌는지)를 잠깐 띄운다. 지난 수업은 그대로라 화면만 보면 안 바뀐 듯 보일 수 있다.
-  const saved = useCallback((message: string) => {
-    setState(null);
-    setNotice(message);
-  }, []);
+  const router = useRouter();
+  const saved = useCallback(
+    (message: string) => {
+      setState(null);
+      setNotice(message);
+      // 서버 액션이 다시 그려 주지만, 혹시 빠지는 화면이 없도록 한 번 더 새로 고친다
+      router.refresh();
+    },
+    [router],
+  );
 
   useEffect(() => {
     if (!notice) return;

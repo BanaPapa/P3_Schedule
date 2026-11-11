@@ -82,9 +82,9 @@ export async function editSessionAction(_prev: FormState, formData: FormData): P
 
   // 지난 수업은 그대로 남으므로 "언제부터" 바뀌는지 꼭 알려 준다
   const first = formatDayLabel(firstClassDate(slot.p_from, slot.p_weekday));
-  if (!childChanged) return success(`${first}부터 매주 바뀝니다. 지난 수업은 그대로 둡니다.`);
+  if (!childChanged) return success(`${first}부터 매주 바뀝니다. 기록이 있는 수업은 그대로 둡니다.`);
   const { data: child } = await supabase.from("children").select("name").eq("id", input.childId).maybeSingle();
-  return success(`${first}부터 매주 ${child?.name ?? "다른 아이"} 수업으로 옮겼습니다. 지난 수업은 그대로 둡니다.`);
+  return success(`${first}부터 매주 ${child?.name ?? "다른 아이"} 수업으로 옮겼습니다. 기록이 있는 수업은 그대로 둡니다.`);
 }
 
 /** 캘린더 우클릭 삭제: 이번만(취소로 남김) 또는 앞으로 매주(그 요일·시간 수업을 없앰) */
@@ -109,8 +109,7 @@ export async function deleteSessionAction(_prev: FormState, formData: FormData):
   }
 
   if (session.kind !== "regular") return failure(ERROR_MESSAGES.only_regular_session);
-  const today = todayInSeoul();
-  const from = session.session_date > today ? session.session_date : today;
+  const from = weeklyFrom(session.session_date, session.session_date, todayInSeoul());
   const { error } = await supabase.rpc("remove_rule_from", {
     p_session_id: input.id,
     p_version: input.version,
@@ -119,5 +118,5 @@ export async function deleteSessionAction(_prev: FormState, formData: FormData):
   refreshPages(input.id);
   if (error) return rpcFailure("remove_rule_from", error);
   const first = formatDayLabel(firstClassDate(from, isoWeekday(session.session_date)));
-  return success(`${first}부터 이 시간 수업을 없앴습니다. 지난 수업은 그대로 둡니다.`);
+  return success(`${first}부터 이 시간 수업을 없앴습니다. 기록이 있는 수업은 그대로 둡니다.`);
 }

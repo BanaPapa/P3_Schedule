@@ -42,6 +42,10 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
     trips.trips.flatMap((trip) => datesBetween(trip.startDate, trip.endDate).filter((day) => day >= from && day <= to)),
   );
   const byDate = groupByDate(sessions);
+  // 주간·표는 "지금 시간표" 를 보는 화면이라 취소된 수업(이번만 삭제, 다른 날로 옮긴 원래 수업)은 뺀다.
+  // 그대로 두면 삭제·이동 뒤에도 흐린 칸이 남아 바뀌지 않은 것처럼 보인다. 월간 목록과 수업 화면에는 기록으로 남는다.
+  const scheduled = sessions.filter((session) => session.status !== "cancelled");
+  const scheduledByDate = groupByDate(scheduled);
   const showChild = params.childId === null && children.length > 1;
   // 주간 보기의 자녀 줄: 고른 자녀 한 명, 아니면 모든 자녀(수업이 없는 아이 줄로도 끌어 옮길 수 있게)
   const childOptions = children.map(({ id, name, color }) => ({ id, name, color }));
@@ -69,8 +73,8 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
         <WeekTable
           dates={weekDates(params.date)}
           today={today}
-          sessions={sessions}
-          childOrder={children.map((child) => child.id)}
+          sessions={scheduled}
+          childOptions={childOptions}
         />
       ) : (
         <>
@@ -80,12 +84,12 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
               days={weekDates(params.date).map((date) => ({ date, href: calendarHref({ ...params, date }, today) }))}
               selected={params.date}
               today={today}
-              sessionsByDate={byDate}
+              sessionsByDate={scheduledByDate}
             />
             <DayFlow
               date={params.date}
               today={today}
-              sessions={byDate.get(params.date) ?? []}
+              sessions={scheduledByDate.get(params.date) ?? []}
               lanes={lanes}
               allDay={
                 <>
@@ -101,7 +105,7 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
             <WeekTimetable
               dates={weekDates(params.date)}
               today={today}
-              sessionsByDate={byDate}
+              sessionsByDate={scheduledByDate}
               lanes={lanes}
               childOptions={childOptions}
             />

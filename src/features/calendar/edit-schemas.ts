@@ -51,13 +51,20 @@ export const sessionDeleteSchema = z.object({
   scope: z.enum(EDIT_SCOPES, { error: "삭제 범위를 골라 주세요." }),
 });
 
+/** 그 주 월요일 */
+export function weekStart(date: IsoDate): IsoDate {
+  return addDays(date, 1 - isoWeekday(date));
+}
+
 /**
- * "앞으로 매주" 를 적용할 기준일. 원래 날짜와 새 날짜 중 이른 날부터 바꾸되 오늘보다 앞일 수는 없다
- * (지난 수업 기록은 바꾸지 않는다).
+ * "앞으로 매주" 를 적용할 기준일. 원래 날짜와 새 날짜 중 이른 날부터 바꾸되 이번 주 월요일보다 앞일 수는 없다.
+ * 이번 주 지난 요일도 바꿔야 지금 보는 시간표에 바로 보인다(기록이 있는 수업은 DB 가 그대로 둔다).
+ * 지난주 이전 기록은 바꾸지 않는다.
  */
 export function weeklyFrom(originalDate: IsoDate, newDate: IsoDate, today: IsoDate): IsoDate {
   const earlier = originalDate < newDate ? originalDate : newDate;
-  return earlier > today ? earlier : today;
+  const floor = weekStart(today);
+  return earlier > floor ? earlier : floor;
 }
 
 /** 기준일 이후 처음으로 그 요일(ISO 1=월…7=일)이 오는 날. "언제부터 바뀌는지" 알려 줄 때 쓴다 */

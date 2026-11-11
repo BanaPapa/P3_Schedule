@@ -92,8 +92,7 @@ export function SessionEditModal({ session, draft, fromDrag, childOptions, onClo
   const firstLabel = isIsoDate(date)
     ? formatDayLabel(firstClassDate(weeklyFrom(session.date, date, today), isoWeekday(date)))
     : "";
-  const pastNote =
-    session.date < today ? `이미 지난 ${formatDayLabel(session.date)} 수업은 기록으로 그대로 남습니다.` : "지난 기록은 그대로 둡니다.";
+  const pastNote = "완료·결석 등 기록이 있는 수업과 지난주 이전 수업은 그대로 둡니다.";
   const original = `${session.child.name} · ${session.academyName} · ${formatDayLabel(session.date)} ${hhmm(session.startTime)}–${hhmm(session.endTime)}`;
 
   return (

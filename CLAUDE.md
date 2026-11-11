@@ -74,7 +74,8 @@ E2E는 3100 포트에 이미 떠 있는 서버를 재사용한다(`reuseExisting
 - 원 회차 하나에 살아 있는(취소 아닌) 보강·변경은 **하나뿐**이다(부분 유일 인덱스). 학원비(M4)는 이 연결로 중복·누락을 판단한다.
 - 상태는 `set_session_status` RPC 로만 바꾼다. 보강은 `makeup_scheduled/makeup_completed/cancelled`, 나머지는 `scheduled/completed/absent/academy_cancelled/cancelled`. 살아 있는 보강·변경이 있으면 원 회차를 `scheduled/completed` 로 되돌릴 수 없다.
 - **이번만 변경**(`reschedule_session`): 같은 날 시간만 바꾸면 그 회차를 고친다. 정규 회차를 다른 날로 옮기면 원 회차는 `cancelled`, 새 `rescheduled` 회차를 만든다(앱은 새 회차 화면으로 이동).
-- **앞으로 전체 변경**(`change_schedule_from`): 기준일(오늘 ~ +400일) 전날까지 기존 규칙을 끝내고 새 규칙을 넣는다.
+- **앞으로 전체 변경**(`change_schedule_from`): 기준일(**이번 주 월요일** ~ +400일) 전날까지 기존 규칙을 끝내고 새 규칙을 넣는다. 이번 주 지난 요일도 바꿔야 지금 보는 시간표에 바로 보인다(손대지 않은 회차만 바뀌므로 기록은 그대로).
+  - 캘린더에서 바로 고치기(끌기·더블클릭·우클릭)는 회차 하나의 요일·시간 규칙만 바꾸는 `change_rule_from` / `move_rule_to_child` / `remove_rule_from` 을 쓴다. "이 수업" = 기준일에도 쓰이는 같은 요일·시작 시각 규칙.
   - "손대지 않은 회차" = `kind = 'regular' and status = 'scheduled' and version = 1`. 이것만 지우고 다시 만든다. 메모·시간 변경·상태 변경한 회차는 남는다.
   - `generate_sessions_between` 은 그날 이미 **끝난(또는 지워진) 규칙의 정규 회차**가 있으면 건너뛴다. 남긴 회차와 새 회차가 겹치지 않게 하는 장치다.
   - 수강 과목당 규칙은 60개까지(`too_many_schedule_changes`).
