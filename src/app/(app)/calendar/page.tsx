@@ -9,6 +9,7 @@ import { calendarRange, groupByDate, parseCalendarParams } from "@/features/cale
 import { getSessionsBetween } from "@/features/calendar/queries";
 import { TripAgenda } from "@/features/calendar/components/trip-agenda";
 import { SchoolAgenda } from "@/features/calendar/components/school-agenda";
+import { WeekTimetable } from "@/features/calendar/components/week-timetable";
 import { getSchoolEventsBetween } from "@/features/school/queries";
 
 import { getTripsBetween } from "@/features/travel/queries";
@@ -60,21 +61,24 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
         </>
       ) : (
         <div className="flex flex-col gap-3">
-          {weekDates(params.date).map((date) => (
-            <section
-              key={date}
-              aria-label={formatDayLabel(date)}
-              className={`rounded-2xl border bg-surface px-4 py-3 ${date === today ? "border-primary" : "border-border"}`}
-            >
-              <h3 className="text-sm font-semibold">
-                {formatDayLabel(date)}
-                {date === today ? <span className="ml-2 text-primary">오늘</span> : null}
-              </h3>
-              <TripAgenda date={date} data={trips} />
-              <SchoolAgenda date={date} events={schoolEvents} />
-              <SessionList sessions={byDate.get(date) ?? []} showChild={showChild} emptyText="수업 없음" />
-            </section>
-          ))}
+          <WeekTimetable dates={weekDates(params.date)} today={today} sessionsByDate={byDate} showChild={showChild} />
+          {/* 여행·학교 일정은 시간이 없으므로 시간표 아래에 날짜별로 따로 보인다 */}
+          {weekDates(params.date)
+            .filter((date) => tripDates.has(date) || schoolDates.has(date))
+            .map((date) => (
+              <section
+                key={date}
+                aria-label={`${formatDayLabel(date)} 종일 일정`}
+                className={`rounded-2xl border bg-surface px-4 py-3 ${date === today ? "border-primary" : "border-border"}`}
+              >
+                <h3 className="text-sm font-semibold">
+                  {formatDayLabel(date)}
+                  {date === today ? <span className="ml-2 text-primary">오늘</span> : null}
+                </h3>
+                <TripAgenda date={date} data={trips} />
+                <SchoolAgenda date={date} events={schoolEvents} />
+              </section>
+            ))}
         </div>
       )}
 

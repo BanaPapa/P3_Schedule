@@ -176,3 +176,20 @@ body {
     color: var(--primary);
   }
 }
+
+/* 주간 시간표: 1시간 높이와 정각 가로줄 (week-timetable.tsx) */
+.timetable {
+  --tt-hour: 4rem;
+}
+@media (min-width: 1024px) {
+  .timetable {
+    --tt-hour: 4.75rem;
+  }
+}
+.timetable-day {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--border) 0 1px,
+    transparent 1px var(--tt-hour)
+  );
+}
