@@ -38,6 +38,8 @@ export const ERROR_MESSAGES = {
   ai_limit_reached: "오늘 AI 도우미를 30번 모두 썼습니다. 내일 다시 이용해 주세요.",
   invalid_trip_day: "여행 기간 안의 날짜를 골라 주세요.",
   trip_items_outside: "바꾼 기간 밖에 일정이 남아 있습니다. 그 일정을 먼저 옮기거나 지워 주세요.",
+  only_regular_session: "보강·변경된 수업은 '이번만'으로만 바꿀 수 있습니다.",
+  same_child: "이미 그 아이의 수업입니다.",
   // 앱
   academy_in_use: "수강 과목이 등록된 학원은 삭제할 수 없습니다. 먼저 수강 과목을 정리해 주세요.",
   child_in_use: "수강 과목이 등록된 자녀는 삭제할 수 없습니다. 먼저 수강 과목을 정리해 주세요.",
@@ -94,6 +96,8 @@ const RPC_ERROR_CODES: ReadonlySet<string> = new Set<ErrorCode>([
   "ai_limit_reached",
   "invalid_trip_day",
   "trip_items_outside",
+  "only_regular_session",
+  "same_child",
 ]);
 
 /** 회차를 읽은 뒤 다른 사람이 먼저 바꿨을 때 RPC 가 던지는 코드. 화면은 conflict() 로 처리한다. */

@@ -16,6 +16,8 @@ export interface CalendarSession {
   endTime: string;
   status: SessionStatus;
   kind: Database["public"]["Enums"]["class_session_kind"];
+  /** 동시 수정 감지용. 캘린더에서 바로 고칠 때 보낸다 */
+  version: number;
   academyName: string;
   child: { id: string; name: string; color: string };
 }
@@ -43,7 +45,7 @@ export async function getSessionsBetween(
   let query = supabase
     .from("class_sessions")
     .select(
-      `id, session_date, start_time, end_time, status, kind,
+      `id, session_date, start_time, end_time, status, kind, version,
        enrollment:enrollments!inner (
          child_id,
          child:children!inner (id, name, color),
@@ -69,6 +71,7 @@ export async function getSessionsBetween(
     endTime: row.end_time,
     status: row.status,
     kind: row.kind,
+    version: row.version,
     academyName: row.enrollment.academy.name,
     child: row.enrollment.child,
   }));

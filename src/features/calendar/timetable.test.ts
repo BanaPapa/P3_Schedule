@@ -3,9 +3,11 @@ import {
   CASCADE_INDENT,
   childTone,
   dayFlow,
+  dropStartMinutes,
   findOverlaps,
   hourRange,
   layoutDay,
+  minutesToTime,
   seoulMinutes,
   toMinutes,
 } from "./timetable";
@@ -85,6 +87,29 @@ describe("layoutDay", () => {
     );
     expect(placed.map((p) => Number(p.width.toFixed(2)))).toEqual([1, 0.78, 0.56, 0.5]);
     expect(placed.map((p) => p.z)).toEqual([0, 1, 2, 3]);
+  });
+});
+
+describe("dropStartMinutes", () => {
+  // 13시~22시(9시간) 줄이 540px → 1px = 1분
+  const lane = { laneHeightPx: 540, startHour: 13, endHour: 22, durationMinutes: 50 };
+
+  it("놓은 위치를 시각으로 바꾸고 10분 단위로 맞춘다", () => {
+    expect(dropStartMinutes({ ...lane, topPx: 60 })).toBe(14 * 60);
+    expect(dropStartMinutes({ ...lane, topPx: 114 })).toBe(14 * 60 + 50);
+    expect(dropStartMinutes({ ...lane, topPx: 116 })).toBe(15 * 60);
+  });
+
+  it("시간표 밖으로 나가지 않게 자른다", () => {
+    expect(dropStartMinutes({ ...lane, topPx: -40 })).toBe(13 * 60);
+    expect(dropStartMinutes({ ...lane, topPx: 530 })).toBe(22 * 60 - 50);
+  });
+});
+
+describe("minutesToTime", () => {
+  it("분을 HH:MM 으로", () => {
+    expect(minutesToTime(870)).toBe("14:30");
+    expect(minutesToTime(545)).toBe("09:05");
   });
 });
 

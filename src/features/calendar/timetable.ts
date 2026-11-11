@@ -149,6 +149,39 @@ export function dayFlow<T extends TimedItem>(items: readonly T[]): FlowStep<T>[]
   });
 }
 
+/** 끌어 놓을 때 시작 시각을 맞추는 단위(분) */
+export const DROP_SNAP_MINUTES = 10;
+
+/**
+ * 끌어 놓은 위치 → 새 시작 시각(분). 줄 맨 위에서 칸 위쪽까지의 거리(px)를 시간으로 바꾸고
+ * 10분 단위로 맞춘 뒤, 수업 길이가 시간표 안에 들어가도록 자른다.
+ */
+export function dropStartMinutes({
+  topPx,
+  laneHeightPx,
+  startHour,
+  endHour,
+  durationMinutes,
+}: {
+  topPx: number;
+  laneHeightPx: number;
+  startHour: number;
+  endHour: number;
+  durationMinutes: number;
+}): number {
+  const total = (endHour - startHour) * 60;
+  const raw = startHour * 60 + (topPx / laneHeightPx) * total;
+  const snapped = Math.round(raw / DROP_SNAP_MINUTES) * DROP_SNAP_MINUTES;
+  const latest = Math.max(startHour * 60, endHour * 60 - durationMinutes);
+  return Math.min(Math.max(snapped, startHour * 60), latest);
+}
+
+/** 870 → "14:30" */
+export function minutesToTime(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  return `${String(hours).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+}
+
 /** 서울 기준 지금 시각(분). 시간표의 현재 시각 선에 쓴다. */
 export function seoulMinutes(now: Date): number {
   const parts = new Intl.DateTimeFormat("en-GB", {

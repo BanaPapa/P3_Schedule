@@ -43,11 +43,9 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
   );
   const byDate = groupByDate(sessions);
   const showChild = params.childId === null && children.length > 1;
-  // 주간 보기의 자녀 줄: 고른 자녀 한 명, 아니면 이번 주 수업이 있는 자녀(자녀 순서대로)
-  const childIdsWithSessions = new Set(sessions.map((session) => session.child.id));
-  const lanes = children
-    .filter((child) => (params.childId ? child.id === params.childId : childIdsWithSessions.has(child.id)))
-    .map(({ id, name, color }) => ({ id, name, color }));
+  // 주간 보기의 자녀 줄: 고른 자녀 한 명, 아니면 모든 자녀(수업이 없는 아이 줄로도 끌어 옮길 수 있게)
+  const childOptions = children.map(({ id, name, color }) => ({ id, name, color }));
+  const lanes = params.childId ? childOptions.filter((child) => child.id === params.childId) : childOptions;
 
   return (
     <>
@@ -100,7 +98,13 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
 
           {/* 태블릿·PC: 요일 × 시간 격자. 시간이 없는 여행·학교 일정은 아래 날짜별 카드로 */}
           <div className="hidden flex-col gap-3 md:flex">
-            <WeekTimetable dates={weekDates(params.date)} today={today} sessionsByDate={byDate} lanes={lanes} />
+            <WeekTimetable
+              dates={weekDates(params.date)}
+              today={today}
+              sessionsByDate={byDate}
+              lanes={lanes}
+              childOptions={childOptions}
+            />
             {weekDates(params.date)
               .filter((date) => tripDates.has(date) || schoolDates.has(date))
               .map((date) => (

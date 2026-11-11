@@ -757,6 +757,15 @@ isOneToOne: false
 "change_schedule_from":
 { Args: { "p_enrollment_id": string,"p_from": string,"p_rules": Json }; Returns: undefined
                            },
+"change_rule_from":
+{ Args: { "p_session_id": string,"p_version": number,"p_from": string,"p_weekday": number,"p_start": string,"p_end": string }; Returns: undefined
+                           },
+"move_rule_to_child":
+{ Args: { "p_session_id": string,"p_version": number,"p_child_id": string,"p_from": string,"p_weekday": number,"p_start": string,"p_end": string }; Returns: string
+                           },
+"remove_rule_from":
+{ Args: { "p_session_id": string,"p_version": number,"p_from": string }; Returns: undefined
+                           },
 "confirm_invoice":
 { Args: { "p_base_amount": number,"p_enrollment_id": string,"p_items": Json,"p_month": string,"p_reason": string }; Returns: string
                            },
