@@ -5,7 +5,8 @@ import { Card, CardSkeleton } from "@/components/ui/card";
 import { CalendarToolbar } from "@/features/calendar/components/calendar-toolbar";
 import { MonthGrid } from "@/features/calendar/components/month-grid";
 import { SessionList } from "@/features/calendar/components/session-item";
-import { calendarRange, groupByDate, parseCalendarParams } from "@/features/calendar/params";
+import { calendarHref, calendarRange, groupByDate, parseCalendarParams } from "@/features/calendar/params";
+import { DayAgenda, DayStrip } from "@/features/calendar/components/day-view";
 import { getSessionsBetween } from "@/features/calendar/queries";
 import { TripAgenda } from "@/features/calendar/components/trip-agenda";
 import { SchoolAgenda } from "@/features/calendar/components/school-agenda";
@@ -60,26 +61,50 @@ async function CalendarContent({ searchParams }: { searchParams: PageProps<"/cal
           </Card>
         </>
       ) : (
-        <div className="flex flex-col gap-3">
-          <WeekTimetable dates={weekDates(params.date)} today={today} sessionsByDate={byDate} showChild={showChild} />
-          {/* 여행·학교 일정은 시간이 없으므로 시간표 아래에 날짜별로 따로 보인다 */}
-          {weekDates(params.date)
-            .filter((date) => tripDates.has(date) || schoolDates.has(date))
-            .map((date) => (
-              <section
-                key={date}
-                aria-label={`${formatDayLabel(date)} 종일 일정`}
-                className={`rounded-2xl border bg-surface px-4 py-3 ${date === today ? "border-primary" : "border-border"}`}
-              >
-                <h3 className="text-sm font-semibold">
-                  {formatDayLabel(date)}
-                  {date === today ? <span className="ml-2 text-primary">오늘</span> : null}
-                </h3>
-                <TripAgenda date={date} data={trips} />
-                <SchoolAgenda date={date} events={schoolEvents} />
-              </section>
-            ))}
-        </div>
+        <>
+          {/* 휴대폰: 요일 줄 + 고른 날의 수업 목록 */}
+          <div className="flex flex-col gap-3 md:hidden">
+            <DayStrip
+              days={weekDates(params.date).map((date) => ({ date, href: calendarHref({ ...params, date }, today) }))}
+              selected={params.date}
+              today={today}
+              sessionsByDate={byDate}
+            />
+            <DayAgenda
+              date={params.date}
+              today={today}
+              sessions={byDate.get(params.date) ?? []}
+              showChild={showChild}
+              allDay={
+                <>
+                  <TripAgenda date={params.date} data={trips} />
+                  <SchoolAgenda date={params.date} events={schoolEvents} />
+                </>
+              }
+            />
+          </div>
+
+          {/* 태블릿·PC: 요일 × 시간 격자. 시간이 없는 여행·학교 일정은 아래 날짜별 카드로 */}
+          <div className="hidden flex-col gap-3 md:flex">
+            <WeekTimetable dates={weekDates(params.date)} today={today} sessionsByDate={byDate} showChild={showChild} />
+            {weekDates(params.date)
+              .filter((date) => tripDates.has(date) || schoolDates.has(date))
+              .map((date) => (
+                <section
+                  key={date}
+                  aria-label={`${formatDayLabel(date)} 종일 일정`}
+                  className="rounded-2xl border border-border bg-surface px-4 py-3"
+                >
+                  <h3 className="mb-2 text-sm font-semibold">
+                    {formatDayLabel(date)}
+                    {date === today ? <span className="ml-2 text-primary">오늘</span> : null}
+                  </h3>
+                  <TripAgenda date={date} data={trips} />
+                  <SchoolAgenda date={date} events={schoolEvents} />
+                </section>
+              ))}
+          </div>
+        </>
       )}
 
       {sessions.length === 0 ? (

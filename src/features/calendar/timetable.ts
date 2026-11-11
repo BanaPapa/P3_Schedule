@@ -90,21 +90,35 @@ export function layoutDay<T extends TimedItem>(items: readonly T[], startHour: n
   return placed;
 }
 
-/** 학원 이름마다 다른 파스텔 색. 보이는 학원 이름을 정렬해 차례로 준다(같은 화면 안에서 겹치지 않게). */
-export const TIMETABLE_COLORS = [
-  "#fcc54e",
-  "#8b9cf7",
-  "#a3e1ef",
-  "#f798d9",
-  "#a5dd86",
-  "#86c0b1",
-  "#d8a985",
-  "#7ba7c4",
-  "#e5c9f7",
-  "#f7b298",
-] as const;
+export interface Tone {
+  /** 아주 연한 배경 */
+  background: string;
+  /** 왼쪽 띠 */
+  accent: string;
+  /** 같은 색 계열의 진한 글자 */
+  text: string;
+}
 
-export function academyColors(names: readonly string[]): Map<string, string> {
-  const unique = [...new Set(names)].sort((a, b) => a.localeCompare(b, "ko"));
-  return new Map(unique.map((name, index) => [name, TIMETABLE_COLORS[index % TIMETABLE_COLORS.length]]));
+/**
+ * 자녀 색 하나로 수업 칸의 배경·띠·글자색을 만든다(Notion Calendar 식).
+ * 테마 변수와 섞으므로 밝은·어두운 테마 모두에서 읽힌다.
+ */
+export function childTone(color: string): Tone {
+  return {
+    background: `color-mix(in oklch, ${color} 13%, var(--surface))`,
+    accent: color,
+    text: `color-mix(in oklch, ${color} 72%, var(--foreground))`,
+  };
+}
+
+/** 서울 기준 지금 시각(분). 시간표의 현재 시각 선에 쓴다. */
+export function seoulMinutes(now: Date): number {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+  const value = (type: string) => Number(parts.find((part) => part.type === type)?.value ?? 0);
+  return value("hour") * 60 + value("minute");
 }

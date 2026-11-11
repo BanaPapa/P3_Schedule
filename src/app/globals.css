@@ -189,7 +189,7 @@ body {
 .timetable-day {
   background-image: repeating-linear-gradient(
     to bottom,
-    var(--border) 0 1px,
+    color-mix(in oklch, var(--border) 70%, transparent) 0 1px,
     transparent 1px var(--tt-hour)
   );
 }

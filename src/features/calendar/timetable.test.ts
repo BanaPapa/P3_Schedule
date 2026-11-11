@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { academyColors, hourRange, layoutDay, TIMETABLE_COLORS, toMinutes } from "./timetable";
+import { childTone, hourRange, layoutDay, seoulMinutes, toMinutes } from "./timetable";
 
 const item = (id: string, startTime: string, endTime: string) => ({ id, startTime, endTime });
 
@@ -67,12 +67,21 @@ describe("layoutDay", () => {
   });
 });
 
-describe("academyColors", () => {
-  it("이름 순으로 서로 다른 색을 준다", () => {
-    const colors = academyColors(["피아노", "발레", "피아노", "로봇"]);
-    expect(colors.size).toBe(3);
-    expect(colors.get("로봇")).toBe(TIMETABLE_COLORS[0]);
-    expect(colors.get("발레")).toBe(TIMETABLE_COLORS[1]);
-    expect(colors.get("피아노")).toBe(TIMETABLE_COLORS[2]);
+describe("childTone", () => {
+  it("자녀 색으로 연한 배경, 진한 띠, 같은 계열 글자색을 만든다", () => {
+    expect(childTone("#2563eb")).toEqual({
+      background: "color-mix(in oklch, #2563eb 13%, var(--surface))",
+      accent: "#2563eb",
+      text: "color-mix(in oklch, #2563eb 72%, var(--foreground))",
+    });
+  });
+});
+
+describe("seoulMinutes", () => {
+  it("서울 시각으로 자정부터 분을 센다", () => {
+    // UTC 07:30 = 서울 16:30
+    expect(seoulMinutes(new Date("2026-11-11T07:30:00Z"))).toBe(990);
+    // UTC 15:05 = 서울 다음 날 00:05
+    expect(seoulMinutes(new Date("2026-11-11T15:05:00Z"))).toBe(5);
   });
 });
